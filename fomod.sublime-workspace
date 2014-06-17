@@ -1,0 +1,355 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"do",
+				"doEvaluator"
+			],
+			[
+				"set",
+				"setDevice"
+			],
+			[
+				"event",
+				"eventLog"
+			],
+			[
+				"st",
+				"stateMachineDef"
+			],
+			[
+				"de",
+				"devices"
+			],
+			[
+				"state",
+				"stateMachine"
+			],
+			[
+				"to",
+				"toState"
+			],
+			[
+				"for",
+				"for	for (…) {…}"
+			],
+			[
+				"c",
+				"controller"
+			],
+			[
+				"sc",
+				"scripts"
+			],
+			[
+				"sh",
+				"sharedPlanTitle"
+			],
+			[
+				"item",
+				"itemText"
+			],
+			[
+				"plan",
+				"planPath"
+			],
+			[
+				"ali",
+				"vertical-align"
+			],
+			[
+				"mar",
+				"margin-right"
+			],
+			[
+				"marg",
+				"margin-right"
+			],
+			[
+				"font",
+				"font-size"
+			],
+			[
+				"margin",
+				"margin-top"
+			],
+			[
+				"pa",
+				"pathLast"
+			],
+			[
+				"border-to",
+				"border-top-right-radius"
+			],
+			[
+				"radiu",
+				"border-top-left-radius"
+			],
+			[
+				"rad",
+				"border-top-left-radius"
+			],
+			[
+				"sta",
+				"statusText"
+			],
+			[
+				"ma",
+				"margin-bottom"
+			],
+			[
+				"a",
+				"apply"
+			],
+			[
+				"other",
+				"otherNameSide"
+			],
+			[
+				"ba",
+				"background-color"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 287.0,
+		"selected_items":
+		[
+			[
+				"Package Control: ",
+				"Package Control: Install Package"
+			],
+			[
+				"pack",
+				"Package Control: Install Package"
+			],
+			[
+				"pac",
+				"Preferences: Browse Packages"
+			],
+			[
+				"Package",
+				"Preferences: Browse Packages"
+			]
+		],
+		"width": 449.0
+	},
+	"console":
+	{
+		"height": 125.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/Users/dag/work/houser/StateMachine.js",
+		"/Users/dag/work/houser/app/scripts/utils.js",
+		"/Users/dag/.htaccess",
+		"/Users/dag/work/houser/Gruntfile.js",
+		"/Users/dag/work/houser/package.json",
+		"/Users/dag/work/houser/app/index.html",
+		"/Users/dag/work/houser/app/scripts/app.js",
+		"/Users/dag/work/houser/app/scripts/StateMachine.js",
+		"/Users/dag/work/houser/app/views/main.html",
+		"/Users/dag/work/houser/app/scripts/controllers/main.js",
+		"/Users/dag/work/houser/app/styles/main.css",
+		"/Users/dag/work/houser/app/bower_components/joint/dist/joint.all.js",
+		"/Users/dag/work/houser/app/bower_components/joint/dist/error-demo.html",
+		"/Users/dag/Library/Application Support/Sublime Text 2/Packages/User/Refactor.sublime-settings",
+		"/Users/dag/work/houser/app/joint-demo.html",
+		"/Users/dag/work/houser/bower.json",
+		"/Users/dag/work/plando/plando.sublime-project",
+		"/Users/dag/firepad/firepad/examples/firepad.js",
+		"/Users/dag/firepad/firepad/lib/firepad.css",
+		"/Users/dag/firepad/firepad/lib/rich-text-toolbar.js",
+		"/Users/dag/firepad/firepad/Gruntfile.js",
+		"/Users/dag/work/plando/app/index.html",
+		"/Users/dag/work/plando/app/scripts/app.js",
+		"/Users/dag/work/plando/app/views/plans.html",
+		"/Users/dag/work/plando/app/scripts/controllers/plans.js",
+		"/Users/dag/work/plando/app/views/plan.html",
+		"/Users/dag/work/plando/app/scripts/controllers/plan.js",
+		"/Users/dag/work/plando/app/views/share.html",
+		"/Users/dag/work/plando/app/scripts/controllers/share.js",
+		"/Users/dag/work/plando/app/styles/main.css",
+		"/Users/dag/work/plando/plando.sublime-workspace",
+		"/Users/dag/Library/Application Support/Sublime Text 2/Packages/JsFormat/Default (OSX).sublime-keymap",
+		"/Users/dag/Library/Application Support/Sublime Text 2/Packages/JsFormat/JsFormat.sublime-settings",
+		"/Users/dag/work/plando/firebase-rules.json",
+		"/Users/dag/work/plando/app/scripts/controllers/go.js",
+		"/Users/dag/work/plando/app/views/go.html",
+		"/Users/dag/work/plando/app/scripts/controllers/main.js",
+		"/Users/dag/work/plando/app/views/main.html",
+		"/Users/dag/work/plando/Gruntfile.js",
+		"/Users/dag/work/plando/app/scripts/controllers/auth.js",
+		"/Users/dag/work/plando/app/scripts/controllers/tab.js",
+		"/Users/dag/work/plando/app/scripts/controllers/do.js",
+		"/Users/dag/work/plando/app/views/do.html",
+		"/Users/dag/work/plando/app/scripts/services/items.js",
+		"/Users/dag/work/plando/app/views/tabsep.html",
+		"/Users/dag/work/nodepres/hello.js",
+		"/Users/dag/work/nodepres/hello-tcp.js",
+		"/Users/dag/work/nodepres/hello-http.js",
+		"/Users/dag/work/nodepres/node-todo/package.json",
+		"/Users/dag/work/nodepres/non-block.js",
+		"/Users/dag/work/nodepres/streams.js",
+		"/Users/dag/work/nodepres/promises.js",
+		"/Users/dag/work/nodepres/lab/app/index.html",
+		"/Users/dag/work/nodepres/lab/app/main.js",
+		"/Users/dag/work/nodepres/lab/server.js",
+		"/Users/dag/work/nodepres/socket-io/index.html",
+		"/Users/dag/work/nodepres/socket-io/app.js",
+		"/Users/dag/work/nodepres/lab/app/app.js",
+		"/Users/dag/work/nodepres/lab/app/sic.html",
+		"/Users/dag/work/nodepres/lab/app/tic-tac-toe.html",
+		"/Users/dag/work/nodepres/lab/app/BoardCtrl.js",
+		"/Users/dag/Library/Application Support/Sublime Text 2/Packages/Default/Preferences.sublime-settings",
+		"/Users/dag/work/node-pres/sketchup-spiral.rb",
+		"/Users/dag/work/node-pres/server1.js",
+		"/Users/dag/work/nexter/nexuss/net-props-normal.txt",
+		"/Users/dag/work/nexter/nexuss/net-props-ap.txt",
+		"/Users/dag/Downloads/soju-jzo54k/flash-all.sh",
+		"/Users/dag/work/nexter/nexuss/net-props-without-with-portable-hotspot.txt",
+		"/Users/dag/work/nexter/nexuss/rooting-notes.txt"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"devices",
+			"console.log",
+			"stateMachine",
+			"local",
+			"devices",
+			"connect",
+			"open",
+			"sortableEle",
+			"paste",
+			"item",
+			"Item",
+			"item",
+			"formLine",
+			"todo",
+			"winner",
+			"winnerMark",
+			"otherside",
+			"\"click(",
+			" alt=\"\" id=\"src\"",
+			"pack"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"log",
+			"plan",
+			"Plan",
+			"plan",
+			"formline",
+			"item",
+			"\"clickMove(",
+			" onclick=\"click('')\"",
+			""
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 0.0
+	},
+	"input":
+	{
+		"height": 31.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"replace":
+	{
+		"height": 64.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"selected_items":
+		[
+		],
+		"width": 380.0
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 205.0,
+	"status_bar_visible": true
+}
