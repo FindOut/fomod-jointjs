@@ -15,13 +15,15 @@ angular.module('fomodApp')
 	var ConstraintElementView = joint.dia.ElementView.extend(
 		function() {
 			var relDragging = undefined;
+			var rubberband;
+			var center;
 			var templateDragging = undefined;
 			var near = function(a, b) {return Math.abs(a - b) < 5};
 			return {
 			    pointerdown: function(evt, x, y) {
 			        var position = this.model.get('position');
 			        var size = this.model.get('size');
-			        var center = g.rect(position.x, position.y, size.width, size.height).center();
+			         center = g.rect(position.x, position.y, size.width, size.height).center();
 			        var nearEdge = function(x, y) {return near(x, position.x) || near(y, position.y) || near(x, position.x + size.width) || near(y, position.y + size.height)};
 			        if (this.model.get('parent') === palette.id) {
 			        	// create new object from template
@@ -31,11 +33,18 @@ angular.module('fomodApp')
 			        } else if (nearEdge(x, y) && this.model != palette) {
 			        	// create new relation
 				        relDragging = this;
+				        rubberband = V('<path/>');
+						rubberband.attr({ 
+						    stroke: 'black', d: 'M ' + center.x + ' ' + center.y + ' ' + center.x + ' ' + center.y
+						});
+						V(graphPaper.viewport).append(rubberband);
 			        }
 			        joint.dia.ElementView.prototype.pointerdown.apply(this, [evt, x, y]);
 			    },
 			    pointermove: function(evt, x, y) {
-			        if (!relDragging) {
+			        if (relDragging) {
+			        	rubberband.attr({d: 'M ' + center.x + ' ' + center.y + ' ' + x + ' ' + y});
+			        } else {
 			        	joint.dia.ElementView.prototype.pointermove.apply(this, [evt, x, y]);
 			        }
 			    },
@@ -46,6 +55,7 @@ angular.module('fomodApp')
 			    		if (toViews.length > 0) {
 			    			console.log('from ' + relDragging.model.id + ' to ', toViews[0].model.id);
 			    			graph.addCell(new joint.dia.Link({source: { id: relDragging.model.id }, target: { id: toViews[0].model.id }}));
+			    			rubberband.remove();
 			    		}
 			    		relDragging = false;
 			    	} else if (templateDragging) {
@@ -99,7 +109,7 @@ angular.module('fomodApp')
 	graph.addCells([rect, rect2, rect3, link]);
 
     function setHeight() {
-		graphPaper.setDimensions(600, $(window).height());
+		graphPaper.setDimensions($(window).width(), $(window).height());
     }
     setHeight();
     $(window).bind("resize", setHeight);
