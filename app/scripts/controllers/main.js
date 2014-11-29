@@ -1,5 +1,8 @@
 'use strict';
-
+/*global $:false */
+/*global joint:false */
+/*global g:false */
+/*global V:false */
 /**
  * @ngdoc function
  * @name fomodApp.controller:MainCtrl
@@ -8,36 +11,36 @@
  * Controller of the fomodApp
  */
 angular.module('fomodApp')
-  .controller('MainCtrl', function ($scope) {
+  .controller('MainCtrl', function () {
   	// graph
-	var graph = new joint.dia.Graph;
+	var graph = new joint.dia.Graph();
 
 	var ConstraintElementView = joint.dia.ElementView.extend(
-		function() {
-			var relDragging = undefined;
+		(function() {
+			var relDragging;
 			var rubberband;
 			var center;
-			var templateDragging = undefined;
-			var near = function(a, b) {return Math.abs(a - b) < 5};
+			var templateDragging;
+			var near = function(a, b) {return Math.abs(a - b) < 5;};
 			return {
 			    pointerdown: function(evt, x, y) {
 			        var position = this.model.get('position');
 			        var size = this.model.get('size');
 			         center = g.rect(position.x, position.y, size.width, size.height).center();
-			        var nearEdge = function(x, y) {return near(x, position.x) || near(y, position.y) || near(x, position.x + size.width) || near(y, position.y + size.height)};
+			        var nearEdge = function(x, y) {return near(x, position.x) || near(y, position.y) || near(x, position.x + size.width) || near(y, position.y + size.height);};
 			        if (this.model.get('parent') === palette.id) {
 			        	// create new object from template
 			        	var newObj = this.model.clone();
 			        	graph.addCell(newObj); 
 			        	templateDragging = newObj;
-			        } else if (nearEdge(x, y) && this.model != palette) {
+			        } else if (nearEdge(x, y) && this.model !== palette) {
 			        	// create new relation
 				        relDragging = this;
-				        rubberband = V('<path/>');
+				        rubberband = new V('<path/>');
 						rubberband.attr({ 
 						    stroke: 'black', d: 'M ' + center.x + ' ' + center.y + ' ' + center.x + ' ' + center.y
 						});
-						V(graphPaper.viewport).append(rubberband);
+						new V(graphPaper.viewport).append(rubberband);
 			        }
 			        joint.dia.ElementView.prototype.pointerdown.apply(this, [evt, x, y]);
 			    },
@@ -67,7 +70,7 @@ angular.module('fomodApp')
 			        }
 			    }
 			};
-		}()
+		}())
 	);
 
 	var graphPaper = new joint.dia.Paper({
@@ -76,7 +79,9 @@ angular.module('fomodApp')
 	    height: 200,
 	    model: graph,
 	    gridSize: 1,
-	    elementView: ConstraintElementView
+	    elementView: dragThresholder(ConstraintElementView),
+		linkView: dragThresholder(joint.dia.LinkView)
+
 	});
 
 	var palette = new joint.shapes.basic.Rect({
@@ -112,6 +117,6 @@ angular.module('fomodApp')
 		graphPaper.setDimensions($(window).width(), $(window).height());
     }
     setHeight();
-    $(window).bind("resize", setHeight);
+    $(window).bind('resize', setHeight);
 
   });

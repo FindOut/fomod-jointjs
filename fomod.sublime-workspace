@@ -4,6 +4,22 @@
 		"selected_items":
 		[
 			[
+				"tem",
+				"templateDragging"
+			],
+			[
+				"te",
+				"templateDragging"
+			],
+			[
+				"rect",
+				"rectTemplate"
+			],
+			[
+				"add",
+				"addCell"
+			],
+			[
 				"do",
 				"doEvaluator"
 			],
@@ -115,6 +131,49 @@
 	},
 	"buffers":
 	[
+		{
+			"file": "app/index.html",
+			"settings":
+			{
+				"buffer_size": 2811,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "app/views/main.html",
+			"settings":
+			{
+				"buffer_size": 23,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "'use strict';\n\n/**\n * @ngdoc function\n * @name fomodApp.controller:MainCtrl\n * @description\n * # MainCtrl\n * Controller of the fomodApp\n */\nangular.module('fomodApp')\n  .controller('MainCtrl', function ($scope) {\n  	// graph\n	var graph = new joint.dia.Graph;\n\n	var ConstraintElementView = joint.dia.ElementView.extend(\n		function() {\n			var relDragging = undefined;\n			var rubberband;\n			var center;\n			var templateDragging = undefined;\n			var near = function(a, b) {return Math.abs(a - b) < 5};\n			return {\n			    pointerdown: function(evt, x, y) {\n			        var position = this.model.get('position');\n			        var size = this.model.get('size');\n			         center = g.rect(position.x, position.y, size.width, size.height).center();\n			        var nearEdge = function(x, y) {return near(x, position.x) || near(y, position.y) || near(x, position.x + size.width) || near(y, position.y + size.height)};\n			        if (this.model.get('parent') === palette.id) {\n			        	// create new object from template\n			        	var newObj = this.model.clone();\n			        	graph.addCell(newObj); \n			        	templateDragging = newObj;\n			        } else if (nearEdge(x, y) && this.model != palette) {\n			        	// create new relation\n				        relDragging = this;\n				        rubberband = V('<path/>');\n						rubberband.attr({ \n						    stroke: 'black', d: 'M ' + center.x + ' ' + center.y + ' ' + center.x + ' ' + center.y\n						});\n						V(graphPaper.viewport).append(rubberband);\n			        }\n			        joint.dia.ElementView.prototype.pointerdown.apply(this, [evt, x, y]);\n			    },\n			    pointermove: function(evt, x, y) {\n			        if (relDragging) {\n			        	rubberband.attr({d: 'M ' + center.x + ' ' + center.y + ' ' + x + ' ' + y});\n			        } else {\n			        	\n			        	joint.dia.ElementView.prototype.pointermove.apply(this, [evt, x, y]);\n			        }\n			    },\n			    pointerup: function(evt, x, y) {\n			    	if (relDragging) {\n			    		var toViews = graphPaper.findViewsFromPoint(g.point(x, y));\n			    		console.log('toViews',toViews);\n			    		if (toViews.length > 0) {\n			    			console.log('from ' + relDragging.model.id + ' to ', toViews[0].model.id);\n			    			graph.addCell(new joint.dia.Link({source: { id: relDragging.model.id }, target: { id: toViews[0].model.id }}));\n			    			rubberband.remove();\n			    		}\n			    		relDragging = false;\n			    	} else if (templateDragging) {\n			        	graph.getCell(this.model.get('parent')).unembed(this.model);\n			        	graph.getCell(templateDragging.get('parent')).embed(templateDragging);\n			        	templateDragging = undefined;\n			    	} else {\n			        	joint.dia.ElementView.prototype.pointerup.apply(this, [evt, x, y]);\n			        }\n			    }\n			};\n		}();\n	);\n\n	var graphPaper = new joint.dia.Paper({\n	    el: $('#graph'),\n	    width: 600,\n	    height: 200,\n	    model: graph,\n	    gridSize: 1,\n	    elementView: ConstraintElementView\n	});\n\n	var palette = new joint.shapes.basic.Rect({\n	    position: { x: 5, y: 5},\n	    size: { width: 110, height: 100 },\n	    attrs: { rect: { fill: '#eeeeee' }}\n	});\n	var rectTemplate = new joint.shapes.basic.Rect({\n	    position: { x: palette.get('position').x + 5, y: palette.get('position').y + 5},\n	    size: { width: 100, height: 30 },\n	    attrs: { rect: { fill: 'blue' }, text: { text: 'new box', fill: 'white' } }\n	});\n	palette.embed(rectTemplate);\n	graph.addCells([palette, rectTemplate]);\n\n	// example model\n	var rect = new joint.shapes.basic.Rect({\n	    position: { x: 150, y: 30 },\n	    size: { width: 100, height: 30 },\n	    attrs: { rect: { fill: 'blue' }, text: { text: 'my box', fill: 'white' } }\n	});\n	var rect2 = rect.clone();\n	rect2.translate(300);\n	var rect3 = rect.clone();\n	rect3.translate(300, 50);\n	var link = new joint.dia.Link({\n	    source: { id: rect.id },\n	    target: { id: rect2.id }\n	});\n	graph.addCells([rect, rect2, rect3, link]);\n\n    function setHeight() {\n		graphPaper.setDimensions($(window).width(), $(window).height());\n    }\n    setHeight();\n    $(window).bind(\"resize\", setHeight);\n\n  });\n",
+			"file": "app/scripts/controllers/main.js",
+			"file_size": 4040,
+			"file_write_time": 1403013863000000,
+			"settings":
+			{
+				"buffer_size": 4054,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "app/styles/main.css",
+			"settings":
+			{
+				"buffer_size": 65,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "bower_components/joint/dist/joint.all.js",
+			"settings":
+			{
+				"buffer_size": 908706,
+				"line_ending": "Unix"
+			}
+		}
 	],
 	"build_system": "",
 	"command_palette":
@@ -243,6 +302,10 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"remove:",
+			"remove",
+			"startView",
+			"coord",
 			"devices",
 			"console.log",
 			"stateMachine",
@@ -289,8 +352,148 @@
 	"groups":
 	[
 		{
+			"selected": 2,
 			"sheets":
 			[
+				{
+					"buffer": 0,
+					"file": "app/index.html",
+					"settings":
+					{
+						"buffer_size": 2811,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								656,
+								656
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 179.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "app/views/main.html",
+					"settings":
+					{
+						"buffer_size": 23,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "app/scripts/controllers/main.js",
+					"settings":
+					{
+						"buffer_size": 4054,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2747,
+								2747
+							]
+						],
+						"settings":
+						{
+							"nodePath": "/usr/local/bin/node",
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1024.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "app/styles/main.css",
+					"settings":
+					{
+						"buffer_size": 65,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								39,
+								39
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/CSS/CSS.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "bower_components/joint/dist/joint.all.js",
+					"settings":
+					{
+						"buffer_size": 908706,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								531139,
+								531145
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 252839.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
 			]
 		}
 	],
