@@ -58,7 +58,14 @@ angular.module('fomodApp')
 			    		console.log('toViews',toViews);
 			    		if (toViews.length > 0) {
 			    			console.log('from ' + relDragging.model.id + ' to ', toViews[0].model.id);
-			    			graph.addCell(new joint.dia.Link({source: { id: relDragging.model.id }, target: { id: toViews[0].model.id }}));
+			    			graph.addCell(new joint.dia.Link({
+			    				source: { id: relDragging.model.id }, 
+			    				target: { id: toViews[0].model.id },
+				    			attrs: {
+				    				'.': { filter: { name: 'dropShadow', args: { dx: 1, dy: 1, blur: 1.5 } } }
+				    			}
+    						
+			    			}));
 			    		}
 			    		rubberband.remove();
 			    		relDragging = false;
@@ -88,7 +95,8 @@ angular.module('fomodApp')
 	var palette = new joint.shapes.basic.Rect({
 	    position: { x: 5, y: 5},
 	    size: { width: 110, height: 100 },
-	    attrs: { rect: { fill: '#888', 'stroke-width': 0}}
+	    attrs: { rect: { fill: '#888', 'stroke-width': 0,
+	    	filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } }}
 	});
 
 	var addToPalette = function(shape) {
@@ -105,24 +113,32 @@ angular.module('fomodApp')
 
 	addToPalette(new joint.shapes.basic.Rect({
 	    size: { width: 100, height: 30 },
-	    attrs: { rect: { fill: 'blue' }, text: { text: 'new box', fill: 'white' } }
-	}));
-
-	addToPalette(new joint.shapes.basic.Rect({
-	    size: { width: 120, height: 30 },
-	    attrs: { rect: { fill: 'green' }, text: { text: 'new box 2', fill: 'white' } }
+	    attrs: { rect: { fill: 'blue',
+	    	filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } }, 
+	    	text: { text: 'new box', fill: 'white' }}
 	}));
 
 	addToPalette(new joint.shapes.basic.Rect({
 	    size: { width: 100, height: 30 },
-	    attrs: { rect: { fill: 'yellow' }, text: { text: 'new box 3', fill: 'black' } }
+	    attrs: { rect: { fill: 'green',
+	    	filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } }, 
+	    	text: { text: 'new box 2', fill: 'white' } }
+	}));
+
+	addToPalette(new joint.shapes.basic.Rect({
+	    size: { width: 100, height: 30 },
+	    attrs: { rect: { fill: 'yellow',
+	    	filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } }, 
+	    	text: { text: 'new box 3', fill: 'black' } }
 	}));
 
 	// example model
 	var rect = new joint.shapes.basic.Rect({
 	    position: { x: 150, y: 30 },
 	    size: { width: 100, height: 30 },
-	    attrs: { rect: { fill: 'blue' }, text: { text: 'my box', fill: 'white' } }
+	    attrs: { rect: { fill: 'blue',
+	    		filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
+	    	text: { text: 'my box', fill: 'white' } }
 	});
 
 	var rect2 = rect.clone();
@@ -133,7 +149,11 @@ angular.module('fomodApp')
 	
 	var link = new joint.dia.Link({
 	    source: { id: rect.id },
-	    target: { id: rect2.id }
+	    target: { id: rect2.id },
+	    attrs: {
+	        // Define a filter for the whole link (special selector '.' means the root element )
+	        '.': { filter: { name: 'dropShadow', args: { dx: 1, dy: 1, blur: 1.5 } } }
+    	}
 	});
 	
 	graph.addCells([rect, rect2, rect3, link]);
