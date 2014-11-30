@@ -3,6 +3,7 @@
 /*global joint:false */
 /*global g:false */
 /*global V:false */
+/*global dragThresholder:false */
 /**
  * @ngdoc function
  * @name fomodApp.controller:MainCtrl
@@ -58,8 +59,8 @@ angular.module('fomodApp')
 			    		if (toViews.length > 0) {
 			    			console.log('from ' + relDragging.model.id + ' to ', toViews[0].model.id);
 			    			graph.addCell(new joint.dia.Link({source: { id: relDragging.model.id }, target: { id: toViews[0].model.id }}));
-			    			rubberband.remove();
 			    		}
+			    		rubberband.remove();
 			    		relDragging = false;
 			    	} else if (templateDragging) {
 			        	graph.getCell(this.model.get('parent')).unembed(this.model);
@@ -87,15 +88,35 @@ angular.module('fomodApp')
 	var palette = new joint.shapes.basic.Rect({
 	    position: { x: 5, y: 5},
 	    size: { width: 110, height: 100 },
-	    attrs: { rect: { fill: '#eeeeee' }}
+	    attrs: { rect: { fill: '#888', 'stroke-width': 0}}
 	});
-	var rectTemplate = new joint.shapes.basic.Rect({
-	    position: { x: palette.get('position').x + 5, y: palette.get('position').y + 5},
+
+	var addToPalette = function(shape) {
+		var maxBottom = palette.getEmbeddedCells().reduce(
+			function(max, shape) {return Math.max(max, shape.get('position').y + shape.get('size').height);}, 5);
+		shape.set('position', {x: palette.get('position').x + 5, y: maxBottom + 5});
+		palette.embed(shape);
+		graph.addCells([shape]);
+		var maxWidth = palette.getEmbeddedCells().reduce(
+			function(max, shape) {return Math.max(max, shape.get('size').width);}, 0);
+		palette.set('size', {width: maxWidth + 10, height: maxBottom + shape.get('size').height + 10 - palette.get('position').y});
+	};
+	graph.addCells([palette]);
+
+	addToPalette(new joint.shapes.basic.Rect({
 	    size: { width: 100, height: 30 },
 	    attrs: { rect: { fill: 'blue' }, text: { text: 'new box', fill: 'white' } }
-	});
-	palette.embed(rectTemplate);
-	graph.addCells([palette, rectTemplate]);
+	}));
+
+	addToPalette(new joint.shapes.basic.Rect({
+	    size: { width: 120, height: 30 },
+	    attrs: { rect: { fill: 'green' }, text: { text: 'new box 2', fill: 'white' } }
+	}));
+
+	addToPalette(new joint.shapes.basic.Rect({
+	    size: { width: 100, height: 30 },
+	    attrs: { rect: { fill: 'yellow' }, text: { text: 'new box 3', fill: 'black' } }
+	}));
 
 	// example model
 	var rect = new joint.shapes.basic.Rect({
@@ -103,14 +124,18 @@ angular.module('fomodApp')
 	    size: { width: 100, height: 30 },
 	    attrs: { rect: { fill: 'blue' }, text: { text: 'my box', fill: 'white' } }
 	});
+
 	var rect2 = rect.clone();
 	rect2.translate(300);
+
 	var rect3 = rect.clone();
 	rect3.translate(300, 50);
+	
 	var link = new joint.dia.Link({
 	    source: { id: rect.id },
 	    target: { id: rect2.id }
 	});
+	
 	graph.addCells([rect, rect2, rect3, link]);
 
     function setHeight() {
