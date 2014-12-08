@@ -12,6 +12,8 @@
 */
 angular.module('fomodApp')
 .controller('MainCtrl', function ($scope, dragThresholder) {
+  var near = function(a, b) {return Math.abs(a - b) < 5;};
+  var nearEdge = function(x, y, position, size) {return near(x, position.x) || near(y, position.y) || near(x, position.x + size.width) || near(y, position.y + size.height);};
   var graph = new joint.dia.Graph();
 
   var ConstraintElementView = joint.dia.ElementView.extend(
@@ -20,19 +22,17 @@ angular.module('fomodApp')
       var rubberband;
       var center;
       var templateDragging;
-      var near = function(a, b) {return Math.abs(a - b) < 5;};
       return {
         pointerdown: function(evt, x, y) {
           var position = this.model.get('position');
           var size = this.model.get('size');
           center = g.rect(position.x, position.y, size.width, size.height).center();
-          var nearEdge = function(x, y) {return near(x, position.x) || near(y, position.y) || near(x, position.x + size.width) || near(y, position.y + size.height);};
           if (this.model.get('parent') === palette.id) {
             // create new object from template
             var newObj = this.model.clone();
             graph.addCell(newObj);
             templateDragging = newObj;
-          } else if (nearEdge(x, y) && this.model !== palette) {
+          } else if (nearEdge(x, y, position, size) && this.model !== palette) {
             // create new relation
             relDragging = this;
             rubberband = new V('<path/>');
@@ -160,5 +160,12 @@ angular.module('fomodApp')
       }
       setHeight();
       $(window).bind('resize', setHeight);
-
+      $(window).bind('mousemove', function(evt) {
+        var views = graphPaper.findViewsFromPoint({x:evt.clientX, y:evt.clientY});
+        if (views.length > 0) {
+          var attrs = views[0].model.attributes;
+          var isNearEdge = nearEdge(evt.clientX, evt.clientY, attrs.position, attrs.size);
+          views[0].el.style.cursor = isNearEdge ? 'crosshair' : 'move';
+        }
+      });
     });
