@@ -60,7 +60,8 @@ angular.module('fomodApp')
                 source: { id: relDragging.model.id },
                 target: { id: toViews[0].model.id },
                 attrs: {
-                  '.': { filter: { name: 'dropShadow', args: { dx: 1, dy: 1, blur: 1.5 } } }
+                  '.': { filter: { name: 'dropShadow', args: { dx: 1, dy: 1, blur: 1.5 } } },
+                  '.marker-target': { d: 'M 10 0 L 0 3 L 10 6 z' }
                 }
 
               }));
@@ -149,7 +150,8 @@ angular.module('fomodApp')
         target: { id: rect2.id },
         attrs: {
           // Define a filter for the whole link (special selector '.' means the root element )
-          '.': { filter: { name: 'dropShadow', args: { dx: 1, dy: 1, blur: 1.5 } } }
+          '.': { filter: { name: 'dropShadow', args: { dx: 1, dy: 1, blur: 1.5 } } },
+          '.marker-target': { d: 'M 10 0 L 0 3 L 10 6 z' }
         }
       });
 
