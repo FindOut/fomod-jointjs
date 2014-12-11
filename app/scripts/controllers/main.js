@@ -11,12 +11,19 @@
 * Controller of the fomodApp
 */
 angular.module('fomodApp')
-.controller('MainCtrl', function ($scope, dragThresholder) {
+.controller('MainCtrl', function ($scope, dragThresholder, data) {
   var near = function(a, b) {return Math.abs(a - b) < 5;};
-  var nearEdge = function(x, y, position, size) {return near(x, position.x) || near(y, position.y) || near(x, position.x + size.width) || near(y, position.y + size.height);};
+  // var sqr = function(x) {return x * x;};
+  // var dist2 = function(x1, y1, x2, y2) {return sqr(x1 - x2) + sqr(y1 - y2);};
+  var nearEdge = function(x, y, position, size) {
+    return near(x, position.x) || near(y, position.y) || near(x, position.x + size.width) || near(y, position.y + size.height);};
   var graph = new joint.dia.Graph();
 
-  //layouter
+  var adjustViewToData = function() {
+    // compare graph with data and add/remove graph objects accordingly
+
+    
+  }
 
   // keeps rect size a little larger than the text in it
   var growWithTextLayout = function(rect, paper) {
@@ -27,13 +34,13 @@ angular.module('fomodApp')
         var bbox = view.getBBox();
         rect.set('size', {width: bbox.width + 20, height: bbox.height + 5});
       }
-    }
+    };
     rect.on('change:attrs', layout);
     layout();
-  }
+  };
 
   // makes all embedded cells line up from top to bottom and container resize around them
-  var sizeAroundEmbeddedObjects = function(container, paper) {
+  var sizeAroundEmbeddedObjectsLayout = function(container) {
     var layout = function() {
       var pos = container.get('position');
       var y = pos.y + 5;
@@ -48,10 +55,10 @@ angular.module('fomodApp')
         maxWidth = Math.max(maxWidth, shapeSize.width);
       }
       palette.set('size', {width: maxWidth + 10, height: y - pos.y});
-    }
+    };
     container.on('change:embeds', layout);
     layout();
-  }
+  };
 
   var ConstraintElementView = joint.dia.ElementView.extend(
     (function() {
@@ -136,7 +143,7 @@ angular.module('fomodApp')
     filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } }}
   });
 
-  sizeAroundEmbeddedObjects(palette, paper);
+  sizeAroundEmbeddedObjectsLayout(palette, paper);
 
   var addToPalette = function(shape) {
     graph.addCells([shape]);
@@ -200,7 +207,7 @@ angular.module('fomodApp')
   }
   setHeight();
   $(window).bind('resize', setHeight);
-  $(window).bind('mousemove', function(evt) {
+  $('#graph').bind('mousemove', function(evt) {
     var views = paper.findViewsFromPoint({x:evt.clientX, y:evt.clientY});
     if (views.length > 0) {
       var attrs = views[0].model.attributes;
@@ -209,13 +216,9 @@ angular.module('fomodApp')
     }
   });
 
-  var isLong = false;
-  paper.on('cell:click', function(cell, evt, x, y) {
-    if (isLong) {
-      cell.model.attr({text: { text: 'short' }});
-    } else {
-      cell.model.attr({text: { text: 'long text' }});
+  paper.on('cell:doubleclick', function(cell) {
+    if (cell.model.id) {
+      window.location.href = '/#/objects/' + cell.model.id;
     }
-    isLong = !isLong;
   });
 });

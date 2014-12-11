@@ -15,7 +15,7 @@ angular.module('fomodApp')
       var isSpecial = false;
       var isDrag = false;
       var isDown = false;
-      var downEvt, downX, downY;
+      var downEvt, downX, downY, downTimestamp;
       var dist2 = function(x1, y1, x2, y2) {
         var dx = x2 - x1, dy = y2 - y1;
         return dx * dx + dy * dy;
@@ -28,10 +28,14 @@ angular.module('fomodApp')
             viewType.prototype.pointerdown.apply(this, arguments);
           }
           else {
+            if (new Date().getTime() - downTimestamp < 300) {
+              this.notify('cell:doubleclick', evt, x, y);
+            }
             isDown = true;
             downEvt = jQuery.extend({}, evt);
             downX = x;
             downY = y;
+            downTimestamp = new Date().getTime();
           }
         },
         pointermove: function (evt, x, y) {

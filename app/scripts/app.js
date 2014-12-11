@@ -23,11 +23,13 @@ angular
         templateUrl: 'views/main.html',
         controller: 'MainCtrl'
       })
-      .when('/about', {
-        templateUrl: 'views/about.html',
-        controller: 'AboutCtrl'
+      .when('/objects/:id', {
+        templateUrl: 'views/object.html',
+        controller: 'ObjectCtrl'
       })
       .otherwise({
         redirectTo: '/'
       });
   });
+
+  
