@@ -11,7 +11,7 @@
 * Controller of the fomodApp
 */
 angular.module('fomodApp')
-.controller('MainCtrl', function ($scope, dragThresholder, data, commander, CreateObjectCommand, CreateRelationCommand) {
+.controller('MainCtrl', function ($scope, dragThresholder, data, commander, CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand) {
   var near = function(a, b) {return Math.abs(a - b) < 5;};
   // var sqr = function(x) {return x * x;};
   // var dist2 = function(x1, y1, x2, y2) {return sqr(x1 - x2) + sqr(y1 - y2);};
@@ -19,10 +19,11 @@ angular.module('fomodApp')
     return near(x, position.x) || near(y, position.y) || near(x, position.x + size.width) || near(y, position.y + size.height);};
   var graph = new joint.dia.Graph();
   var attrMap = {};
+  var adjusting = false;
 
   var adjustViewToData = function(data, graph) {
     // compare graph with data and add/remove graph objects accordingly
-
+    adjusting = true;
     // adjust elements
     var graphElementsToRemove = {};
     var dataElementsToAdd =[];
@@ -95,6 +96,7 @@ angular.module('fomodApp')
         }
       })
     }));
+    adjusting = false;
   };
 
   // keeps rect size a little larger than the text in it
@@ -304,4 +306,12 @@ angular.module('fomodApp')
     }
   });
   adjustViewToData(data, graph);
+
+  graph.on('remove', function(cell) {
+    if (!adjusting) {
+      console.log(arguments);
+      commander.do(new DeleteRelationCommand(cell.id));
+      adjustViewToData(data, graph);
+    }
+  });
 });

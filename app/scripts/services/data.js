@@ -26,6 +26,48 @@ angular.module('fomodApp')
       }
       return undefined;
     };
+
+    this.getRelationById = function(id) {
+      for (var i in this.relations) {
+        var obj = this.relations[i];
+        if (id === obj.id) {
+          return obj;
+        }
+      }
+      return undefined;
+    };
+  })
+  .service('DeleteRelationCommand', function(data) {
+    function remove(arr, item) {
+      for(var i = arr.length; i--;) {
+        if(arr[i] === item) {
+          arr.splice(i, 1);
+        }
+      }
+    }
+    return function(id) {
+      var relation;
+      this.do = function() {
+        console.log('DeleteRelationCommand(' + id + ')')
+        relation = data.getRelationById(id);
+        if (relation) {
+          console.log('relation',relation);
+          remove(data.relations, relation);
+          console.log(data.relations);
+        }
+      }
+      this.undo = function() {
+        console.log('undo');
+        if (relation) {
+          console.log('relation',relation);
+          data.relations.push(relation);
+          console.log(data.relations);
+        }
+      }
+      this.redo = function() {
+        this.do();
+      }
+    }
   })
   .service('CreateObjectCommand', function(data) {
     return function(id, name) {
@@ -69,9 +111,11 @@ angular.module('fomodApp')
         command.do();
       }
       this.undo = function() {
+        console.log('b undoI',undoI);
         if (undoI > 0) {
           undoStack[--undoI].undo();
         }
+        console.log('a undoI',undoI);
       }
       this.redo = function() {
         if (undoI < maxRedoI) {
