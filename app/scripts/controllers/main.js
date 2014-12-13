@@ -11,19 +11,91 @@
 * Controller of the fomodApp
 */
 angular.module('fomodApp')
-.controller('MainCtrl', function ($scope, dragThresholder, data) {
+.controller('MainCtrl', function ($scope, dragThresholder, data, commander, CreateObjectCommand, CreateRelationCommand) {
   var near = function(a, b) {return Math.abs(a - b) < 5;};
   // var sqr = function(x) {return x * x;};
   // var dist2 = function(x1, y1, x2, y2) {return sqr(x1 - x2) + sqr(y1 - y2);};
   var nearEdge = function(x, y, position, size) {
     return near(x, position.x) || near(y, position.y) || near(x, position.x + size.width) || near(y, position.y + size.height);};
   var graph = new joint.dia.Graph();
+  var attrMap = {};
 
-  var adjustViewToData = function() {
+  var adjustViewToData = function(data, graph) {
     // compare graph with data and add/remove graph objects accordingly
 
-    
-  }
+    // adjust elements
+    var graphElementsToRemove = {};
+    var dataElementsToAdd =[];
+    graph.getElements().forEach(function(element) {graphElementsToRemove[element.id] = element;});
+
+    graphElementsToRemove[palette.id] = undefined;
+    palette.getEmbeddedCells().forEach(function(element) {graphElementsToRemove[element.id] = undefined;});
+
+    data.objects.forEach(function(obj) {
+      if (graphElementsToRemove[obj.id]) {
+        graphElementsToRemove[obj.id] = undefined;
+      } else {
+        dataElementsToAdd.push(obj);
+      }
+    });
+
+    // remove unneeded elements
+    Object.keys(graphElementsToRemove).forEach(function(key) {
+      var element = graphElementsToRemove[key];
+      if (element) {
+        element.remove();
+      }
+    });
+
+    // add new elements
+    graph.addCells(dataElementsToAdd.map(function(obj) {
+      var element = new joint.shapes.basic.Rect({
+        id: obj.id,
+        position: attrMap[obj.id] || { x: 150, y: 30 },
+        size: { width: 100, height: 30 },
+        attrs: { rect: { fill: 'blue',
+        filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
+        text: { text: obj.name, fill: 'white' } }
+      });
+      return element;
+    }));
+
+    // adjust links
+    var graphLinksToRemove = {};
+    var dataRelationsToAdd =[];
+    graph.getLinks().forEach(function(link) {graphLinksToRemove[link.get('source') + '|' + link.get('target')] = link;});
+
+    data.relations.forEach(function(relation) {
+      var key = relation.from + '|' + relation.to;
+      if (graphLinksToRemove[key]) {
+        graphLinksToRemove[key] = undefined;
+      } else {
+        dataRelationsToAdd.push(relation);
+      }
+    });
+
+    // remove unneeded links
+    Object.keys(graphLinksToRemove).forEach(function(key) {
+      var element = graphLinksToRemove[key];
+      if (element) {
+        element.remove();
+      }
+    });
+
+    // add new links
+    graph.addCells(dataRelationsToAdd.map(function(relation) {
+      return new joint.dia.Link({
+        id: relation.id,
+        source: { id: relation.from },
+        target: { id: relation.to },
+        attrs: {
+          // Define a filter for the whole link (special selector '.' means the root element )
+          '.': { filter: { name: 'dropShadow', args: { dx: 1, dy: 1, blur: 1.5 } } },
+          '.marker-target': { d: 'M 10 0 L 0 3 L 10 6 z' }
+        }
+      })
+    }));
+  };
 
   // keeps rect size a little larger than the text in it
   var growWithTextLayout = function(rect, paper) {
@@ -97,26 +169,24 @@ angular.module('fomodApp')
         pointerup: function(evt, x, y) {
           if (relDragging) {
             var toViews = paper.findViewsFromPoint(g.point(x, y));
-            console.log('toViews',toViews);
             if (toViews.length > 0) {
-              console.log('from ' + relDragging.model.id + ' to ', toViews[0].model.id);
-              graph.addCell(new joint.dia.Link({
-                source: { id: relDragging.model.id },
-                target: { id: toViews[0].model.id },
-                attrs: {
-                  '.': { filter: { name: 'dropShadow', args: { dx: 1, dy: 1, blur: 1.5 } } },
-                  '.marker-target': { d: 'M 10 0 L 0 3 L 10 6 z' }
-                }
-
-              }));
+              var cmd = new CreateRelationCommand(undefined, this.model.attr('text/text'), relDragging.model.id, toViews[0].model.id);
+              commander.do(cmd);
+              adjustViewToData(data, graph);
             }
             rubberband.remove();
             relDragging = false;
           } else if (templateDragging) {
             graph.getCell(this.model.get('parent')).unembed(this.model);
+            var cmd = new CreateObjectCommand(this.model.id, this.model.attr('text/text'));
+            commander.do(cmd);
+            attrMap[this.model.id] = this.model.get('position');
+            this.model.remove();
             graph.getCell(templateDragging.get('parent')).embed(templateDragging);
             templateDragging = undefined;
             growWithTextLayout(this.model, paper);
+
+            adjustViewToData(data, graph);
 
           } else {
             joint.dia.ElementView.prototype.pointerup.apply(this, [evt, x, y]);
@@ -160,16 +230,16 @@ angular.module('fomodApp')
 
   addToPalette(new joint.shapes.basic.Rect({
     size: { width: 100, height: 30 },
-    attrs: { rect: { fill: 'green',
+    attrs: { rect: { fill: 'blue',
     filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
     text: { text: 'new box 2', fill: 'white' } }
   }));
 
   addToPalette(new joint.shapes.basic.Rect({
     size: { width: 100, height: 30 },
-    attrs: { rect: { fill: 'yellow',
+    attrs: { rect: { fill: 'blue',
     filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
-    text: { text: 'new box 3', fill: 'black' } }
+    text: { text: 'new box 3', fill: 'white' } }
   }));
 
   // example model
@@ -221,4 +291,17 @@ angular.module('fomodApp')
       window.location.href = '/#/objects/' + cell.model.id;
     }
   });
+
+  $(document).keydown(function(e){
+    e = e || window.event // IE support
+    if ( e.which === 90 && (e.ctrlKey || e.metaKey)) {
+      if (e.shiftKey) {
+        commander.redo();
+      } else {
+        commander.undo();
+      }
+      adjustViewToData(data, graph);
+    }
+  });
+  adjustViewToData(data, graph);
 });
