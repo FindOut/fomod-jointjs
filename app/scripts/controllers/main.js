@@ -13,13 +13,11 @@
 angular.module('fomodApp')
 .controller('MainCtrl', function ($scope, dragThresholder, data, commander, CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand) {
   var near = function(a, b) {return Math.abs(a - b) < 5;};
-  // var sqr = function(x) {return x * x;};
-  // var dist2 = function(x1, y1, x2, y2) {return sqr(x1 - x2) + sqr(y1 - y2);};
   var nearEdge = function(x, y, position, size) {
     return near(x, position.x) || near(y, position.y) || near(x, position.x + size.width) || near(y, position.y + size.height);};
-  var graph = new joint.dia.Graph();
-  var attrMap = {};
+  var attrMap = {'234': {x: 450, y: 30}};
   var adjusting = false;
+  var graph = new joint.dia.Graph();;
 
   var adjustViewToData = function(data, graph) {
     // compare graph with data and add/remove graph objects accordingly
@@ -64,7 +62,7 @@ angular.module('fomodApp')
     // adjust links
     var graphLinksToRemove = {};
     var dataRelationsToAdd =[];
-    graph.getLinks().forEach(function(link) {graphLinksToRemove[link.get('source') + '|' + link.get('target')] = link;});
+    graph.getLinks().forEach(function(link) {graphLinksToRemove[link.get('source').id + '|' + link.get('target').id] = link;});
 
     data.relations.forEach(function(relation) {
       var key = relation.from + '|' + relation.to;
@@ -172,7 +170,7 @@ angular.module('fomodApp')
           if (relDragging) {
             var toViews = paper.findViewsFromPoint(g.point(x, y));
             if (toViews.length > 0) {
-              var cmd = new CreateRelationCommand(undefined, this.model.attr('text/text'), relDragging.model.id, toViews[0].model.id);
+              var cmd = new CreateRelationCommand(joint.util.uuid(), this.model.attr('text/text'), relDragging.model.id, toViews[0].model.id);
               commander.do(cmd);
               adjustViewToData(data, graph);
             }
@@ -180,10 +178,13 @@ angular.module('fomodApp')
             relDragging = false;
           } else if (templateDragging) {
             graph.getCell(this.model.get('parent')).unembed(this.model);
-            var cmd = new CreateObjectCommand(this.model.id, this.model.attr('text/text'));
+            var newId = joint.util.uuid();
+            var cmd = new CreateObjectCommand(newId, this.model.attr('text/text'));
             commander.do(cmd);
-            attrMap[this.model.id] = this.model.get('position');
+            attrMap[newId] = this.model.get('position');
+            adjusting = true;
             this.model.remove();
+            adjusting = false;
             graph.getCell(templateDragging.get('parent')).embed(templateDragging);
             templateDragging = undefined;
             growWithTextLayout(this.model, paper);
@@ -243,36 +244,6 @@ angular.module('fomodApp')
     filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
     text: { text: 'new box 3', fill: 'white' } }
   }));
-
-  // example model
-  var rect = new joint.shapes.basic.Rect({
-    position: { x: 150, y: 30 },
-    size: { width: 100, height: 30 },
-    attrs: { rect: { fill: 'blue',
-    filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
-    text: { text: 'my box', fill: 'white' } }
-  });
-
-  var rect2 = rect.clone();
-  rect2.translate(300);
-  rect2.attr({text: { text: 'my box with long name', fill: 'white' }});
-
-  var rect3 = rect.clone();
-  rect3.translate(300, 50);
-
-  var link = new joint.dia.Link({
-    source: { id: rect.id },
-    target: { id: rect2.id },
-    attrs: {
-      // Define a filter for the whole link (special selector '.' means the root element )
-      '.': { filter: { name: 'dropShadow', args: { dx: 1, dy: 1, blur: 1.5 } } },
-      '.marker-target': { d: 'M 10 0 L 0 3 L 10 6 z' }
-    }
-  });
-
-  graph.addCells([rect, rect2, rect3, link]);
-
-  growWithTextLayout(rect2, paper);
 
   function setHeight() {
     paper.setDimensions($(window).width(), $(window).height());

@@ -1,5 +1,7 @@
 'use strict';
 
+
+
 /**
  * @ngdoc service
  * @name fomodApp.data
@@ -37,38 +39,79 @@ angular.module('fomodApp')
       return undefined;
     };
   })
-  .service('DeleteRelationCommand', function(data) {
-    function remove(arr, item) {
+  .service('arrayRemove', function() {
+    return function(arr, item) {
       for(var i = arr.length; i--;) {
         if(arr[i] === item) {
           arr.splice(i, 1);
         }
       }
-    }
-    return function(id) {
-      var relation;
+    };
+  })
+  .service('CreateRelationCommand', function(data, arrayRemove) {
+    return function(id, name, from, to) {
+      var relation = {id: id, name: name, from: from, to: to};
       this.do = function() {
-        console.log('DeleteRelationCommand(' + id + ')')
-        relation = data.getRelationById(id);
-        if (relation) {
-          console.log('relation',relation);
-          remove(data.relations, relation);
-          console.log(data.relations);
-        }
+        console.log('CreateRelationCommand.do',relation);
+        data.relations.push(relation);
       }
       this.undo = function() {
-        console.log('undo');
+        var relation = data.getRelationById(id);
         if (relation) {
-          console.log('relation',relation);
-          data.relations.push(relation);
-          console.log(data.relations);
+          console.log('will remove'  + JSON.stringify(relation) + ' from ' + JSON.stringify(data.relations))
+          arrayRemove(data.relations, relation);
+          console.log('data.relations ' + JSON.stringify(data.relations))
         }
       }
       this.redo = function() {
         this.do();
       }
+      this.toString = function() {
+        return 'CreateRelationCommand relation=' + JSON.stringify(relation);
+      }
     }
   })
+  .service('DeleteRelationCommand', function(data, arrayRemove) {
+    return function(id) {
+      var relation;
+      this.do = function() {
+        relation = data.getRelationById(id);
+        if (relation) {
+          console.log('DeleteRelationCommand.do',relation);
+          arrayRemove(data.relations, relation);
+        }
+      }
+      this.undo = function() {
+        if (relation) {
+          console.log('DeleteRelationCommand.undo',relation);
+          data.relations.push(relation);
+        }
+      }
+      this.redo = function() {
+        this.do();
+      }
+      this.toString = function() {
+        return 'DeleteRelationCommand relation=' + relation;
+      }
+    }
+  })
+  // .service('MoveObjectCommand', function(graph) {
+  //   return function(id, position) {
+  //     var element;
+  //     this.do = function() {
+  //       element = data.getCell(id);
+  //       element.set('position', position);
+  //     }
+  //     this.undo = function() {
+  //     }
+  //     this.redo = function() {
+  //       this.do();
+  //     }
+  //     this.toString = function() {
+  //       return 'MoveObjectCommand';
+  //     }
+  //   }
+  // })
   .service('CreateObjectCommand', function(data) {
     return function(id, name) {
       this.do = function() {
@@ -80,18 +123,8 @@ angular.module('fomodApp')
       this.redo = function() {
         this.do();
       }
-    }
-  })
-  .service('CreateRelationCommand', function(data) {
-    return function(id, name, from, to) {
-      this.do = function() {
-        data.relations.push({id: id, name: name, from: from, to: to});
-      }
-      this.undo = function() {
-        data.relations.pop();
-      }
-      this.redo = function() {
-        this.do();
+      this.toString = function() {
+        return 'CreateObjectCommand(' + id + ', ' + name + ')';
       }
     }
   })
@@ -111,11 +144,12 @@ angular.module('fomodApp')
         command.do();
       }
       this.undo = function() {
-        console.log('b undoI',undoI);
+        console.log('commander.undo undoI=',undoI);
         if (undoI > 0) {
-          undoStack[--undoI].undo();
+          var cmd = undoStack[--undoI];
+          console.log('will undo',cmd.toString());
+          cmd.undo();
         }
-        console.log('a undoI',undoI);
       }
       this.redo = function() {
         if (undoI < maxRedoI) {
