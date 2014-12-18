@@ -11,91 +11,12 @@
 * Controller of the fomodApp
 */
 angular.module('fomodApp')
-.controller('MainCtrl', function ($scope, dragThresholder, data, commander, CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand) {
+.controller('MainCtrl', function ($scope, dragThresholder, data, commander, CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand, mapper, attrMap) {
   var near = function(a, b) {return Math.abs(a - b) < 5;};
   var nearEdge = function(x, y, position, size) {
     return near(x, position.x) || near(y, position.y) || near(x, position.x + size.width) || near(y, position.y + size.height);};
-  var attrMap = {'234': {x: 450, y: 30}};
   var adjusting = false;
-  var graph = new joint.dia.Graph();;
-
-  var adjustViewToData = function(data, graph) {
-    // compare graph with data and add/remove graph objects accordingly
-    adjusting = true;
-    // adjust elements
-    var graphElementsToRemove = {};
-    var dataElementsToAdd =[];
-    graph.getElements().forEach(function(element) {graphElementsToRemove[element.id] = element;});
-
-    graphElementsToRemove[palette.id] = undefined;
-    palette.getEmbeddedCells().forEach(function(element) {graphElementsToRemove[element.id] = undefined;});
-
-    data.objects.forEach(function(obj) {
-      if (graphElementsToRemove[obj.id]) {
-        graphElementsToRemove[obj.id] = undefined;
-      } else {
-        dataElementsToAdd.push(obj);
-      }
-    });
-
-    // remove unneeded elements
-    Object.keys(graphElementsToRemove).forEach(function(key) {
-      var element = graphElementsToRemove[key];
-      if (element) {
-        element.remove();
-      }
-    });
-
-    // add new elements
-    graph.addCells(dataElementsToAdd.map(function(obj) {
-      var element = new joint.shapes.basic.Rect({
-        id: obj.id,
-        position: attrMap[obj.id] || { x: 150, y: 30 },
-        size: { width: 100, height: 30 },
-        attrs: { rect: { fill: 'blue',
-        filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
-        text: { text: obj.name, fill: 'white' } }
-      });
-      return element;
-    }));
-
-    // adjust links
-    var graphLinksToRemove = {};
-    var dataRelationsToAdd =[];
-    graph.getLinks().forEach(function(link) {graphLinksToRemove[link.get('source').id + '|' + link.get('target').id] = link;});
-
-    data.relations.forEach(function(relation) {
-      var key = relation.from + '|' + relation.to;
-      if (graphLinksToRemove[key]) {
-        graphLinksToRemove[key] = undefined;
-      } else {
-        dataRelationsToAdd.push(relation);
-      }
-    });
-
-    // remove unneeded links
-    Object.keys(graphLinksToRemove).forEach(function(key) {
-      var element = graphLinksToRemove[key];
-      if (element) {
-        element.remove();
-      }
-    });
-
-    // add new links
-    graph.addCells(dataRelationsToAdd.map(function(relation) {
-      return new joint.dia.Link({
-        id: relation.id,
-        source: { id: relation.from },
-        target: { id: relation.to },
-        attrs: {
-          // Define a filter for the whole link (special selector '.' means the root element )
-          '.': { filter: { name: 'dropShadow', args: { dx: 1, dy: 1, blur: 1.5 } } },
-          '.marker-target': { d: 'M 10 0 L 0 3 L 10 6 z' }
-        }
-      })
-    }));
-    adjusting = false;
-  };
+  var graph = new joint.dia.Graph();
 
   // keeps rect size a little larger than the text in it
   var growWithTextLayout = function(rect, paper) {
@@ -168,29 +89,26 @@ angular.module('fomodApp')
         },
         pointerup: function(evt, x, y) {
           if (relDragging) {
+            // create relation
             var toViews = paper.findViewsFromPoint(g.point(x, y));
             if (toViews.length > 0) {
               var cmd = new CreateRelationCommand(joint.util.uuid(), this.model.attr('text/text'), relDragging.model.id, toViews[0].model.id);
               commander.do(cmd);
-              adjustViewToData(data, graph);
             }
             rubberband.remove();
             relDragging = false;
           } else if (templateDragging) {
+            // create object
             graph.getCell(this.model.get('parent')).unembed(this.model);
             var newId = joint.util.uuid();
-            var cmd = new CreateObjectCommand(newId, this.model.attr('text/text'));
-            commander.do(cmd);
             attrMap[newId] = this.model.get('position');
+            commander.do(new CreateObjectCommand(newId, this.model.attr('text/text')));
             adjusting = true;
             this.model.remove();
             adjusting = false;
             graph.getCell(templateDragging.get('parent')).embed(templateDragging);
             templateDragging = undefined;
             growWithTextLayout(this.model, paper);
-
-            adjustViewToData(data, graph);
-
           } else {
             joint.dia.ElementView.prototype.pointerup.apply(this, [evt, x, y]);
           }
@@ -266,23 +184,21 @@ angular.module('fomodApp')
   });
 
   $(document).keydown(function(e){
-    e = e || window.event // IE support
+    e = e || window.event; // IE support
     if ( e.which === 90 && (e.ctrlKey || e.metaKey)) {
       if (e.shiftKey) {
         commander.redo();
       } else {
         commander.undo();
       }
-      adjustViewToData(data, graph);
     }
   });
-  adjustViewToData(data, graph);
+  mapper(data, graph);
 
   graph.on('remove', function(cell) {
     if (!adjusting) {
       console.log(arguments);
       commander.do(new DeleteRelationCommand(cell.id));
-      adjustViewToData(data, graph);
     }
   });
 });
