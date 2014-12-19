@@ -116,6 +116,31 @@ angular.module('fomodApp')
     };
   };
 })
+.service('ChangeNameCommand', function(data) {
+  return function(id, newName) {
+    var obj, oldName;
+    this.do = function() {
+      obj = data.objects.get(id);
+      if (obj) {
+        console.log('ChangeNameCommand.do',id,newName);
+        oldName = obj.get('name');
+        obj.set('name', newName);
+      }
+    };
+    this.undo = function() {
+      if (obj) {
+        console.log('ChangeNameCommand.undo',id,oldName);
+        obj.set('name', oldName);
+      }
+    };
+    this.redo = function() {
+      this.do();
+    };
+    this.toString = function() {
+      return 'ChangeNameCommand(' + id + ', ' + newName + ')';
+    };
+  };
+})
 .service('commander', function() {
   var undoStack = [], undoI = 0, maxRedoI = 0, inCommand = 0
 

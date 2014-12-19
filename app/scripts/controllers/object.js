@@ -8,11 +8,16 @@
  * Controller of the fomodApp
  */
 angular.module('fomodApp')
-  .controller('ObjectCtrl', function ($scope, $routeParams, data) {
+  .controller('ObjectCtrl', function ($scope, $routeParams, data, commander, ChangeNameCommand) {
     var id = $routeParams.id;
-    var obj = data.getObjectById(id);
+    var obj = data.objects.get(id);
     if (obj) {
-      $scope.name = obj.name;
+      $scope.name = obj.get('name');
     }
-    console.log('getObjectById(' + id + ')',obj);
+    $scope.save = function() {
+      if (obj) {
+        console.log('changed $scope.name to', $scope.name);
+        commander.do(new ChangeNameCommand(id, $scope.name));
+      }
+    };
   });

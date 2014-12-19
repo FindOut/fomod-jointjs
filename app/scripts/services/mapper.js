@@ -35,6 +35,10 @@ angular.module('fomodApp')
           cell.remove();
         }
       });
+      data.objects.on('change:name', function(obj) {
+        var cell = graph.getCell(obj.id);
+        cell.attr('text/text', obj.get('name'));
+      });
 
       // add link for each relation
       var addLink = function(rel) {
