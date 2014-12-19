@@ -196,7 +196,7 @@ angular.module('fomodApp')
   mapper(data, graph);
 
   graph.on('remove', function(cell) {
-    if (!adjusting) {
+    if (cell instanceof joint.dia.Link) {
       console.log(arguments);
       commander.do(new DeleteRelationCommand(cell.id));
     }

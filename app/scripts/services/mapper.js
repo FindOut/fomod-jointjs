@@ -22,8 +22,8 @@ angular.module('fomodApp')
           position: attrMap[obj.id] || { x: 150, y: 30 },
           size: { width: 100, height: 30 },
           attrs: { rect: { fill: 'blue',
-          filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
-          text: { text: obj.get('name'), fill: 'white' } }
+              filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
+            text: { text: obj.get('name'), fill: 'white' } }
         });
         graph.addCell(element);
       };

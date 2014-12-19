@@ -55,10 +55,12 @@ angular.module('fomodApp')
   return function(id, name) {
     var newObject;
     this.do = function() {
+      console.log('CreateObjectCommand.do', id, name);
       newObject = new FomodObject({id: id, name: name});
       data.objects.add(newObject);
     };
     this.undo = function() {
+      console.log('CreateObjectCommand.undo', newObject);
       data.objects.remove(newObject);
     };
     this.redo = function() {
@@ -73,6 +75,7 @@ angular.module('fomodApp')
   return function(id, name, from, to) {
     var relation = new FomodRelation({id: id, name: name, from: from, to: to});
     this.do = function() {
+      console.log('CreateRelationCommand.do', relation);
       data.relations.add(relation);
     };
     this.undo = function() {
@@ -114,26 +117,33 @@ angular.module('fomodApp')
   };
 })
 .service('commander', function() {
-  var undoStack = [];
-  var undoI = 0, maxRedoI = 0;
+  var undoStack = [], undoI = 0, maxRedoI = 0, inCommand = 0
 
-  return (function() {
+  return new (function() {
     this.do = function(command) {
-      if (undoI < undoStack.length) {
-        undoStack[undoI] = command;
-      } else {
-        undoStack.push(command);
+      console.log('commander.do(' + command.toString() + ') inCommand=',inCommand);
+      if (inCommand == 0) {
+        inCommand++;
+        if (undoI < undoStack.length) {
+          undoStack[undoI] = command;
+        } else {
+          undoStack.push(command);
+        }
+        undoI++;
+        maxRedoI = undoI;
+        command.do();
+        inCommand--;
       }
-      undoI++;
-      maxRedoI = undoI;
-      command.do();
     };
     this.undo = function() {
-      console.log('commander.undo undoI=',undoI);
-      if (undoI > 0) {
+      console.log('commander.undo undoI=',undoI,'inCommand=',inCommand);
+      if (undoI > 0 && inCommand == 0) {
+        inCommand++;
         var cmd = undoStack[--undoI];
-        console.log('will undo',cmd.toString());
+        console.log('  commander will undo',cmd.toString());
         cmd.undo();
+        console.log('  commander undoI=',undoI);
+        inCommand--;
       }
     };
     this.redo = function() {
