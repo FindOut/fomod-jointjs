@@ -10,10 +10,43 @@
  * Service in the fomodApp.
  */
 angular.module('fomodApp')
-  .service('attrMap', function() {
+.service('MoveObjectCommand', function() {
+  return function(element, startPosition, endPosition) {
+    this.do = function() {
+      element.set('position', endPosition);
+    };
+    this.undo = function() {
+      element.set('position', startPosition);
+    };
+    this.redo = function() {
+      this.do();
+    };
+    this.toString = function() {
+      return 'MoveObjectCommand(' + id + ', ' + name + ')';
+    };
+  };
+})
+.service('ChangeLinkVerticesCommand', function() {
+  return function(link, startVertices, endVertices) {
+    this.do = function() {
+      link.set('vertices', endVertices);
+    };
+    this.undo = function() {
+      link.set('vertices', startVertices);
+    };
+    this.redo = function() {
+      this.do();
+    };
+    this.toString = function() {
+      return 'MoveObjectCommand(' + id + ', ' + name + ')';
+    };
+  };
+})
+.service('attrMap', function() {
     return {'123': {x: 150, y: 30}, '234': {x: 450, y: 30}};
   })
-  .service('mapper', function (attrMap, data, commander, DeleteRelationCommand) {
+  .service('mapper', function (attrMap, data, commander, DeleteRelationCommand, MoveObjectCommand, ChangeLinkVerticesCommand) {
+    var batch;
     return function(model, graph) {
       // add element for each model object
       var addElement = function(obj) {
@@ -38,6 +71,43 @@ angular.module('fomodApp')
       data.objects.on('change:name', function(obj) {
         var cell = graph.getCell(obj.id);
         cell.attr('text/text', obj.get('name'));
+      });
+
+      graph.on('change:vertices', function(cell) {
+        if (cell instanceof joint.dia.Link && batch) {
+          if (!batch.changeLinkVertices) {
+            batch.changeLinkVertices = {link: cell, startVertices: cell.previous('vertices')};
+          }
+          batch.changeLinkVertices.endVertices = cell.get('vertices');
+        }
+      });
+
+      graph.on('change:position', function(cell) {
+        if (cell instanceof joint.dia.Element && batch) {
+          if (!batch.moveElement) {
+            batch.moveElement = {element: cell, startPosition: cell.previous('position')};
+          }
+          batch.moveElement.endPosition = cell.get('position');
+        }
+      });
+
+      graph.on('batch:start', function() {
+          batch = {};
+      });
+
+      graph.on('batch:stop', function() {
+        if (batch) {
+          if (batch.moveElement) {
+            commander.register(new MoveObjectCommand(batch.moveElement.element, batch.moveElement.startPosition, batch.moveElement.endPosition));
+          } else if (batch.changeLinkVertices) {
+            commander.register(new ChangeLinkVerticesCommand(batch.changeLinkVertices.link, batch.changeLinkVertices.startVertices, batch.changeLinkVertices.endVertices));
+          }
+          batch = undefined;
+        }
+      });
+
+      graph.on('all', function() {
+        // console.log(arguments);
       });
 
       // add link for each relation

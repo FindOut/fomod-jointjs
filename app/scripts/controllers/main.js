@@ -192,6 +192,7 @@ angular.module('fomodApp')
       }
     }
   });
+
   mapper(data, graph);
 
 });

@@ -44,9 +44,8 @@ angular.module('fomodApp')
 })
 .service('CreateObjectCommand', function(data, FomodObject) {
   return function(id, name) {
-    var newObject;
+    var newObject = new FomodObject({id: id, name: name});
     this.do = function() {
-      newObject = new FomodObject({id: id, name: name});
       data.objects.add(newObject);
     };
     this.undo = function() {
@@ -155,5 +154,21 @@ angular.module('fomodApp')
         inCommand--;
       }
     };
+    this.register = function(command) {
+      // adds a command to the undo stack without executing it
+      // use when the result of a command is already achieved, but it should be undoable
+      if (inCommand == 0) {
+        inCommand++;
+        if (undoI < undoStack.length) {
+          undoStack[undoI] = command;
+        } else {
+          undoStack.push(command);
+        }
+        undoI++;
+        maxRedoI = undoI;
+        inCommand--;
+      }
+
+    }
   })();
 });
