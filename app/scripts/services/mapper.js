@@ -13,7 +13,7 @@ angular.module('fomodApp')
   .service('attrMap', function() {
     return {'123': {x: 150, y: 30}, '234': {x: 450, y: 30}};
   })
-  .service('mapper', function (attrMap, data) {
+  .service('mapper', function (attrMap, data, commander, DeleteRelationCommand) {
     return function(model, graph) {
       // add element for each model object
       var addElement = function(obj) {
@@ -60,6 +60,13 @@ angular.module('fomodApp')
         var link = graph.getCell(rel.id);
         if (link) {
           link.remove();
+        }
+      });
+
+      graph.on('remove', function(cell) {
+        if (cell instanceof joint.dia.Link) {
+          console.log(arguments);
+          commander.do(new DeleteRelationCommand(cell.id));
         }
       });
     };

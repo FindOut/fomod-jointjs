@@ -42,25 +42,14 @@ angular.module('fomodApp')
   d.relations.add(new FomodRelation({id: '123234', from: '123', to: '234'}));
   return d;
 })
-.service('arrayRemove', function() {
-  return function(arr, item) {
-    for(var i = arr.length; i--;) {
-      if(arr[i] === item) {
-        arr.splice(i, 1);
-      }
-    }
-  };
-})
 .service('CreateObjectCommand', function(data, FomodObject) {
   return function(id, name) {
     var newObject;
     this.do = function() {
-      console.log('CreateObjectCommand.do', id, name);
       newObject = new FomodObject({id: id, name: name});
       data.objects.add(newObject);
     };
     this.undo = function() {
-      console.log('CreateObjectCommand.undo', newObject);
       data.objects.remove(newObject);
     };
     this.redo = function() {
@@ -75,11 +64,9 @@ angular.module('fomodApp')
   return function(id, name, from, to) {
     var relation = new FomodRelation({id: id, name: name, from: from, to: to});
     this.do = function() {
-      console.log('CreateRelationCommand.do', relation);
       data.relations.add(relation);
     };
     this.undo = function() {
-      console.log('CreateRelationCommand.undo', relation);
       if (relation) {
         data.relations.remove(relation);
       }
@@ -94,17 +81,14 @@ angular.module('fomodApp')
 })
 .service('DeleteRelationCommand', function(data) {
   return function(id) {
-    var relation;
+    var relation = data.relations.get(id);
     this.do = function() {
-      relation = data.relations.get(id);
       if (relation) {
-        console.log('DeleteRelationCommand.do',relation);
         data.relations.remove(relation);
       }
     };
     this.undo = function() {
       if (relation) {
-        console.log('DeleteRelationCommand.undo',relation);
         data.relations.add(relation);
       }
     };
@@ -122,14 +106,12 @@ angular.module('fomodApp')
     this.do = function() {
       obj = data.objects.get(id);
       if (obj) {
-        console.log('ChangeNameCommand.do',id,newName);
         oldName = obj.get('name');
         obj.set('name', newName);
       }
     };
     this.undo = function() {
       if (obj) {
-        console.log('ChangeNameCommand.undo',id,oldName);
         obj.set('name', oldName);
       }
     };
@@ -143,10 +125,8 @@ angular.module('fomodApp')
 })
 .service('commander', function() {
   var undoStack = [], undoI = 0, maxRedoI = 0, inCommand = 0
-
   return new (function() {
     this.do = function(command) {
-      console.log('commander.do(' + command.toString() + ') inCommand=',inCommand);
       if (inCommand == 0) {
         inCommand++;
         if (undoI < undoStack.length) {
@@ -161,19 +141,18 @@ angular.module('fomodApp')
       }
     };
     this.undo = function() {
-      console.log('commander.undo undoI=',undoI,'inCommand=',inCommand);
       if (undoI > 0 && inCommand == 0) {
         inCommand++;
         var cmd = undoStack[--undoI];
-        console.log('  commander will undo',cmd.toString());
         cmd.undo();
-        console.log('  commander undoI=',undoI);
         inCommand--;
       }
     };
     this.redo = function() {
-      if (undoI < maxRedoI) {
+      if (undoI < maxRedoI && inCommand == 0) {
+        inCommand++;
         undoStack[undoI++].redo();
+        inCommand--;
       }
     };
   })();

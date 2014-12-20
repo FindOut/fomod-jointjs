@@ -108,7 +108,6 @@ angular.module('fomodApp')
             adjusting = false;
             graph.getCell(templateDragging.get('parent')).embed(templateDragging);
             templateDragging = undefined;
-            growWithTextLayout(this.model, paper);
           } else {
             joint.dia.ElementView.prototype.pointerup.apply(this, [evt, x, y]);
           }
@@ -195,10 +194,4 @@ angular.module('fomodApp')
   });
   mapper(data, graph);
 
-  graph.on('remove', function(cell) {
-    if (cell instanceof joint.dia.Link) {
-      console.log(arguments);
-      commander.do(new DeleteRelationCommand(cell.id));
-    }
-  });
 });
