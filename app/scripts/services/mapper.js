@@ -38,17 +38,17 @@ angular.module('fomodApp')
       this.do();
     };
     this.toString = function() {
-      return 'MoveObjectCommand(' + id + ', ' + name + ')';
+      return 'ChangeLinkVerticesCommand(' + link + ', ' + startVertices + ', ' + endVertices + ')';
     };
   };
 })
 .service('attrMap', function() {
-    return {'123': {x: 150, y: 30}, '234': {x: 450, y: 30}};
+    return {'123': {x: 150, y: 30}, '234': {x: 450, y: 30}, '345': {x: 420, y: 120}};
   })
-  .service('mapper', function (attrMap, data, commander, DeleteRelationCommand, MoveObjectCommand, ChangeLinkVerticesCommand) {
+  .service('mapper', function (attrMap, data, commander, DeleteRelationCommand, MoveObjectCommand, ChangeLinkVerticesCommand, ChangeRelationToCommand, ChangeRelationAttributeCommand) {
     var batch;
     return function(model, graph) {
-      // add element for each model object
+      // add an element for each model object
       var addElement = function(obj) {
         var element = new joint.shapes.basic.Rect({
           id: obj.id,
@@ -73,44 +73,8 @@ angular.module('fomodApp')
         cell.attr('text/text', obj.get('name'));
       });
 
-      graph.on('change:vertices', function(cell) {
-        if (cell instanceof joint.dia.Link && batch) {
-          if (!batch.changeLinkVertices) {
-            batch.changeLinkVertices = {link: cell, startVertices: cell.previous('vertices')};
-          }
-          batch.changeLinkVertices.endVertices = cell.get('vertices');
-        }
-      });
 
-      graph.on('change:position', function(cell) {
-        if (cell instanceof joint.dia.Element && batch) {
-          if (!batch.moveElement) {
-            batch.moveElement = {element: cell, startPosition: cell.previous('position')};
-          }
-          batch.moveElement.endPosition = cell.get('position');
-        }
-      });
-
-      graph.on('batch:start', function() {
-          batch = {};
-      });
-
-      graph.on('batch:stop', function() {
-        if (batch) {
-          if (batch.moveElement) {
-            commander.register(new MoveObjectCommand(batch.moveElement.element, batch.moveElement.startPosition, batch.moveElement.endPosition));
-          } else if (batch.changeLinkVertices) {
-            commander.register(new ChangeLinkVerticesCommand(batch.changeLinkVertices.link, batch.changeLinkVertices.startVertices, batch.changeLinkVertices.endVertices));
-          }
-          batch = undefined;
-        }
-      });
-
-      graph.on('all', function() {
-        // console.log(arguments);
-      });
-
-      // add link for each relation
+      // add a link for each relation
       var addLink = function(rel) {
         var link = new joint.dia.Link({
           id: rel.id,
@@ -132,11 +96,93 @@ angular.module('fomodApp')
           link.remove();
         }
       });
+      data.relations.on('change:from', function(rel) {
+        var link = graph.getCell(rel.id);
+        if (link) {
+          link.set('source', {id: rel.get('from')});
+        }
+      });
+      data.relations.on('change:to', function(rel) {
+        var link = graph.getCell(rel.id);
+        if (link) {
+          link.set('target', {id: rel.get('to')});
+        }
+      });
 
+      // handle graph direct manipulation events and run commands that changes model accordingly and make changes undoable
       graph.on('remove', function(cell) {
         if (cell instanceof joint.dia.Link) {
           console.log(arguments);
           commander.do(new DeleteRelationCommand(cell.id));
+        }
+      });
+
+      // the following commands are enclosed in batch events to mark start and end of a dragging operation
+      // some commands use batch inside batch, so we use batchLevel to find the outermost batch:start - batch:stop
+
+      var batchLevel = 0; // no active batch
+
+      graph.on('batch:start', function() {
+        if (batchLevel++ == 0) {
+          // outermost batch command found
+          batch = {}; // create an object to hold data for the command
+        }
+      });
+
+      graph.on('change:position', function(cell) {
+        if (cell instanceof joint.dia.Element && batch) {
+          if (!batch.moveElement) {
+            batch.moveElement = {element: cell, startPosition: cell.previous('position')};
+          }
+          batch.moveElement.endPosition = cell.get('position');
+        }
+      });
+
+      graph.on('change:source', function(cell, target) {
+        if (cell instanceof joint.dia.Link && batch) {
+          if (!batch.changeLinkTarget) {
+            batch.changeLinkTarget = {link: cell, attributeName: 'from', linkAttr: 'source', startTarget: cell.previous('source').id};
+          }
+          batch.changeLinkTarget.endTarget = target.id;
+        }
+      });
+
+      graph.on('change:target', function(cell, target) {
+        if (cell instanceof joint.dia.Link && batch) {
+          if (!batch.changeLinkTarget) {
+            batch.changeLinkTarget = {link: cell, attributeName: 'to', linkAttr: 'target', startTarget: cell.previous('target').id};
+          }
+          batch.changeLinkTarget.endTarget = target.id;
+        }
+      });
+
+      graph.on('change:vertices', function(cell) {
+        if (cell instanceof joint.dia.Link && batch) {
+          if (!batch.changeLinkVertices) {
+            batch.changeLinkVertices = {link: cell, startVertices: cell.previous('vertices')};
+          }
+          batch.changeLinkVertices.endVertices = cell.get('vertices');
+        }
+      });
+
+      graph.on('batch:stop', function() {
+        if (--batchLevel == 0) {
+          // outermost batch command end
+          if (batch) {
+            if (batch.moveElement) {
+              commander.register(new MoveObjectCommand(batch.moveElement.element, batch.moveElement.startPosition, batch.moveElement.endPosition));
+            } else if (batch.changeLinkTarget) {
+              if (batch.changeLinkTarget.endTarget) {
+                commander.do(new ChangeRelationAttributeCommand(batch.changeLinkTarget.link.id, batch.changeLinkTarget.attributeName, batch.changeLinkTarget.endTarget));
+              } else {
+                // link end dropped outside any object - set back previous target
+                batch.changeLinkTarget.link.set(batch.changeLinkTarget.linkAttr, {id: batch.changeLinkTarget.startTarget});
+              }
+            } else if (batch.changeLinkVertices) {
+              commander.register(new ChangeLinkVerticesCommand(batch.changeLinkVertices.link, batch.changeLinkVertices.startVertices, batch.changeLinkVertices.endVertices));
+            }
+            batch = undefined;
+          }
         }
       });
     };

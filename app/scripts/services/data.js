@@ -39,6 +39,7 @@ angular.module('fomodApp')
   var d = new FomodModel();
   d.objects.add(new FomodObject({id: '123', name: 'Hej'}));
   d.objects.add(new FomodObject({id: '234', name: 'Du'}));
+  d.objects.add(new FomodObject({id: '345', name: 'glade'}));
   d.relations.add(new FomodRelation({id: '123234', from: '123', to: '234'}));
   return d;
 })
@@ -99,6 +100,24 @@ angular.module('fomodApp')
     };
   };
 })
+.service('ChangeRelationToCommand', function(data) {
+  return function(relationId, toId) {
+    var relation = data.relations.get(relationId);
+    var previousToId = relation.get('to');
+    this.do = function() {
+      relation.set('to', toId);
+    };
+    this.undo = function() {
+      relation.set('to', previousToId);
+    };
+    this.redo = function() {
+      this.do();
+    };
+    this.toString = function() {
+      return 'ChangeRelationToCommand(' + relationId + ', ' + toId + ')';
+    };
+  };
+})
 .service('ChangeNameCommand', function(data) {
   return function(id, newName) {
     var obj, oldName;
@@ -119,6 +138,29 @@ angular.module('fomodApp')
     };
     this.toString = function() {
       return 'ChangeNameCommand(' + id + ', ' + newName + ')';
+    };
+  };
+})
+.service('ChangeRelationAttributeCommand', function(data) {
+  return function(id, attributeName, newValue) {
+    var relation, oldValue;
+    this.do = function() {
+      relation = data.relations.get(id);
+      if (relation) {
+        oldValue = relation.get(attributeName);
+        relation.set(attributeName, newValue);
+      }
+    };
+    this.undo = function() {
+      if (relation) {
+        relation.set(attributeName, oldValue);
+      }
+    };
+    this.redo = function() {
+      this.do();
+    };
+    this.toString = function() {
+      return 'ChangeRelationAttributeCommand(' + id + ', ' + attributeName + ', ' + newValue + ')';
     };
   };
 })
