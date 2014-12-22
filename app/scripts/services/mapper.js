@@ -138,21 +138,21 @@ angular.module('fomodApp')
         }
       });
 
-      graph.on('change:source', function(cell, target) {
+      graph.on('change:source', function(cell, source) {
         if (cell instanceof joint.dia.Link && batch) {
-          if (!batch.changeLinkTarget) {
-            batch.changeLinkTarget = {link: cell, attributeName: 'from', linkAttr: 'source', startTarget: cell.previous('source').id};
+          if (!batch.changeLinkEnd) {
+            batch.changeLinkEnd = {link: cell, attributeName: 'from', linkAttr: 'source', oldEndElementId: cell.previous('source').id};
           }
-          batch.changeLinkTarget.endTarget = target.id;
+          batch.changeLinkEnd.newEndElementId = source.id;
         }
       });
 
       graph.on('change:target', function(cell, target) {
         if (cell instanceof joint.dia.Link && batch) {
-          if (!batch.changeLinkTarget) {
-            batch.changeLinkTarget = {link: cell, attributeName: 'to', linkAttr: 'target', startTarget: cell.previous('target').id};
+          if (!batch.changeLinkEnd) {
+            batch.changeLinkEnd = {link: cell, attributeName: 'to', linkAttr: 'target', oldEndElementId: cell.previous('target').id};
           }
-          batch.changeLinkTarget.endTarget = target.id;
+          batch.changeLinkEnd.newEndElementId = target.id;
         }
       });
 
@@ -171,12 +171,12 @@ angular.module('fomodApp')
           if (batch) {
             if (batch.moveElement) {
               commander.register(new MoveObjectCommand(batch.moveElement.element, batch.moveElement.startPosition, batch.moveElement.endPosition));
-            } else if (batch.changeLinkTarget) {
-              if (batch.changeLinkTarget.endTarget) {
-                commander.do(new ChangeRelationAttributeCommand(batch.changeLinkTarget.link.id, batch.changeLinkTarget.attributeName, batch.changeLinkTarget.endTarget));
+            } else if (batch.changeLinkEnd) {
+              if (batch.changeLinkEnd.newEndElementId) {
+                commander.do(new ChangeRelationAttributeCommand(batch.changeLinkEnd.link.id, batch.changeLinkEnd.attributeName, batch.changeLinkEnd.newEndElementId));
               } else {
                 // link end dropped outside any object - set back previous target
-                batch.changeLinkTarget.link.set(batch.changeLinkTarget.linkAttr, {id: batch.changeLinkTarget.startTarget});
+                batch.changeLinkEnd.link.set(batch.changeLinkEnd.linkAttr, {id: batch.changeLinkEnd.oldEndElementId});
               }
             } else if (batch.changeLinkVertices) {
               commander.register(new ChangeLinkVerticesCommand(batch.changeLinkVertices.link, batch.changeLinkVertices.startVertices, batch.changeLinkVertices.endVertices));
