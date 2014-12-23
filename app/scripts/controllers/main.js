@@ -11,26 +11,17 @@
 * Controller of the fomodApp
 */
 angular.module('fomodApp')
-.controller('MainCtrl', function ($scope, dragThresholder, data, commander, CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand, mapper, attrMap) {
-  var near = function(a, b) {return Math.abs(a - b) < 5;};
-  var nearEdge = function(x, y, position, size) {
-    return near(x, position.x) || near(y, position.y) || near(x, position.x + size.width) || near(y, position.y + size.height);};
-  var adjusting = false;
+.service('palette', function() {
+  return new joint.shapes.basic.Rect({
+    position: { x: 5, y: 5},
+    size: { width: 110, height: 100 },
+    attrs: { rect: { fill: '#888', 'stroke-width': 0,
+    filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } }}
+  });
+})
+.service('graph', function(palette, mapper, data) {
+  console.log('service graph');
   var graph = new joint.dia.Graph();
-
-  // keeps rect size a little larger than the text in it
-  var growWithTextLayout = function(rect, paper) {
-    var layout = function() {
-      var view = paper.findViewByModel(rect);
-      if (view) {
-        rect.set('size', {width: 1, height: 1});
-        var bbox = view.getBBox();
-        rect.set('size', {width: bbox.width + 20, height: bbox.height + 5});
-      }
-    };
-    rect.on('change:attrs', layout);
-    layout();
-  };
 
   // makes all embedded cells line up from top to bottom and container resize around them
   var sizeAroundEmbeddedObjectsLayout = function(container) {
@@ -50,6 +41,61 @@ angular.module('fomodApp')
       palette.set('size', {width: maxWidth + 10, height: y - pos.y});
     };
     container.on('change:embeds', layout);
+    layout();
+  };
+
+
+  sizeAroundEmbeddedObjectsLayout(palette);
+
+  var addToPalette = function(shape) {
+    graph.addCells([shape]);
+    palette.embed(shape);
+  };
+  graph.addCells([palette]);
+
+  addToPalette(new joint.shapes.basic.Rect({
+    size: { width: 100, height: 30 },
+    attrs: { rect: { fill: 'blue',
+    filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
+    text: { text: 'new box 1', fill: 'white' }}
+  }));
+
+  addToPalette(new joint.shapes.basic.Rect({
+    size: { width: 100, height: 30 },
+    attrs: { rect: { fill: 'blue',
+    filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
+    text: { text: 'new box 2', fill: 'white' } }
+  }));
+
+  addToPalette(new joint.shapes.basic.Rect({
+    size: { width: 100, height: 30 },
+    attrs: { rect: { fill: 'blue',
+    filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
+    text: { text: 'new box 3', fill: 'white' } }
+  }));
+
+  mapper(data, graph);
+
+
+  return graph;
+})
+.controller('MainCtrl', function ($scope, dragThresholder, graph, palette, data, commander, CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand, mapper, attrMap) {
+  var near = function(a, b) {return Math.abs(a - b) < 5;};
+  var nearEdge = function(x, y, position, size) {
+    return near(x, position.x) || near(y, position.y) || near(x, position.x + size.width) || near(y, position.y + size.height);};
+  var adjusting = false;
+
+  // keeps rect size a little larger than the text in it
+  var growWithTextLayout = function(rect, paper) {
+    var layout = function() {
+      var view = paper.findViewByModel(rect);
+      if (view) {
+        rect.set('size', {width: 1, height: 1});
+        var bbox = view.getBBox();
+        rect.set('size', {width: bbox.width + 20, height: bbox.height + 5});
+      }
+    };
+    rect.on('change:attrs', layout);
     layout();
   };
 
@@ -125,42 +171,8 @@ angular.module('fomodApp')
     elementView: dragThresholder(ConstraintElementView),
     linkView: dragThresholder(joint.dia.LinkView)
   });
+  paper.resetCells(graph.get("cells"));
 
-  var palette = new joint.shapes.basic.Rect({
-    position: { x: 5, y: 5},
-    size: { width: 110, height: 100 },
-    attrs: { rect: { fill: '#888', 'stroke-width': 0,
-    filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } }}
-  });
-
-  sizeAroundEmbeddedObjectsLayout(palette, paper);
-
-  var addToPalette = function(shape) {
-    graph.addCells([shape]);
-    palette.embed(shape);
-  };
-  graph.addCells([palette]);
-
-  addToPalette(new joint.shapes.basic.Rect({
-    size: { width: 100, height: 30 },
-    attrs: { rect: { fill: 'blue',
-    filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
-    text: { text: 'new box 1', fill: 'white' }}
-  }));
-
-  addToPalette(new joint.shapes.basic.Rect({
-    size: { width: 100, height: 30 },
-    attrs: { rect: { fill: 'blue',
-    filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
-    text: { text: 'new box 2', fill: 'white' } }
-  }));
-
-  addToPalette(new joint.shapes.basic.Rect({
-    size: { width: 100, height: 30 },
-    attrs: { rect: { fill: 'blue',
-    filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
-    text: { text: 'new box 3', fill: 'white' } }
-  }));
 
   function setHeight() {
     paper.setDimensions($(window).width(), $(window).height());
@@ -193,6 +205,5 @@ angular.module('fomodApp')
     }
   });
 
-  mapper(data, graph);
 
 });
