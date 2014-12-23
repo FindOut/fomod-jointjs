@@ -35,13 +35,13 @@ angular.module('fomodApp')
     }
   });
 })
-.service('data', function (FomodModel, FomodObject, FomodRelation) {
-  var d = new FomodModel();
-  d.objects.add(new FomodObject({id: '123', name: 'Hej'}));
-  d.objects.add(new FomodObject({id: '234', name: 'Du'}));
-  d.objects.add(new FomodObject({id: '345', name: 'glade'}));
-  d.relations.add(new FomodRelation({id: '123234', from: '123', to: '234'}));
-  return d;
+.service('data', function (FomodModel, FomodObject, FomodRelation, commander) {
+  var data = new FomodModel();
+  data.objects.add(new FomodObject({id: '123', name: 'Hej'}));
+  data.objects.add(new FomodObject({id: '234', name: 'Du'}));
+  data.objects.add(new FomodObject({id: '345', name: 'glade'}));
+  data.relations.add(new FomodRelation({id: '123234', from: '123', to: '234'}));
+  return data;
 })
 .service('CreateObjectCommand', function(data, FomodObject) {
   return function(id, name) {
@@ -165,7 +165,7 @@ angular.module('fomodApp')
   };
 })
 .service('commander', function() {
-  var undoStack = [], undoI = 0, maxRedoI = 0, inCommand = 0
+  var undoStack = [], undoI = 0, maxRedoI = 0, inCommand = 0, commandListeners = [];
   return new (function() {
     this.do = function(command) {
       if (inCommand == 0) {
@@ -179,6 +179,7 @@ angular.module('fomodApp')
         maxRedoI = undoI;
         command.do();
         inCommand--;
+        fireCommandDone(command, 'do');
       }
     };
     this.undo = function() {
@@ -187,13 +188,16 @@ angular.module('fomodApp')
         var cmd = undoStack[--undoI];
         cmd.undo();
         inCommand--;
+        fireCommandDone(cmd, 'undo');
       }
     };
     this.redo = function() {
       if (undoI < maxRedoI && inCommand == 0) {
         inCommand++;
-        undoStack[undoI++].redo();
+        var cmd = undoStack[undoI++];
+        cmd.redo();
         inCommand--;
+        fireCommandDone(cmd, 'redo');
       }
     };
     this.register = function(command) {
@@ -209,8 +213,14 @@ angular.module('fomodApp')
         undoI++;
         maxRedoI = undoI;
         inCommand--;
+        fireCommandDone(command, 'register');
       }
-
-    }
+    };
+    var fireCommandDone = function(cmd, what) {
+      _.each(commandListeners, function(item) {item(cmd, what)});
+    };
+    this.on = function(commandListener) {
+      commandListeners.push(commandListener);
+    };
   })();
 });
