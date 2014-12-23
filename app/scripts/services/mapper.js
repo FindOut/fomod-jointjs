@@ -60,15 +60,15 @@ angular.module('fomodApp')
       });
       graph.addCell(element);
     };
-    data.objects.forEach(addElement);
-    data.objects.on('add', addElement);
-    data.objects.on('remove', function(obj) {
+    data.get('objects').forEach(addElement);
+    data.get('objects').on('add', addElement);
+    data.get('objects').on('remove', function(obj) {
       var cell = graph.getCell(obj.id);
       if (cell) {
         cell.remove();
       }
     });
-    data.objects.on('change:name', function(obj) {
+    data.get('objects').on('change:name', function(obj) {
       var cell = graph.getCell(obj.id);
       cell.attr('text/text', obj.get('name'));
     });
@@ -88,21 +88,21 @@ angular.module('fomodApp')
       });
       graph.addCell(link);
     };
-    data.relations.forEach(addLink);
-    data.relations.on('add', addLink);
-    data.relations.on('remove', function(rel) {
+    data.get('relations').forEach(addLink);
+    data.get('relations').on('add', addLink);
+    data.get('relations').on('remove', function(rel) {
       var link = graph.getCell(rel.id);
       if (link) {
         link.remove();
       }
     });
-    data.relations.on('change:from', function(rel) {
+    data.get('relations').on('change:from', function(rel) {
       var link = graph.getCell(rel.id);
       if (link) {
         link.set('source', {id: rel.get('from')});
       }
     });
-    data.relations.on('change:to', function(rel) {
+    data.get('relations').on('change:to', function(rel) {
       var link = graph.getCell(rel.id);
       if (link) {
         link.set('target', {id: rel.get('to')});
@@ -112,7 +112,6 @@ angular.module('fomodApp')
     // handle graph direct manipulation events and run commands that changes model accordingly and make changes undoable
     graph.on('remove', function(cell) {
       if (cell instanceof joint.dia.Link) {
-        console.log(arguments);
         commander.do(new DeleteRelationCommand(cell.id));
       }
     });

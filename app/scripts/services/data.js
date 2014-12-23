@@ -12,45 +12,52 @@
  */
 angular.module('fomodApp')
 .service('FomodObject', function() {
-  return Backbone.Model.extend();
+  return Backbone.AssociatedModel.extend();
 })
 .service('FomodRelation', function() {
-  return Backbone.Model.extend();
+  return Backbone.AssociatedModel.extend();
 })
-.service('FomodObjectCollection', function(FomodObject) {
-  return Backbone.Collection.extend({
-    model: FomodObject
-  });
-})
-.service('FomodRelationCollection', function(FomodRelation) {
-  return Backbone.Collection.extend({
-    model: FomodRelation
-  });
-})
-.service('FomodModel', function(FomodObjectCollection, FomodRelationCollection) {
-  return Backbone.Model.extend({
-    initialize : function() {
-      this.objects = new FomodObjectCollection();
-      this.relations = new FomodRelationCollection();
+.service('FomodModel', function(FomodObject, FomodRelation) {
+  return Backbone.AssociatedModel.extend({
+    relations: [
+      {
+        type: Backbone.Many, //nature of the relation
+        key: 'objects', //attribute of Project
+        relatedModel:FomodObject //AssociatedModel for attribute key
+      },
+      {
+        type: Backbone.Many, //nature of the relation
+        key: 'relations', //attribute of Project
+        relatedModel:FomodRelation //AssociatedModel for attribute key
+      }
+    ],
+    defaults: {
+      objects: [],
+      relations: []
     }
   });
 })
 .service('data', function (FomodModel, FomodObject, FomodRelation, commander) {
   var data = new FomodModel();
-  data.objects.add(new FomodObject({id: '123', name: 'Hej'}));
-  data.objects.add(new FomodObject({id: '234', name: 'Du'}));
-  data.objects.add(new FomodObject({id: '345', name: 'glade'}));
-  data.relations.add(new FomodRelation({id: '123234', from: '123', to: '234'}));
+  data.get('objects').add(new FomodObject({id: '123', name: 'Hej'}));
+  data.get('objects').add(new FomodObject({id: '234', name: 'Du'}));
+  data.get('objects').add(new FomodObject({id: '345', name: 'glade'}));
+  data.get('relations').add(new FomodRelation({id: '123234', from: '123', to: '234'}));
+
+  commander.on(function() {
+    console.log(JSON.stringify(data.toJSON()));
+  });
+
   return data;
 })
 .service('CreateObjectCommand', function(data, FomodObject) {
   return function(id, name) {
     var newObject = new FomodObject({id: id, name: name});
     this.do = function() {
-      data.objects.add(newObject);
+      data.get('objects').add(newObject);
     };
     this.undo = function() {
-      data.objects.remove(newObject);
+      data.get('objects').remove(newObject);
     };
     this.redo = function() {
       this.do();
@@ -64,11 +71,11 @@ angular.module('fomodApp')
   return function(id, name, from, to) {
     var relation = new FomodRelation({id: id, name: name, from: from, to: to});
     this.do = function() {
-      data.relations.add(relation);
+      data.get('relations').add(relation);
     };
     this.undo = function() {
       if (relation) {
-        data.relations.remove(relation);
+        data.get('relations').remove(relation);
       }
     };
     this.redo = function() {
@@ -81,15 +88,15 @@ angular.module('fomodApp')
 })
 .service('DeleteRelationCommand', function(data) {
   return function(id) {
-    var relation = data.relations.get(id);
+    var relation = data.get('relations').get(id);
     this.do = function() {
       if (relation) {
-        data.relations.remove(relation);
+        data.get('relations').remove(relation);
       }
     };
     this.undo = function() {
       if (relation) {
-        data.relations.add(relation);
+        data.get('relations').add(relation);
       }
     };
     this.redo = function() {
@@ -102,7 +109,7 @@ angular.module('fomodApp')
 })
 .service('ChangeRelationToCommand', function(data) {
   return function(relationId, toId) {
-    var relation = data.relations.get(relationId);
+    var relation = data.get('relations').get(relationId);
     var previousToId = relation.get('to');
     this.do = function() {
       relation.set('to', toId);
@@ -122,7 +129,7 @@ angular.module('fomodApp')
   return function(id, newName) {
     var obj, oldName;
     this.do = function() {
-      obj = data.objects.get(id);
+      obj = data.get('objects').get(id);
       if (obj) {
         oldName = obj.get('name');
         obj.set('name', newName);
@@ -145,7 +152,7 @@ angular.module('fomodApp')
   return function(id, attributeName, newValue) {
     var relation, oldValue;
     this.do = function() {
-      relation = data.relations.get(id);
+      relation = data.get('relations').get(id);
       if (relation) {
         oldValue = relation.get(attributeName);
         relation.set(attributeName, newValue);
