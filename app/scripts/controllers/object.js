@@ -10,7 +10,7 @@
 angular.module('fomodApp')
   .controller('ObjectCtrl', function ($scope, $routeParams, data, commander, ChangeNameCommand) {
     var id = $routeParams.id;
-    var obj = data.objects.get(id);
+    var obj = data.get('objects').get(id);
     if (obj) {
       $scope.name = obj.get('name');
     }

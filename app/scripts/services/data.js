@@ -37,17 +37,8 @@ angular.module('fomodApp')
     }
   });
 })
-.service('data', function (FomodModel, FomodObject, FomodRelation, commander) {
+.service('data', function (FomodModel) {
   var data = new FomodModel();
-  data.get('objects').add(new FomodObject({id: '123', name: 'Hej'}));
-  data.get('objects').add(new FomodObject({id: '234', name: 'Du'}));
-  data.get('objects').add(new FomodObject({id: '345', name: 'glade'}));
-  data.get('relations').add(new FomodRelation({id: '123234', from: '123', to: '234'}));
-
-  commander.on(function() {
-    console.log(JSON.stringify(data.toJSON()));
-  });
-
   return data;
 })
 .service('CreateObjectCommand', function(data, FomodObject) {
@@ -68,8 +59,8 @@ angular.module('fomodApp')
   };
 })
 .service('CreateRelationCommand', function(data, FomodRelation) {
-  return function(id, name, from, to) {
-    var relation = new FomodRelation({id: id, name: name, from: from, to: to});
+  return function(id, from, to) {
+    var relation = new FomodRelation({id: id, from: from, to: to});
     this.do = function() {
       data.get('relations').add(relation);
     };

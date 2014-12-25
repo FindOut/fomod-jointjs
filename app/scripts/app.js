@@ -30,6 +30,7 @@ angular
       .otherwise({
         redirectTo: '/'
       });
+  })
+  .run(function(dataStore) {
+    console.log('dataStore', dataStore);
   });
-
-  

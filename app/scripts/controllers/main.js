@@ -12,12 +12,14 @@
 */
 angular.module('fomodApp')
 .service('palette', function() {
-  return new joint.shapes.basic.Rect({
+  var palette = new joint.shapes.basic.Rect({
     position: { x: 5, y: 5},
     size: { width: 110, height: 100 },
     attrs: { rect: { fill: '#888', 'stroke-width': 0,
     filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } }}
   });
+  palette.belongsToPalette = true;
+  return palette;
 })
 .service('graph', function(palette, mapper, data) {
   console.log('service graph');
@@ -48,6 +50,7 @@ angular.module('fomodApp')
   sizeAroundEmbeddedObjectsLayout(palette);
 
   var addToPalette = function(shape) {
+    shape.belongsToPalette = true;
     graph.addCells([shape]);
     palette.embed(shape);
   };
@@ -138,7 +141,7 @@ angular.module('fomodApp')
             // create relation
             var toViews = paper.findViewsFromPoint(g.point(x, y));
             if (toViews.length > 0) {
-              var cmd = new CreateRelationCommand(joint.util.uuid(), this.model.attr('text/text'), relDragging.model.id, toViews[0].model.id);
+              var cmd = new CreateRelationCommand(joint.util.uuid(), relDragging.model.id, toViews[0].model.id);
               commander.do(cmd);
             }
             rubberband.remove();
