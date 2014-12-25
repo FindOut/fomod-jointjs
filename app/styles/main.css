@@ -4,3 +4,11 @@
 }
 #graph {
 }
+#toolbar {
+  border-bottom: solid #ccc 1px;
+  padding: 0.13em 0.15em;
+  background-color: #eed;
+}
+#toolbar button {
+  margin-right: 0.1em;
+}

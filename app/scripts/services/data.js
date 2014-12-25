@@ -1,7 +1,7 @@
 'use strict';
 
 /*global Backbone:false */
-
+/*global _:false */
 
 /**
  * @ngdoc service
@@ -166,7 +166,7 @@ angular.module('fomodApp')
   var undoStack = [], undoI = 0, maxRedoI = 0, inCommand = 0, commandListeners = [];
   return new (function() {
     this.do = function(command) {
-      if (inCommand == 0) {
+      if (inCommand === 0) {
         inCommand++;
         if (undoI < undoStack.length) {
           undoStack[undoI] = command;
@@ -181,7 +181,8 @@ angular.module('fomodApp')
       }
     };
     this.undo = function() {
-      if (undoI > 0 && inCommand == 0) {
+      console.log('commander.undo()');
+      if (undoI > 0 && inCommand === 0) {
         inCommand++;
         var cmd = undoStack[--undoI];
         cmd.undo();
@@ -190,7 +191,8 @@ angular.module('fomodApp')
       }
     };
     this.redo = function() {
-      if (undoI < maxRedoI && inCommand == 0) {
+      console.log('commander.redo()');
+      if (undoI < maxRedoI && inCommand === 0) {
         inCommand++;
         var cmd = undoStack[undoI++];
         cmd.redo();
@@ -201,7 +203,7 @@ angular.module('fomodApp')
     this.register = function(command) {
       // adds a command to the undo stack without executing it
       // use when the result of a command is already achieved, but it should be undoable
-      if (inCommand == 0) {
+      if (inCommand === 0) {
         inCommand++;
         if (undoI < undoStack.length) {
           undoStack[undoI] = command;
@@ -215,10 +217,12 @@ angular.module('fomodApp')
       }
     };
     var fireCommandDone = function(cmd, what) {
-      _.each(commandListeners, function(item) {item(cmd, what)});
+      _.each(commandListeners, function(item) {item(cmd, what);});
     };
     this.on = function(commandListener) {
       commandListeners.push(commandListener);
     };
+    this.canUndo = function() {return undoI > 0 && inCommand === 0;};
+    this.canRedo = function() {return undoI < maxRedoI && inCommand === 0;};
   })();
 });

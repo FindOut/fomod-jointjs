@@ -3,6 +3,7 @@
 /*global joint:false */
 /*global g:false */
 /*global V:false */
+
 /**
 * @ngdoc function
 * @name fomodApp.controller:MainCtrl
@@ -21,12 +22,9 @@ angular.module('fomodApp')
   palette.belongsToPalette = true;
   return palette;
 })
-.service('graph', function(palette, mapper, data) {
-  console.log('service graph');
-  var graph = new joint.dia.Graph();
-
+.service('sizeAroundEmbeddedObjectsLayout', function() {
   // makes all embedded cells line up from top to bottom and container resize around them
-  var sizeAroundEmbeddedObjectsLayout = function(container) {
+  return function(container) {
     var layout = function() {
       var pos = container.get('position');
       var y = pos.y + 5;
@@ -40,12 +38,15 @@ angular.module('fomodApp')
         y += shapeSize.height + 5;
         maxWidth = Math.max(maxWidth, shapeSize.width);
       }
-      palette.set('size', {width: maxWidth + 10, height: y - pos.y});
+      container.set('size', {width: maxWidth + 10, height: y - pos.y});
     };
     container.on('change:embeds', layout);
     layout();
   };
-
+})
+.service('graph', function(palette, mapper, data, sizeAroundEmbeddedObjectsLayout) {
+  console.log('service graph');
+  var graph = new joint.dia.Graph();
 
   sizeAroundEmbeddedObjectsLayout(palette);
 
@@ -79,28 +80,18 @@ angular.module('fomodApp')
 
   mapper(data, graph);
 
-
   return graph;
 })
 .controller('MainCtrl', function ($scope, dragThresholder, graph, palette, data, commander, CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand, mapper, attrMap) {
+  $scope.commander = commander;
+  commander.on(function() {
+    setTimeout(function() {$scope.$apply();});
+  });
+
   var near = function(a, b) {return Math.abs(a - b) < 5;};
   var nearEdge = function(x, y, position, size) {
     return near(x, position.x) || near(y, position.y) || near(x, position.x + size.width) || near(y, position.y + size.height);};
   var adjusting = false;
-
-  // keeps rect size a little larger than the text in it
-  var growWithTextLayout = function(rect, paper) {
-    var layout = function() {
-      var view = paper.findViewByModel(rect);
-      if (view) {
-        rect.set('size', {width: 1, height: 1});
-        var bbox = view.getBBox();
-        rect.set('size', {width: bbox.width + 20, height: bbox.height + 5});
-      }
-    };
-    rect.on('change:attrs', layout);
-    layout();
-  };
 
   var ConstraintElementView = joint.dia.ElementView.extend(
     (function() {
@@ -174,7 +165,7 @@ angular.module('fomodApp')
     elementView: dragThresholder(ConstraintElementView),
     linkView: dragThresholder(joint.dia.LinkView)
   });
-  paper.resetCells(graph.get("cells"));
+  paper.resetCells(graph.get('cells'));
 
 
   function setHeight() {

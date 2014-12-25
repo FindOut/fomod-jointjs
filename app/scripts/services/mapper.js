@@ -22,7 +22,7 @@ angular.module('fomodApp')
       this.do();
     };
     this.toString = function() {
-      return 'MoveObjectCommand(' + id + ', ' + name + ')';
+      return 'MoveObjectCommand(' + element + ', ' + startPosition + ', ' + endPosition + ')';
     };
   };
 })
@@ -122,7 +122,7 @@ angular.module('fomodApp')
     var batchLevel = 0; // no active batch
 
     graph.on('batch:start', function() {
-      if (batchLevel++ == 0) {
+      if (batchLevel++ === 0) {
         // outermost batch command found
         batch = {}; // create an object to hold data for the command
       }
@@ -165,7 +165,7 @@ angular.module('fomodApp')
     });
 
     graph.on('batch:stop', function() {
-      if (--batchLevel == 0) {
+      if (--batchLevel === 0) {
         // outermost batch command end
         if (batch) {
           if (batch.moveElement) {
