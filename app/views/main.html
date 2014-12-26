@@ -1,6 +1,7 @@
 <div>
   <div id="toolbar">
     <button ng-disabled="!commander.canUndo()" ng-click="commander.undo()">Undo</button><button ng-disabled="!commander.canRedo()" ng-click="commander.redo()">Redo</button>
+    <div class="status">{{status}}</div>
   </div>
   <div id="graph"></div>
 </div>

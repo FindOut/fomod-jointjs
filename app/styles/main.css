@@ -12,3 +12,7 @@
 #toolbar button {
   margin-right: 0.1em;
 }
+#toolbar .status {
+  float: right;
+  padding: 0.15em 0.6em;
+}

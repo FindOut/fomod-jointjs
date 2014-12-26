@@ -82,9 +82,23 @@ angular.module('fomodApp')
 
   return graph;
 })
-.controller('MainCtrl', function ($scope, dragThresholder, graph, palette, data, commander, CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand, mapper, attrMap) {
+.controller('MainCtrl', function ($scope, dragThresholder, dataStore, graph, palette, data, commander, CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand, mapper, attrMap) {
   $scope.commander = commander;
+  $scope.status = 'reading';
   commander.on(function() {
+    setTimeout(function() {$scope.$apply();});
+  });
+  dataStore.on(function(type) {
+    console.log('datastore event ' + type);
+    if (type === 'read-begin') {
+      $scope.status = 'reading';
+    } else if (type === 'read-end') {
+      $scope.status = '';
+    } else if (type === 'write-begin') {
+      $scope.status = 'writing';
+    } else if (type === 'write-end') {
+      $scope.status = '';
+    }
     setTimeout(function() {$scope.$apply();});
   });
 

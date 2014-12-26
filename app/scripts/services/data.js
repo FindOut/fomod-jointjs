@@ -164,7 +164,7 @@ angular.module('fomodApp')
 })
 .service('commander', function() {
   var undoStack = [], undoI = 0, maxRedoI = 0, inCommand = 0, commandListeners = [];
-  return new (function() {
+  var Commander = function() {
     this.do = function(command) {
       if (inCommand === 0) {
         inCommand++;
@@ -224,5 +224,7 @@ angular.module('fomodApp')
     };
     this.canUndo = function() {return undoI > 0 && inCommand === 0;};
     this.canRedo = function() {return undoI < maxRedoI && inCommand === 0;};
-  })();
+    return this;
+  };
+  return new Commander();
 });
