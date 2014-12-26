@@ -45,7 +45,6 @@ angular.module('fomodApp')
   };
 })
 .service('graph', function(palette, mapper, data, sizeAroundEmbeddedObjectsLayout) {
-  console.log('service graph');
   var graph = new joint.dia.Graph();
 
   sizeAroundEmbeddedObjectsLayout(palette);
@@ -89,7 +88,6 @@ angular.module('fomodApp')
     setTimeout(function() {$scope.$apply();});
   });
   dataStore.on(function(type) {
-    console.log('datastore event ' + type);
     if (type === 'read-begin') {
       $scope.status = 'reading';
     } else if (type === 'read-end') {
@@ -105,7 +103,6 @@ angular.module('fomodApp')
   var near = function(a, b) {return Math.abs(a - b) < 5;};
   var nearEdge = function(x, y, position, size) {
     return near(x, position.x) || near(y, position.y) || near(x, position.x + size.width) || near(y, position.y + size.height);};
-  var adjusting = false;
 
   var ConstraintElementView = joint.dia.ElementView.extend(
     (function() {
@@ -157,9 +154,7 @@ angular.module('fomodApp')
             var newId = joint.util.uuid();
             attrMap[newId] = this.model.get('position');
             commander.do(new CreateObjectCommand(newId, this.model.attr('text/text')));
-            adjusting = true;
             this.model.remove();
-            adjusting = false;
             graph.getCell(templateDragging.get('parent')).embed(templateDragging);
             templateDragging = undefined;
           } else {
@@ -171,7 +166,7 @@ angular.module('fomodApp')
   );
 
   var paper = new joint.dia.Paper({
-    el: $('#graph'),
+    el: $('#paper'),
     width: 600,
     height: 200,
     model: graph,
@@ -187,11 +182,13 @@ angular.module('fomodApp')
   }
   setHeight();
   $(window).bind('resize', setHeight);
-  $('#graph').bind('mousemove', function(evt) {
-    var views = paper.findViewsFromPoint({x:evt.clientX, y:evt.clientY});
+
+  $('#paper').bind('mousemove', function(evt) {
+    var paperPoint = V(paper.viewport).toLocalPoint(evt.clientX, evt.clientY);
+    var views = paper.findViewsFromPoint(paperPoint);
     if (views.length > 0) {
       var attrs = views[0].model.attributes;
-      var isNearEdge = nearEdge(evt.clientX, evt.clientY, attrs.position, attrs.size);
+      var isNearEdge = nearEdge(paperPoint.x, paperPoint.y, attrs.position, attrs.size);
       views[0].el.style.cursor = isNearEdge ? 'crosshair' : 'move';
     }
   });

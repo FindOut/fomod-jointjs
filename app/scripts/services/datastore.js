@@ -62,7 +62,7 @@ angular.module('fomodApp')
 
   commander.on(function() {
     fireEvent('write-begin');
-    firebaseRoot.set({data: data.toJSON(), graph: getStorableGraph(graph)}, function(error) {fireEvent('write-end')});
+    firebaseRoot.set({data: data.toJSON(), graph: getStorableGraph(graph)}, function(error) {fireEvent('write-end', error);});
   });
 
   return {

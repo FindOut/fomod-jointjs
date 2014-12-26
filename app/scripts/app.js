@@ -32,5 +32,5 @@ angular
       });
   })
   .run(function(dataStore) {
-    console.log('dataStore', dataStore);
+    return dataStore;
   });

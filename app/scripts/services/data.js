@@ -181,7 +181,6 @@ angular.module('fomodApp')
       }
     };
     this.undo = function() {
-      console.log('commander.undo()');
       if (undoI > 0 && inCommand === 0) {
         inCommand++;
         var cmd = undoStack[--undoI];
@@ -191,7 +190,6 @@ angular.module('fomodApp')
       }
     };
     this.redo = function() {
-      console.log('commander.redo()');
       if (undoI < maxRedoI && inCommand === 0) {
         inCommand++;
         var cmd = undoStack[undoI++];
@@ -217,7 +215,7 @@ angular.module('fomodApp')
       }
     };
     var fireCommandDone = function(cmd, what) {
-      _.each(commandListeners, function(item) {item(cmd, what);});
+      _.each(commandListeners, function(commandListener) {commandListener(cmd, what);});
     };
     this.on = function(commandListener) {
       commandListeners.push(commandListener);
