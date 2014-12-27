@@ -12,16 +12,6 @@
 * Controller of the fomodApp
 */
 angular.module('fomodApp')
-.service('palette', function() {
-  var palette = new joint.shapes.basic.Rect({
-    position: { x: 5, y: 5},
-    size: { width: 110, height: 100 },
-    attrs: { rect: { fill: '#888', 'stroke-width': 0,
-    filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } }}
-  });
-  palette.belongsToPalette = true;
-  return palette;
-})
 .service('sizeAroundEmbeddedObjectsLayout', function() {
   // makes all embedded cells line up from top to bottom and container resize around them
   return function(container) {
@@ -44,17 +34,24 @@ angular.module('fomodApp')
     layout();
   };
 })
-.service('graph', function(palette, mapper, data, sizeAroundEmbeddedObjectsLayout) {
+.service('graph', function(mapper, data, sizeAroundEmbeddedObjectsLayout) {
   var graph = new joint.dia.Graph();
 
+  var palette = new joint.shapes.basic.Rect({
+    position: { x: 5, y: 5},
+    size: { width: 110, height: 100 },
+    attrs: { rect: { fill: '#888', 'stroke-width': 0,
+    filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } }}
+  });
+  palette.isPalette = true;
+  graph.addCell(palette);
   sizeAroundEmbeddedObjectsLayout(palette);
 
   var addToPalette = function(shape) {
-    shape.belongsToPalette = true;
+    shape.isTemplate = true;
     graph.addCells([shape]);
     palette.embed(shape);
   };
-  graph.addCells([palette]);
 
   addToPalette(new joint.shapes.basic.Rect({
     size: { width: 100, height: 30 },
@@ -81,7 +78,7 @@ angular.module('fomodApp')
 
   return graph;
 })
-.controller('MainCtrl', function ($scope, dragThresholder, dataStore, graph, palette, data, commander, CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand, mapper, attrMap) {
+.controller('MainCtrl', function ($scope, dragThresholder, dataStore, graph, data, commander, CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand, mapper, attrMap) {
   $scope.commander = commander;
   $scope.status = 'reading';
   commander.on(function() {
@@ -115,12 +112,13 @@ angular.module('fomodApp')
           var position = this.model.get('position');
           var size = this.model.get('size');
           center = g.rect(position.x, position.y, size.width, size.height).center();
-          if (this.model.get('parent') === palette.id) {
+          if (this.model.isTemplate) {
             // create new object from template
             var newObj = this.model.clone();
+            newObj.isTemplate = true;
             graph.addCell(newObj);
             templateDragging = newObj;
-          } else if (nearEdge(x, y, position, size) && this.model !== palette) {
+          } else if (nearEdge(x, y, position, size) && !this.model.isPalette && !this.model.isTemplate) {
             // create new relation
             relDragging = this;
             rubberband = new V('<path/>');
@@ -143,8 +141,11 @@ angular.module('fomodApp')
             // create relation
             var toViews = paper.findViewsFromPoint(g.point(x, y));
             if (toViews.length > 0) {
-              var cmd = new CreateRelationCommand(joint.util.uuid(), relDragging.model.id, toViews[0].model.id);
-              commander.do(cmd);
+              var destElement = toViews[0].model;
+              if (!destElement.isTemplate && !destElement.isPalette) {
+                var cmd = new CreateRelationCommand(joint.util.uuid(), relDragging.model.id, destElement.id);
+                commander.do(cmd);
+              }
             }
             rubberband.remove();
             relDragging = false;

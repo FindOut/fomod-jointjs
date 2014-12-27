@@ -19,7 +19,7 @@ angular
   ])
   .config(function ($routeProvider) {
     $routeProvider
-      .when('/', {
+      .when('/models', {
         templateUrl: 'views/main.html',
         controller: 'MainCtrl'
       })
@@ -28,7 +28,7 @@ angular
         controller: 'ObjectCtrl'
       })
       .otherwise({
-        redirectTo: '/'
+        redirectTo: '/models'
       });
   })
   .run(function(dataStore) {
