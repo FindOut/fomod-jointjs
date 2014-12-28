@@ -185,7 +185,7 @@ angular.module('fomodApp')
   $(window).bind('resize', setHeight);
 
   $('#paper').bind('mousemove', function(evt) {
-    var paperPoint = V(paper.viewport).toLocalPoint(evt.clientX, evt.clientY);
+    var paperPoint = new V(paper.viewport).toLocalPoint(evt.clientX, evt.clientY);
     var views = paper.findViewsFromPoint(paperPoint);
     if (views.length > 0) {
       var attrs = views[0].model.attributes;
@@ -200,9 +200,9 @@ angular.module('fomodApp')
     }
   });
 
-  $(document).keydown(function(e){
+  $(document).keydown(function(e) {
     e = e || window.event; // IE support
-    if ( e.which === 90 && (e.ctrlKey || e.metaKey)) {
+    if (e.which === 90 && (e.ctrlKey || e.metaKey)) {
       if (e.shiftKey) {
         commander.redo();
       } else {

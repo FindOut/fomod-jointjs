@@ -58,6 +58,27 @@ angular.module('fomodApp')
     };
   };
 })
+.service('DeleteObjectCommand', function(data) {
+  return function(id) {
+    var obj = data.get('objects').get(id);
+    this.do = function() {
+      if (obj) {
+        data.get('objects').remove(obj);
+      }
+    };
+    this.undo = function() {
+      if (obj) {
+        data.get('objects').add(obj);
+      }
+    };
+    this.redo = function() {
+      this.do();
+    };
+    this.toString = function() {
+      return 'DeleteObjectCommand object=' + obj;
+    };
+  };
+})
 .service('CreateRelationCommand', function(data, FomodRelation) {
   return function(id, from, to) {
     var relation = new FomodRelation({id: id, from: from, to: to});

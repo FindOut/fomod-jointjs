@@ -45,7 +45,7 @@ angular.module('fomodApp')
 .service('attrMap', function() {
     return {'123': {x: 150, y: 30}, '234': {x: 450, y: 30}, '345': {x: 420, y: 120}};
   })
-.service('mapper', function (attrMap, data, commander, DeleteRelationCommand, MoveObjectCommand, ChangeLinkVerticesCommand, ChangeRelationToCommand, ChangeRelationAttributeCommand) {
+.service('mapper', function (attrMap, data, commander, DeleteRelationCommand, DeleteObjectCommand, MoveObjectCommand, ChangeLinkVerticesCommand, ChangeRelationToCommand, ChangeRelationAttributeCommand) {
   var batch;
   return function(model, graph) {
     // add an element for each model object
@@ -111,8 +111,11 @@ angular.module('fomodApp')
 
     // handle graph direct manipulation events and run commands that changes model accordingly and make changes undoable
     graph.on('remove', function(cell) {
+      console.log('remove');
       if (cell instanceof joint.dia.Link) {
         commander.do(new DeleteRelationCommand(cell.id));
+      } else if (cell instanceof joint.dia.Element) {
+        commander.do(new DeleteObjectCommand(cell.id));
       }
     });
 
