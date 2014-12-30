@@ -53,21 +53,21 @@ angular.module('fomodApp')
     palette.embed(shape);
   };
 
-  addToPalette(new joint.shapes.basic.Rect({
+  addToPalette(new joint.shapes.fomod.Element({
     size: { width: 100, height: 30 },
     attrs: { rect: { fill: 'blue',
     filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
     text: { text: 'new box 1', fill: 'white' }}
   }));
 
-  addToPalette(new joint.shapes.basic.Rect({
+  addToPalette(new joint.shapes.fomod.Element({
     size: { width: 100, height: 30 },
     attrs: { rect: { fill: 'blue',
     filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
     text: { text: 'new box 2', fill: 'white' } }
   }));
 
-  addToPalette(new joint.shapes.basic.Rect({
+  addToPalette(new joint.shapes.fomod.Element({
     size: { width: 100, height: 30 },
     attrs: { rect: { fill: 'blue',
     filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
@@ -166,14 +166,31 @@ angular.module('fomodApp')
     }())
   );
 
-  var paper = new joint.dia.Paper({
+  var WrappedPaper = joint.dia.Paper.extend({
+    // paper that wraps all elements and links in a dragThresholder
+    createViewForModel: function(cell) {
+      var view;
+      var type = cell.get('type');
+      var module = type.split('.')[0];
+      var entity = type.split('.')[1];
+      // If there is a special view defined for this model, use that one instead of the default `elementView`/`linkView`.
+      if (joint.shapes[module] && joint.shapes[module][entity + 'View']) {
+        view = new (dragThresholder(joint.shapes[module][entity + 'View']))({ model: cell, interactive: this.options.interactive });
+      } else if (cell instanceof joint.dia.Element) {
+        view = new (dragThresholder(this.options.elementView))({ model: cell, interactive: this.options.interactive });
+      } else {
+        view = new (dragThresholder(this.options.linkView))({ model: cell, interactive: this.options.interactive });
+      }
+      return view;
+    }
+  });
+
+  var paper = new WrappedPaper({
     el: $('#paper'),
     width: 600,
     height: 200,
     model: graph,
-    gridSize: 1,
-    elementView: dragThresholder(ConstraintElementView),
-    linkView: dragThresholder(joint.dia.LinkView)
+    gridSize: 1
   });
   paper.resetCells(graph.get('cells'));
 

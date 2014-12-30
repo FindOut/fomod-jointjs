@@ -45,12 +45,12 @@ angular.module('fomodApp')
 .service('attrMap', function() {
     return {'123': {x: 150, y: 30}, '234': {x: 450, y: 30}, '345': {x: 420, y: 120}};
   })
-.service('mapper', function (attrMap, data, commander, DeleteRelationCommand, DeleteObjectCommand, MoveObjectCommand, ChangeLinkVerticesCommand, ChangeRelationToCommand, ChangeRelationAttributeCommand) {
+.service('mapper', function (CustomElementLink, attrMap, data, commander, DeleteRelationCommand, DeleteObjectCommand, MoveObjectCommand, ChangeLinkVerticesCommand, ChangeRelationToCommand, ChangeRelationAttributeCommand) {
   var batch;
   return function(model, graph) {
     // add an element for each model object
     var addElement = function(obj) {
-      var element = new joint.shapes.basic.Rect({
+      var element = new joint.shapes.fomod.Element({
         id: obj.id,
         position: attrMap[obj.id] || { x: 150, y: 30 },
         size: { width: 100, height: 30 },
@@ -125,6 +125,7 @@ angular.module('fomodApp')
     var batchLevel = 0; // no active batch
 
     graph.on('batch:start', function() {
+      console.log('batch:start batchLevel',batchLevel);
       if (batchLevel++ === 0) {
         // outermost batch command found
         batch = {}; // create an object to hold data for the command
@@ -132,10 +133,13 @@ angular.module('fomodApp')
     });
 
     graph.on('change:position', function(cell) {
+      console.log('change:position');
       if (cell instanceof joint.dia.Element && batch) {
         if (!batch.moveElement) {
+          console.log('change:position in batch first');
           batch.moveElement = {element: cell, startPosition: cell.previous('position')};
         }
+        console.log('change:position in batch');
         batch.moveElement.endPosition = cell.get('position');
       }
     });
@@ -168,6 +172,7 @@ angular.module('fomodApp')
     });
 
     graph.on('batch:stop', function() {
+      console.log('batch:stop batchLevel',batchLevel);
       if (--batchLevel === 0) {
         // outermost batch command end
         if (batch) {
