@@ -8,7 +8,7 @@
  * Service in the fomodApp.
  */
 angular.module('fomodApp')
-  .service('CustomElementLink', function (attrMap, commander, CreateRelationCommand, CreateObjectCommand) {
+  .service('CustomElements', function (attrMap, commander, CreateRelationCommand, CreateObjectCommand) {
     joint.shapes.fomod = {};
 
     joint.shapes.fomod.Element = joint.shapes.basic.Rect.extend({
@@ -106,7 +106,6 @@ angular.module('fomodApp')
       return {
         initialize: function() {
           joint.dia.ElementView.prototype.initialize.apply(this, arguments);
-          console.log('init');
         },
         pointerdown: function(evt, x, y) {
           var position = this.model.get('position');

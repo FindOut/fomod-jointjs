@@ -45,7 +45,8 @@ angular.module('fomodApp')
 .service('attrMap', function() {
     return {'123': {x: 150, y: 30}, '234': {x: 450, y: 30}, '345': {x: 420, y: 120}};
   })
-.service('mapper', function (CustomElementLink, attrMap, data, commander, DeleteRelationCommand, DeleteObjectCommand, MoveObjectCommand, ChangeLinkVerticesCommand, ChangeRelationToCommand, ChangeRelationAttributeCommand) {
+.service('mapper', function (CustomElements, attrMap, data, commander, DeleteRelationCommand, DeleteObjectCommand,
+      MoveObjectCommand, ChangeLinkVerticesCommand, ChangeRelationToCommand, ChangeRelationAttributeCommand) {
   var batch;
   return function(model, graph) {
     // add an element for each model object
