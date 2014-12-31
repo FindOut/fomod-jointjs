@@ -53,21 +53,21 @@ angular.module('fomodApp')
     palette.embed(shape);
   };
 
-  addToPalette(new joint.shapes.fomod.Element({
+  addToPalette(new joint.shapes.fomod.ElementTemplate({
     size: { width: 100, height: 30 },
     attrs: { rect: { fill: 'blue',
     filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
     text: { text: 'new box 1', fill: 'white' }}
   }));
 
-  addToPalette(new joint.shapes.fomod.Element({
+  addToPalette(new joint.shapes.fomod.ElementTemplate({
     size: { width: 100, height: 30 },
     attrs: { rect: { fill: 'blue',
     filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
     text: { text: 'new box 2', fill: 'white' } }
   }));
 
-  addToPalette(new joint.shapes.fomod.Element({
+  addToPalette(new joint.shapes.fomod.ElementTemplate({
     size: { width: 100, height: 30 },
     attrs: { rect: { fill: 'blue',
     filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
@@ -99,72 +99,8 @@ angular.module('fomodApp')
 
   var near = function(a, b) {return Math.abs(a - b) < 5;};
   var nearEdge = function(x, y, position, size) {
-    return near(x, position.x) || near(y, position.y) || near(x, position.x + size.width) || near(y, position.y + size.height);};
-
-  var ConstraintElementView = joint.dia.ElementView.extend(
-    (function() {
-      var relDragging;
-      var rubberband;
-      var center;
-      var templateDragging;
-      return {
-        pointerdown: function(evt, x, y) {
-          var position = this.model.get('position');
-          var size = this.model.get('size');
-          center = g.rect(position.x, position.y, size.width, size.height).center();
-          if (this.model.isTemplate) {
-            // create new object from template
-            var newObj = this.model.clone();
-            newObj.isTemplate = true;
-            graph.addCell(newObj);
-            templateDragging = newObj;
-          } else if (nearEdge(x, y, position, size) && !this.model.isPalette && !this.model.isTemplate) {
-            // create new relation
-            relDragging = this;
-            rubberband = new V('<path/>');
-            rubberband.attr({
-              stroke: 'black', d: 'M ' + center.x + ' ' + center.y + ' ' + center.x + ' ' + center.y
-            });
-            new V(paper.viewport).append(rubberband);
-          }
-          joint.dia.ElementView.prototype.pointerdown.apply(this, [evt, x, y]);
-        },
-        pointermove: function(evt, x, y) {
-          if (relDragging) {
-            rubberband.attr({d: 'M ' + center.x + ' ' + center.y + ' ' + x + ' ' + y});
-          } else {
-            joint.dia.ElementView.prototype.pointermove.apply(this, [evt, x, y]);
-          }
-        },
-        pointerup: function(evt, x, y) {
-          if (relDragging) {
-            // create relation
-            var toViews = paper.findViewsFromPoint(g.point(x, y));
-            if (toViews.length > 0) {
-              var destElement = toViews[0].model;
-              if (!destElement.isTemplate && !destElement.isPalette) {
-                var cmd = new CreateRelationCommand(joint.util.uuid(), relDragging.model.id, destElement.id);
-                commander.do(cmd);
-              }
-            }
-            rubberband.remove();
-            relDragging = false;
-          } else if (templateDragging) {
-            // create object
-            graph.getCell(this.model.get('parent')).unembed(this.model);
-            var newId = joint.util.uuid();
-            attrMap[newId] = this.model.get('position');
-            commander.do(new CreateObjectCommand(newId, this.model.attr('text/text')));
-            this.model.remove();
-            graph.getCell(templateDragging.get('parent')).embed(templateDragging);
-            templateDragging = undefined;
-          } else {
-            joint.dia.ElementView.prototype.pointerup.apply(this, [evt, x, y]);
-          }
-        }
-      };
-    }())
-  );
+    return near(x, position.x) || near(y, position.y) || near(x, position.x + size.width) || near(y, position.y + size.height);
+  };
 
   var WrappedPaper = joint.dia.Paper.extend({
     // paper that wraps all elements and links in a dragThresholder
@@ -205,9 +141,11 @@ angular.module('fomodApp')
     var paperPoint = new V(paper.viewport).toLocalPoint(evt.clientX, evt.clientY);
     var views = paper.findViewsFromPoint(paperPoint);
     if (views.length > 0) {
-      var attrs = views[0].model.attributes;
-      var isNearEdge = nearEdge(paperPoint.x, paperPoint.y, attrs.position, attrs.size);
-      views[0].el.style.cursor = isNearEdge ? 'crosshair' : 'move';
+      var view = views[0];
+      if (view instanceof joint.shapes.fomod.ElementView) {
+        var isNearEdge = nearEdge(paperPoint.x, paperPoint.y, view.model.attributes.position, view.model.attributes.size);
+        view.el.style.cursor = isNearEdge ? 'crosshair' : 'move';
+      }
     }
   });
 

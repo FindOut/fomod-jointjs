@@ -12,9 +12,12 @@
  */
 angular.module('fomodApp')
 .service('FomodObject', function() {
+  // id, name
   return Backbone.AssociatedModel.extend();
 })
 .service('FomodRelation', function() {
+  // id
+  // from, to - id of an object
   return Backbone.AssociatedModel.extend();
 })
 .service('FomodModel', function(FomodObject, FomodRelation) {

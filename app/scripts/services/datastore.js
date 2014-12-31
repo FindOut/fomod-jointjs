@@ -11,7 +11,7 @@
  * Service in the fomodApp.
  */
 angular.module('fomodApp')
-.service('dataStore', function(data, graph, FomodObject, FomodRelation, commander) {
+.service('dataStore', function(data, graph, FomodObject, FomodRelation, commander, attrMap) {
   var listeners = [];
   var firebaseRoot = new Firebase('https://fomod.firebaseio.com');
   var fireEvent = function(type) {
@@ -35,6 +35,7 @@ angular.module('fomodApp')
         var element = graph.getCell(storeElement.id);
         if (element) {
           element.set('position', storeElement.position);
+          attrMap[storeElement.id] = storeElement.position;
         }
       });
       _.each(value.graph.links, function(storeLink) {

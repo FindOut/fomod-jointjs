@@ -125,7 +125,6 @@ angular.module('fomodApp')
     var batchLevel = 0; // no active batch
 
     graph.on('batch:start', function() {
-      console.log('batch:start batchLevel',batchLevel);
       if (batchLevel++ === 0) {
         // outermost batch command found
         batch = {}; // create an object to hold data for the command
@@ -133,13 +132,10 @@ angular.module('fomodApp')
     });
 
     graph.on('change:position', function(cell) {
-      console.log('change:position');
       if (cell instanceof joint.dia.Element && batch) {
         if (!batch.moveElement) {
-          console.log('change:position in batch first');
           batch.moveElement = {element: cell, startPosition: cell.previous('position')};
         }
-        console.log('change:position in batch');
         batch.moveElement.endPosition = cell.get('position');
       }
     });
@@ -172,7 +168,6 @@ angular.module('fomodApp')
     });
 
     graph.on('batch:stop', function() {
-      console.log('batch:stop batchLevel',batchLevel);
       if (--batchLevel === 0) {
         // outermost batch command end
         if (batch) {

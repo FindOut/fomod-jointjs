@@ -59,7 +59,10 @@ angular.module('fomodApp')
             isDrag = false;
             isDown = false;
             this.notify('cell:click', evt, x, y);
-          }
+            if (this instanceof joint.dia.ElementView) {
+              viewType.prototype.pointerdown.apply(this, arguments);
+              viewType.prototype.pointerup.apply(this, arguments);
+            }          }
         }
       });
     };
