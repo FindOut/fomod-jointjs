@@ -44,6 +44,13 @@ angular.module('fomodApp')
             cir.on('click', _.bind(this.model.remove, this.model));
             this.$el.on('mouseenter', function() {cir.show();});
             this.$el.on('mouseleave', function() {cir.hide();});
+
+            var view = this;
+            this.$el.on('mousemove', function(evt) {
+              var paperPoint = new V(view.paper.viewport).toLocalPoint(evt.clientX, evt.clientY);
+              var isNearEdge = nearEdge(paperPoint.x, paperPoint.y, view.model.attributes.position, view.model.attributes.size);
+              this.style.cursor = isNearEdge ? 'crosshair' : 'move';
+            });
           },
           pointerdown: function(evt, x, y) {
             var position = this.model.get('position');

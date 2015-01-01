@@ -12,6 +12,7 @@
  */
 angular.module('fomodApp')
 .service('dataStore', function(data, graph, FomodObject, FomodRelation, commander, attrMap) {
+  console.log('create dataStore');
   var listeners = [];
   var firebaseRoot = new Firebase('https://fomod.firebaseio.com');
   var fireEvent = function(type) {
@@ -26,7 +27,6 @@ angular.module('fomodApp')
     data.get('objects').add(new FomodObject({id: '345', name: 'glade'}));
     data.get('relations').add(new FomodRelation({id: '123234', from: '123', to: '234'}));
   } else {
-
     fireEvent('read-begin');
     firebaseRoot.once('value', function(snapshot) {
       var value = snapshot.val();
@@ -61,7 +61,7 @@ angular.module('fomodApp')
     };
   };
 
-  commander.on(function() {
+  commander.on('execute', function() {
     fireEvent('write-begin');
     firebaseRoot.set({data: data.toJSON(), graph: getStorableGraph(graph)}, function(error) {fireEvent('write-end', error);});
   });

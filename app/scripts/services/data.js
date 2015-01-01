@@ -82,6 +82,22 @@ angular.module('fomodApp')
     };
   };
 })
+.service('MoveObjectCommand', function() {
+  return function(element, startPosition, endPosition) {
+    this.do = function() {
+      element.set('position', endPosition);
+    };
+    this.undo = function() {
+      element.set('position', startPosition);
+    };
+    this.redo = function() {
+      this.do();
+    };
+    this.toString = function() {
+      return 'MoveObjectCommand(' + element + ', ' + startPosition + ', ' + endPosition + ')';
+    };
+  };
+})
 .service('CreateRelationCommand', function(data, FomodRelation) {
   return function(id, from, to) {
     var relation = new FomodRelation({id: id, from: from, to: to});
@@ -186,6 +202,22 @@ angular.module('fomodApp')
     };
   };
 })
+.service('ChangeLinkVerticesCommand', function() {
+  return function(link, startVertices, endVertices) {
+    this.do = function() {
+      link.set('vertices', endVertices);
+    };
+    this.undo = function() {
+      link.set('vertices', startVertices);
+    };
+    this.redo = function() {
+      this.do();
+    };
+    this.toString = function() {
+      return 'ChangeLinkVerticesCommand(' + link + ', ' + startVertices + ', ' + endVertices + ')';
+    };
+  };
+})
 .service('commander', function() {
   var undoStack = [], undoI = 0, maxRedoI = 0, inCommand = 0, commandListeners = [];
   var Commander = function() {
@@ -241,7 +273,7 @@ angular.module('fomodApp')
     var fireCommandDone = function(cmd, what) {
       _.each(commandListeners, function(commandListener) {commandListener(cmd, what);});
     };
-    this.on = function(commandListener) {
+    this.on = function(type, commandListener) {
       commandListeners.push(commandListener);
     };
     this.canUndo = function() {return undoI > 0 && inCommand === 0;};
