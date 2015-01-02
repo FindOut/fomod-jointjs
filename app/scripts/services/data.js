@@ -271,6 +271,7 @@ angular.module('fomodApp')
       }
     };
     var fireCommandDone = function(cmd, what) {
+      console.log('commander.' + what, cmd);
       _.each(commandListeners, function(commandListener) {commandListener(cmd, what);});
     };
     this.on = function(type, commandListener) {

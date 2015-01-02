@@ -10,38 +10,6 @@
  * Service in the fomodApp.
  */
 angular.module('fomodApp')
-.service('MoveObjectCommand', function() {
-  return function(element, startPosition, endPosition) {
-    this.do = function() {
-      element.set('position', endPosition);
-    };
-    this.undo = function() {
-      element.set('position', startPosition);
-    };
-    this.redo = function() {
-      this.do();
-    };
-    this.toString = function() {
-      return 'MoveObjectCommand(' + element + ', ' + startPosition + ', ' + endPosition + ')';
-    };
-  };
-})
-.service('ChangeLinkVerticesCommand', function() {
-  return function(link, startVertices, endVertices) {
-    this.do = function() {
-      link.set('vertices', endVertices);
-    };
-    this.undo = function() {
-      link.set('vertices', startVertices);
-    };
-    this.redo = function() {
-      this.do();
-    };
-    this.toString = function() {
-      return 'ChangeLinkVerticesCommand(' + link + ', ' + startVertices + ', ' + endVertices + ')';
-    };
-  };
-})
 .service('attrMap', function() {
     return {'123': {x: 150, y: 30}, '234': {x: 450, y: 30}, '345': {x: 420, y: 120}};
   })

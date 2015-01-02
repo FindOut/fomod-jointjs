@@ -56,17 +56,21 @@ angular.module('fomodApp')
 
   return graph;
 })
-.controller('MainCtrl', function ($scope, dragThresholder, dataStore, graph, data, commander,
+.controller('MainCtrl', function ($scope, $routeParams, dragThresholder, dataStore, graph, data, commander,
       CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand, mapper, attrMap) {
+  var modelId = $routeParams.modelId;
+  console.log('-------');
+  console.log('modelId', modelId, 'graph.getElements().length', graph.getElements().length);
+
+
   $scope.commander = commander;
   $scope.status = 'reading';
 
-  commander.on('execute', function() {
+  commander.on('execute', function(cmd, what) {
     setTimeout(function() {$scope.$apply();});
   });
 
-  console.log('use dataStore');
-  dataStore.on(function(type) {
+  dataStore.on(function(type, data) {
     if (type === 'read-begin') {
       $scope.status = 'reading';
     } else if (type === 'read-end') {
@@ -75,9 +79,15 @@ angular.module('fomodApp')
       $scope.status = 'writing';
     } else if (type === 'write-end') {
       $scope.status = '';
+    } else if (type === 'clear-model') {
+
+    } else if (type === 'create-model') {
+      window.location.href = '/#/models/' + data;
     }
     setTimeout(function() {$scope.$apply();});
   });
+
+  dataStore.load(modelId);
 
   var WrappedPaper = joint.dia.Paper.extend({
     // paper that wraps all elements and links in a dragThresholder
