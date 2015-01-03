@@ -49,7 +49,7 @@ angular.module('fomodApp')
   }
 
   var getStorableGraph = function(graph) {
-    var userElements = _.filter(graph.getElements(), function(element) {return !element.belongsToPalette;});
+    var userElements = _.filter(graph.getElements(), function(element) {return !(element.isPalette || element.isTemplate);});
     var validLinks = _.filter(graph.getLinks(), function(link) {return link.has('vertices');});
     return {
       elements: _.map(userElements, function(element) {
