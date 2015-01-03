@@ -49,7 +49,7 @@ angular.module('fomodApp')
       MoveObjectCommand, ChangeLinkVerticesCommand, ChangeRelationToCommand, ChangeRelationAttributeCommand) {
   var batch;
   return function(model, graph) {
-    // add an element for each model object
+    // change graph elements according to data object change
     var addElement = function(obj) {
       var element = new joint.shapes.fomod.Element({
         id: obj.id,
@@ -57,7 +57,7 @@ angular.module('fomodApp')
         size: { width: 100, height: 30 },
         attrs: { rect: { fill: 'blue',
             filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
-          text: { text: obj.get('name'), fill: 'white' } }
+          text: { text: obj.get('text'), fill: 'white' } }
       });
       graph.addCell(element);
     };
@@ -69,13 +69,14 @@ angular.module('fomodApp')
         cell.remove();
       }
     });
-    data.get('objects').on('change:name', function(obj) {
+    data.get('objects').on('change:text', function(obj) {
       var cell = graph.getCell(obj.id);
-      cell.attr('text/text', obj.get('name'));
+      console.log('obj attrs', obj.attributes);
+      cell.attr('text/text', obj.get('text'));
     });
 
 
-    // add a link for each relation
+    // change graph links according to data relation change
     var addLink = function(rel) {
       var link = new joint.dia.Link({
         id: rel.id,
@@ -110,7 +111,9 @@ angular.module('fomodApp')
       }
     });
 
-    // handle graph direct manipulation events and run commands that changes model accordingly and make changes undoable
+    // change data according to graph change
+
+    // handle click link or element remove button
     graph.on('remove', function(cell) {
       console.log('remove');
       if (cell instanceof joint.dia.Link) {
@@ -132,6 +135,7 @@ angular.module('fomodApp')
       }
     });
 
+    // drag element
     graph.on('change:position', function(cell) {
       if (cell instanceof joint.dia.Element && batch) {
         if (!batch.moveElement) {
@@ -141,6 +145,7 @@ angular.module('fomodApp')
       }
     });
 
+    // drag link source end to another element
     graph.on('change:source', function(cell, source) {
       if (cell instanceof joint.dia.Link && batch) {
         if (!batch.changeLinkEnd) {
@@ -150,6 +155,7 @@ angular.module('fomodApp')
       }
     });
 
+    // drag link target end to another element
     graph.on('change:target', function(cell, target) {
       if (cell instanceof joint.dia.Link && batch) {
         if (!batch.changeLinkEnd) {
@@ -159,6 +165,7 @@ angular.module('fomodApp')
       }
     });
 
+    // drag link line to add a knee or drag knee
     graph.on('change:vertices', function(cell) {
       if (cell instanceof joint.dia.Link && batch) {
         if (!batch.changeLinkVertices) {
@@ -168,6 +175,7 @@ angular.module('fomodApp')
       }
     });
 
+    // end of drag operation - change data accordingly
     graph.on('batch:stop', function() {
       if (--batchLevel === 0) {
         // outermost batch command end

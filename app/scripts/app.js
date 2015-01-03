@@ -27,6 +27,10 @@ angular
         templateUrl: 'views/object.html',
         controller: 'ObjectCtrl'
       })
+      .when('/template/:id', {
+        templateUrl: 'views/template.html',
+        controller: 'TemplateCtrl'
+      })
       .otherwise({
         redirectTo: '/models'
       });

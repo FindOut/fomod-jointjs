@@ -46,7 +46,7 @@ angular.module('fomodApp')
 })
 .service('CreateObjectCommand', function(data, FomodObject) {
   return function(id, name) {
-    var newObject = new FomodObject({id: id, name: name});
+    var newObject = new FomodObject({id: id, text: name});
     this.do = function() {
       data.get('objects').add(newObject);
     };
@@ -162,13 +162,13 @@ angular.module('fomodApp')
     this.do = function() {
       obj = data.get('objects').get(id);
       if (obj) {
-        oldName = obj.get('name');
-        obj.set('name', newName);
+        oldName = obj.get('text');
+        obj.set('text', newName);
       }
     };
     this.undo = function() {
       if (obj) {
-        obj.set('name', oldName);
+        obj.set('text', oldName);
       }
     };
     this.redo = function() {
