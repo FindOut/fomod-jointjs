@@ -11,8 +11,12 @@
  * Service in the fomodApp.
  */
 angular.module('fomodApp')
-.service('FomodObject', function() {
+.service('FomodObjectTemplate', function() {
   // id, name
+  return Backbone.AssociatedModel.extend();
+})
+.service('FomodObject', function(FomodObjectTemplate) {
+  // id, text
   return Backbone.AssociatedModel.extend();
 })
 .service('FomodRelation', function() {
@@ -20,9 +24,14 @@ angular.module('fomodApp')
   // from, to - id of an object
   return Backbone.AssociatedModel.extend();
 })
-.service('FomodModel', function(FomodObject, FomodRelation) {
+.service('FomodModel', function(FomodObjectTemplate, FomodObject, FomodRelation) {
   return Backbone.AssociatedModel.extend({
     relations: [
+      {
+        type: Backbone.Many, //nature of the relation
+        key: 'templates', //attribute of Project
+        relatedModel:FomodObjectTemplate //AssociatedModel for attribute key
+      },
       {
         type: Backbone.Many, //nature of the relation
         key: 'objects', //attribute of Project
@@ -35,6 +44,7 @@ angular.module('fomodApp')
       }
     ],
     defaults: {
+      templates: [],
       objects: [],
       relations: []
     }
@@ -45,8 +55,8 @@ angular.module('fomodApp')
   return data;
 })
 .service('CreateObjectCommand', function(data, FomodObject) {
-  return function(id, name) {
-    var newObject = new FomodObject({id: id, text: name});
+  return function(id, templateId, name) {
+    var newObject = new FomodObject({id: id, template: templateId, text: name});
     this.do = function() {
       data.get('objects').add(newObject);
     };

@@ -45,10 +45,27 @@ angular.module('fomodApp')
 .service('attrMap', function() {
     return {'123': {x: 150, y: 30}, '234': {x: 450, y: 30}, '345': {x: 420, y: 120}};
   })
-.service('mapper', function (CustomElements, attrMap, data, commander, DeleteRelationCommand, DeleteObjectCommand,
+.service('mapper', function (CustomElements, attrMap, data, commander, paletteManager, DeleteRelationCommand, DeleteObjectCommand,
       MoveObjectCommand, ChangeLinkVerticesCommand, ChangeRelationToCommand, ChangeRelationAttributeCommand) {
   var batch;
   return function(model, graph) {
+    // set up and maintain palette
+    var addElementTemplate = function(template) {
+      console.log('addElementTemplate', template);
+      var elementTemplate = new joint.shapes.fomod.ElementTemplate({
+        id: template.id,
+        size: { width: 100, height: 30 },
+        attrs: { rect: { fill: 'blue',
+        filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
+        text: { text: template.get('name'), fill: 'white' }}
+      });
+      paletteManager.addElementTemplate(elementTemplate);
+    };
+    data.get('templates').forEach(addElementTemplate);
+    data.get('templates').on('add', addElementTemplate);
+    // data.get('templates').on('remove', function(obj) {
+
+
     // change graph elements according to data object change
     var addElement = function(obj) {
       var element = new joint.shapes.fomod.Element({
@@ -129,6 +146,7 @@ angular.module('fomodApp')
     var batchLevel = 0; // no active batch
 
     graph.on('batch:start', function() {
+      console.log('batch:start');
       if (batchLevel++ === 0) {
         // outermost batch command found
         batch = {}; // create an object to hold data for the command
@@ -137,6 +155,7 @@ angular.module('fomodApp')
 
     // drag element
     graph.on('change:position', function(cell) {
+      console.log('change:position');
       if (cell instanceof joint.dia.Element && batch) {
         if (!batch.moveElement) {
           batch.moveElement = {element: cell, startPosition: cell.previous('position')};
@@ -147,6 +166,7 @@ angular.module('fomodApp')
 
     // drag link source end to another element
     graph.on('change:source', function(cell, source) {
+      console.log('change:source');
       if (cell instanceof joint.dia.Link && batch) {
         if (!batch.changeLinkEnd) {
           batch.changeLinkEnd = {link: cell, attributeName: 'from', linkAttr: 'source', oldEndElementId: cell.previous('source').id};
@@ -157,6 +177,7 @@ angular.module('fomodApp')
 
     // drag link target end to another element
     graph.on('change:target', function(cell, target) {
+      console.log('change:target');
       if (cell instanceof joint.dia.Link && batch) {
         if (!batch.changeLinkEnd) {
           batch.changeLinkEnd = {link: cell, attributeName: 'to', linkAttr: 'target', oldEndElementId: cell.previous('target').id};
@@ -167,6 +188,7 @@ angular.module('fomodApp')
 
     // drag link line to add a knee or drag knee
     graph.on('change:vertices', function(cell) {
+      console.log('change:vertices');
       if (cell instanceof joint.dia.Link && batch) {
         if (!batch.changeLinkVertices) {
           batch.changeLinkVertices = {link: cell, startVertices: cell.previous('vertices')};
@@ -177,6 +199,7 @@ angular.module('fomodApp')
 
     // end of drag operation - change data accordingly
     graph.on('batch:stop', function() {
+      console.log('batch:stop');
       if (--batchLevel === 0) {
         // outermost batch command end
         if (batch) {

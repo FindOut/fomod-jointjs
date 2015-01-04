@@ -12,9 +12,7 @@
 * Controller of the fomodApp
 */
 angular.module('fomodApp')
-.service('graph', function(mapper, data, sizeAroundEmbeddedObjectsLayout) {
-  var graph = new joint.dia.Graph();
-
+.service('paletteManager', function(graph, sizeAroundEmbeddedObjectsLayout) {
   var palette = new joint.shapes.basic.Rect({
     position: { x: 5, y: 5},
     size: { width: 110, height: 100 },
@@ -31,34 +29,43 @@ angular.module('fomodApp')
     palette.embed(shape);
   };
 
-  addToPalette(new joint.shapes.fomod.ElementTemplate({
-    size: { width: 100, height: 30 },
-    attrs: { rect: { fill: 'blue',
-    filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
-    text: { text: 'new box 1', fill: 'white' }}
-  }));
+  // addToPalette(new joint.shapes.fomod.ElementTemplate({
+  //   size: { width: 100, height: 30 },
+  //   attrs: { rect: { fill: 'blue',
+  //   filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
+  //   text: { text: 'new box 1', fill: 'white' }}
+  // }));
+  //
+  // addToPalette(new joint.shapes.fomod.ElementTemplate({
+  //   size: { width: 100, height: 30 },
+  //   attrs: { rect: { fill: 'blue',
+  //   filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
+  //   text: { text: 'new box 2', fill: 'white' } }
+  // }));
+  //
+  // addToPalette(new joint.shapes.fomod.ElementTemplate({
+  //   size: { width: 100, height: 30 },
+  //   attrs: { rect: { fill: 'blue',
+  //   filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
+  //   text: { text: 'new box 3', fill: 'white' } }
+  // }));
 
-  addToPalette(new joint.shapes.fomod.ElementTemplate({
-    size: { width: 100, height: 30 },
-    attrs: { rect: { fill: 'blue',
-    filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
-    text: { text: 'new box 2', fill: 'white' } }
-  }));
+  return {
+    addElementTemplate: function(elementTemplate) {
+      addToPalette(elementTemplate);
+    }
+  }
+})
+.service('graph', function(data) {
+  var graph = new joint.dia.Graph();
 
-  addToPalette(new joint.shapes.fomod.ElementTemplate({
-    size: { width: 100, height: 30 },
-    attrs: { rect: { fill: 'blue',
-    filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
-    text: { text: 'new box 3', fill: 'white' } }
-  }));
-
-  mapper(data, graph);
 
   return graph;
 })
 .controller('MainCtrl', function ($scope, dragThresholder, dataStore, graph, data, commander,
       CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand, mapper, attrMap) {
-  $scope.commander = commander;
+  mapper(data, graph);
+        $scope.commander = commander;
   $scope.status = 'reading';
 
   commander.on('execute', function() {

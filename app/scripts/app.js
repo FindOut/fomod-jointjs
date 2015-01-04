@@ -15,7 +15,8 @@ angular
     'ngResource',
     'ngRoute',
     'ngSanitize',
-    'ngTouch'
+    'ngTouch',
+    'dr.sortable'
   ])
   .config(function ($routeProvider) {
     $routeProvider
@@ -27,7 +28,11 @@ angular
         templateUrl: 'views/object.html',
         controller: 'ObjectCtrl'
       })
-      .when('/template/:id', {
+      .when('/templates/:id', {
+        templateUrl: 'views/template.html',
+        controller: 'TemplateCtrl'
+      })
+      .when('/templates', {
         templateUrl: 'views/template.html',
         controller: 'TemplateCtrl'
       })
