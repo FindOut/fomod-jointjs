@@ -22,6 +22,7 @@ angular.module('fomodApp')
       };
       return viewType.extend({
         pointerdown: function (evt, x, y) {
+          console.log('dragThresholder.pointerdown');
           if (!evt.target.id) {
             // click or drag joint defined link button - remove link/remove knee/move end
             isSpecial = true;
@@ -39,6 +40,7 @@ angular.module('fomodApp')
           }
         },
         pointermove: function (evt, x, y) {
+          console.log('dragThresholder.pointermove');
           if (isSpecial || isDrag || !isDown) {
             viewType.prototype.pointermove.apply(this, arguments);
           } else {
@@ -50,6 +52,7 @@ angular.module('fomodApp')
           }
         },
         pointerup: function (evt, x, y) {
+          console.log('dragThresholder.pointerup');
           if (isSpecial || isDrag) {
             isDrag = false;
             isDown = false;
@@ -62,7 +65,8 @@ angular.module('fomodApp')
             if (this instanceof joint.dia.ElementView) {
               viewType.prototype.pointerdown.apply(this, arguments);
               viewType.prototype.pointerup.apply(this, arguments);
-            }          }
+            }
+          }
         }
       });
     };

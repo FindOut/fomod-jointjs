@@ -108,13 +108,15 @@ angular.module('fomodApp')
 
   joint.shapes.fomod.ElementTemplateView = joint.dia.ElementView.extend(
     (function() {
-      var templateDragging, dragRect, offset;
+      var templateDragging, dragRect, offset, hasMoved;
       var size;
       return {
         initialize: function() {
           joint.dia.ElementView.prototype.initialize.apply(this, arguments);
         },
         pointerdown: function(evt, x, y) {
+          console.log('ElementTemplateView.pointerdown');
+          hasMoved = false;
           var position = this.model.get('position');
           size = this.model.get('size');
           if (this.model.isTemplate) {
@@ -130,6 +132,8 @@ angular.module('fomodApp')
           joint.dia.ElementView.prototype.pointerdown.apply(this, [evt, x, y]);
         },
         pointermove: function(evt, x, y) {
+          console.log('ElementTemplateView.pointermove');
+          hasMoved = true;
           if (templateDragging) {
             dragRect.attr({x: x - offset.x, y: y - offset.y, width: size.width, height: size.height});
           } else {
@@ -137,20 +141,20 @@ angular.module('fomodApp')
           }
         },
         pointerup: function(evt, x, y) {
-          if (templateDragging) {
+          console.log('ElementTemplateView.pointerup');
+          if (templateDragging && hasMoved) {
             // create object
             var newId = joint.util.uuid();
             attrMap[newId] = {x: x - offset.x, y: y - offset.y};
             commander.do(new CreateObjectCommand(newId, this.model.id, 'new obj'));
             dragRect.remove();
             templateDragging = false;
-          } //else {
-            joint.dia.ElementView.prototype.pointerup.apply(this, [evt, x, y]);
-            //}
           }
-
+          joint.dia.ElementView.prototype.pointerup.apply(this, [evt, x, y]);
+          hasMoved = false;
         }
-      })());
+      }
+    })());
 
     return {};
   });

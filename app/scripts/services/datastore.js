@@ -11,7 +11,7 @@
  * Service in the fomodApp.
  */
 angular.module('fomodApp')
-.service('dataStore', function(data, graph, FomodObjectTemplate, FomodObject, FomodRelation, commander, attrMap) {
+.service('dataStore', function(data, mapper, graph, FomodObjectTemplate, FomodObject, FomodRelation, commander, attrMap) {
   console.log('create dataStore');
   var enableSaving = true;
   var listeners = [];
@@ -21,6 +21,8 @@ angular.module('fomodApp')
       listener(type);
     });
   };
+
+  mapper(data, graph);
 
   fireEvent('read-begin');
   firebaseRoot.once('value', function(snapshot) {

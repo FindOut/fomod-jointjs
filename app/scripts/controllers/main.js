@@ -29,27 +29,6 @@ angular.module('fomodApp')
     palette.embed(shape);
   };
 
-  // addToPalette(new joint.shapes.fomod.ElementTemplate({
-  //   size: { width: 100, height: 30 },
-  //   attrs: { rect: { fill: 'blue',
-  //   filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
-  //   text: { text: 'new box 1', fill: 'white' }}
-  // }));
-  //
-  // addToPalette(new joint.shapes.fomod.ElementTemplate({
-  //   size: { width: 100, height: 30 },
-  //   attrs: { rect: { fill: 'blue',
-  //   filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
-  //   text: { text: 'new box 2', fill: 'white' } }
-  // }));
-  //
-  // addToPalette(new joint.shapes.fomod.ElementTemplate({
-  //   size: { width: 100, height: 30 },
-  //   attrs: { rect: { fill: 'blue',
-  //   filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
-  //   text: { text: 'new box 3', fill: 'white' } }
-  // }));
-
   return {
     addElementTemplate: function(elementTemplate) {
       addToPalette(elementTemplate);
@@ -64,15 +43,13 @@ angular.module('fomodApp')
 })
 .controller('MainCtrl', function ($scope, dragThresholder, dataStore, graph, data, commander,
       CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand, mapper, attrMap) {
-  mapper(data, graph);
-        $scope.commander = commander;
+  $scope.commander = commander;
   $scope.status = 'reading';
 
   commander.on('execute', function() {
     setTimeout(function() {$scope.$apply();});
   });
 
-  console.log('use dataStore');
   dataStore.on(function(type) {
     if (type === 'read-begin') {
       $scope.status = 'reading';
@@ -122,7 +99,11 @@ angular.module('fomodApp')
 
   paper.on('cell:doubleclick', function(cell) {
     if (cell.model.id) {
-      window.location.href = '/#/objects/' + cell.model.id;
+      if (cell.model instanceof joint.shapes.fomod.ElementTemplate) {
+        window.location.href = '/#/templates/' + cell.model.id;
+      } else if (cell.model instanceof joint.shapes.fomod.Element) {
+        window.location.href = '/#/objects/' + cell.model.id;
+      }
     }
   });
 

@@ -104,7 +104,7 @@ angular.module('fomodApp')
       this.do();
     };
     this.toString = function() {
-      return 'MoveObjectCommand(' + element + ', ' + startPosition + ', ' + endPosition + ')';
+      return 'MoveObjectCommand(' + element + ', ' + JSON.stringify(startPosition) + ', ' + endPosition + ')';
     };
   };
 })
@@ -166,26 +166,26 @@ angular.module('fomodApp')
     };
   };
 })
-.service('ChangeNameCommand', function(data) {
-  return function(id, newName) {
-    var obj, oldName;
+.service('ChangeObjectAttributeCommand', function(data) {
+  return function(id, nameValueMap) {
+    var obj, oldNameValueMap;
     this.do = function() {
-      obj = data.get('objects').get(id);
+      obj = data.get('objects').get(id) || data.get('templates').get(id);
       if (obj) {
-        oldName = obj.get('text');
-        obj.set('text', newName);
+        oldNameValueMap = _.reduce(nameValueMap, function(result, key) {result[key] = obj.get(key);}, {});
+        obj.set(nameValueMap);
       }
     };
     this.undo = function() {
       if (obj) {
-        obj.set('text', oldName);
+        obj.set(oldNameValueMap);
       }
     };
     this.redo = function() {
       this.do();
     };
     this.toString = function() {
-      return 'ChangeNameCommand(' + id + ', ' + newName + ')';
+      return 'ChangeNameCommand(' + id + ', ' + nameValueMap + ')';
     };
   };
 })
@@ -280,15 +280,24 @@ angular.module('fomodApp')
         fireCommandDone(command, 'register');
       }
     };
-    var fireCommandDone = function(cmd, what) {
-      _.each(commandListeners, function(commandListener) {commandListener(cmd, what);});
-    };
     this.on = function(type, commandListener) {
       commandListeners.push(commandListener);
     };
-    this.canUndo = function() {return undoI > 0 && inCommand === 0;};
-    this.canRedo = function() {return undoI < maxRedoI && inCommand === 0;};
+    this.canUndo = function() {
+      return undoI > 0 && inCommand === 0;
+    };
+    this.canRedo = function() {
+      return undoI < maxRedoI && inCommand === 0;
+    };
+    this.clear = function() {
+      undoI = 0;
+      maxRedoI = 0;
+    };
     return this;
+  };
+  var fireCommandDone = function(cmd, what) {
+    console.log('commander.' + what, cmd.toString());
+    _.each(commandListeners, function(commandListener) {commandListener(cmd, what);});
   };
   return new Commander();
 });
