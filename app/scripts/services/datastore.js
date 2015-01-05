@@ -52,6 +52,7 @@ angular.module('fomodApp')
     }
     enableSaving = true;
     fireEvent('read-end');
+    commander.clear();
   });
 
   var getStorableGraph = function(graph) {
