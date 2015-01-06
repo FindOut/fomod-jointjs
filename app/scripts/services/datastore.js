@@ -12,7 +12,6 @@
  */
 angular.module('fomodApp')
 .service('dataStore', function(data, mapper, graph, FomodObjectTemplate, FomodObject, FomodRelation, commander, attrMap) {
-  console.log('create dataStore');
   var enableSaving = true;
   var listeners = [];
   var firebaseRoot = new Firebase('https://fomod.firebaseio.com');

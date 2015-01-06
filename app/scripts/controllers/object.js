@@ -16,7 +16,6 @@ angular.module('fomodApp')
     }
     $rootScope.$on('$locationChangeStart', function (event, next, current) {
       if (obj) {
-        console.log('changed $scope.text to', $scope.text);
         commander.do(new ChangeObjectAttributeCommand(id, {text: $scope.text}));
       }
     });

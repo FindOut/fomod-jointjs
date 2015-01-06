@@ -16,3 +16,6 @@
   float: right;
   padding: 0.15em 0.6em;
 }
+#attributes li {
+  list-style-type: none;
+}

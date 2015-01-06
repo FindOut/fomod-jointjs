@@ -1,0 +1,2 @@
+make dependency structure for http://www.daviddurman.com/automatic-graph-layout-with-jointjs-and-dagre.html :
+  grep -R '.service(' app|sed -e 's/.*\.service(//;s/, function.*(/: ["/;s/, /", "/g;s/) {/"],/;s/\[""]/[]/'

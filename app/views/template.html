@@ -1,1 +1,11 @@
-<p>name: <input ng-model="name"></p>
+<div>name: <input ng-model="name"></div>
+<div>
+  <ul id="attributes" ng-model="attributes">
+    <li ng-repeat="attribute in attributes">
+      {{attribute.get('name')}}
+    </li>
+  </ul>
+  <div class="hcenter">
+    <span class="button-char" ng-click="addTool()" title="Add tool">+</span>
+  </div>
+</div>

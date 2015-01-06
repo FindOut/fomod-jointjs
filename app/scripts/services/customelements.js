@@ -115,7 +115,6 @@ angular.module('fomodApp')
           joint.dia.ElementView.prototype.initialize.apply(this, arguments);
         },
         pointerdown: function(evt, x, y) {
-          console.log('ElementTemplateView.pointerdown');
           hasMoved = false;
           var position = this.model.get('position');
           size = this.model.get('size');
@@ -123,7 +122,6 @@ angular.module('fomodApp')
             // create new object from template
             templateDragging = true;
             var dragRectBox = {x: position.x, y: position.y};
-            console.log(dragRectBox);
             dragRect = new V('<rect/>', dragRectBox);
             dragRect.attr({fill: 'none', stroke: 'black', 'stroke-width': 1.5, 'stroke-dasharray': '5,5'});
             offset = {x: x - position.x, y: y - position.y};
@@ -132,7 +130,6 @@ angular.module('fomodApp')
           joint.dia.ElementView.prototype.pointerdown.apply(this, [evt, x, y]);
         },
         pointermove: function(evt, x, y) {
-          console.log('ElementTemplateView.pointermove');
           hasMoved = true;
           if (templateDragging) {
             dragRect.attr({x: x - offset.x, y: y - offset.y, width: size.width, height: size.height});
@@ -141,7 +138,6 @@ angular.module('fomodApp')
           }
         },
         pointerup: function(evt, x, y) {
-          console.log('ElementTemplateView.pointerup');
           if (templateDragging && hasMoved) {
             // create object
             var newId = joint.util.uuid();

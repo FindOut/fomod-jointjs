@@ -11,8 +11,27 @@
  * Service in the fomodApp.
  */
 angular.module('fomodApp')
-.service('FomodObjectTemplate', function() {
+.service('FomodObjectTemplate', function(FomodAttribute) {
   // id, name
+  return Backbone.AssociatedModel.extend({
+    relations: [
+      {
+        type: Backbone.Many,
+        key: 'attributes',
+        relatedModel:FomodAttribute
+      }
+    ],
+    defaults: {
+      attributes: [
+        new FomodAttribute({name: 'description'}),
+        new FomodAttribute({name: 'effort'}),
+        new FomodAttribute({name: 'category'})
+      ]
+    }
+  });
+})
+.service('FomodAttribute', function() {
+  // id, name, visible
   return Backbone.AssociatedModel.extend();
 })
 .service('FomodObject', function(FomodObjectTemplate) {
@@ -28,19 +47,19 @@ angular.module('fomodApp')
   return Backbone.AssociatedModel.extend({
     relations: [
       {
-        type: Backbone.Many, //nature of the relation
-        key: 'templates', //attribute of Project
-        relatedModel:FomodObjectTemplate //AssociatedModel for attribute key
+        type: Backbone.Many,
+        key: 'templates',
+        relatedModel:FomodObjectTemplate
       },
       {
-        type: Backbone.Many, //nature of the relation
-        key: 'objects', //attribute of Project
-        relatedModel:FomodObject //AssociatedModel for attribute key
+        type: Backbone.Many,
+        key: 'objects',
+        relatedModel:FomodObject
       },
       {
-        type: Backbone.Many, //nature of the relation
-        key: 'relations', //attribute of Project
-        relatedModel:FomodRelation //AssociatedModel for attribute key
+        type: Backbone.Many,
+        key: 'relations',
+        relatedModel:FomodRelation
       }
     ],
     defaults: {

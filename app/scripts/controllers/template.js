@@ -10,15 +10,22 @@
 angular.module('fomodApp')
   .controller('TemplateCtrl', function ($scope, $rootScope, $routeParams, data, commander, ChangeObjectAttributeCommand) {
     var id = $routeParams.id;
-    var obj = data.get('templates').get(id);
-    console.log(id, obj);
-    if (obj) {
-      $scope.name = obj.get('name');
-    }
-    $rootScope.$on('$locationChangeStart', function (event, next, current) {
+    var templates = data.get('templates');
+    var changeHandler = function(d) {
+      var obj = templates.get(id);
       if (obj) {
-        console.log('changed $scope.text to', $scope.name);
-        commander.do(new ChangeObjectAttributeCommand(id, {name: $scope.name}));
+        $scope.name = obj.get('name');
+        $scope.attributes = obj.get('attributes').models;
+        setTimeout(function() {$scope.$apply();});
+        var off = $rootScope.$on('$locationChangeStart', function (event, next, current) {
+          templates.off(null, changeHandler);
+          commander.do(new ChangeObjectAttributeCommand(id, {name: $scope.name}));
+          off();
+        });
       }
-    });
+    };
+    templates.on('change add', changeHandler);
+    if (templates.get(id)) {
+      changeHandler();
+    }
   });
