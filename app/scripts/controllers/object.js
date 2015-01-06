@@ -10,13 +10,21 @@
 angular.module('fomodApp')
   .controller('ObjectCtrl', function ($scope, $rootScope, $routeParams, data, commander, ChangeObjectAttributeCommand) {
     var id = $routeParams.id;
-    var obj = data.get('objects').get(id);
-    if (obj) {
-      $scope.text = obj.get('text');
-    }
-    $rootScope.$on('$locationChangeStart', function (event, next, current) {
+    var objects = data.get('objects');
+    var changeHandler = function(d) {
+      var obj = objects.get(id);
       if (obj) {
-        commander.do(new ChangeObjectAttributeCommand(id, {text: $scope.text}));
+        $scope.text = obj.get('text');
+        setTimeout(function() {$scope.$apply();});
+        var off = $rootScope.$on('$locationChangeStart', function (event, next, current) {
+          objects.off(null, changeHandler);
+          commander.do(new ChangeObjectAttributeCommand(id, {text: $scope.text}));
+          off();
+        });
       }
-    });
+    };
+    objects.on('change add', changeHandler);
+    if (objects.get(id)) {
+      changeHandler();
+    }
   });
