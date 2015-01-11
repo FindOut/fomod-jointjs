@@ -42,7 +42,10 @@ To start developing the Fomod app:
 
 ####Steps
 
-git clone xxxxx
+git clone git@github.com:FindOut/fomod.git
+cd fomod
+npm install
+bower install
 
 
 - Git
