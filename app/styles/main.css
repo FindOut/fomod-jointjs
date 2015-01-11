@@ -16,6 +16,21 @@
   float: right;
   padding: 0.15em 0.6em;
 }
-#attributes li {
+.attributes {
+  padding: 1em;
+
+}
+.attributes li {
   list-style-type: none;
+
+}
+.objectform {
+  padding: 0.5em;
+  background-color: #eee;
+}
+.objectform input.name {
+  width: 20em;
+}
+.attributes li button {
+  margin-top: 0.5em;
 }

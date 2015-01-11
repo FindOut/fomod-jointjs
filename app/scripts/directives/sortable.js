@@ -23,7 +23,7 @@
          scope.$apply();
        }
 
-       sortableEle = $(elm).sortable({
+       var sortableEle = $(elm).sortable({
          start: scope.dragStart,
          update: scope.dragEnd
        });

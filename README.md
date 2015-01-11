@@ -38,15 +38,21 @@ To start developing the Fomod app:
 
 ####Prerequisites
 
-  you have installed node, grunt, bower
+you have installed node, grunt and bower.
 
 ####Steps
 
+```
 git clone git@github.com:FindOut/fomod.git
 cd fomod
 npm install
 bower install
+grunt serve
+```
 
+A web browser opens on http://localhost:9000/#/models, reads and displays the  model from the database.
+
+While the grunt serve command is running, all changes to source files causes the web browser to reload the current page to show the changes.
 
 - Git
 - [Node](http://nodejs.org/)

@@ -42,7 +42,7 @@ angular.module('fomodApp')
   return graph;
 })
 .controller('MainCtrl', function ($scope, dragThresholder, dataStore, graph, data, commander,
-      CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand, mapper, attrMap) {
+      CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand, attrMap) {
   $scope.commander = commander;
   $scope.status = 'reading';
 

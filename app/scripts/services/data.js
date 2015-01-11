@@ -23,9 +23,9 @@ angular.module('fomodApp')
     ],
     defaults: {
       attributes: [
-        new FomodAttribute({name: 'description'}),
-        new FomodAttribute({name: 'effort'}),
-        new FomodAttribute({name: 'category'})
+        new FomodAttribute({name: 'description', visible: 'true'}),
+        new FomodAttribute({name: 'effort', visible: 'false'}),
+        new FomodAttribute({name: 'category', visible: 'true'})
       ]
     }
   });
@@ -204,7 +204,7 @@ angular.module('fomodApp')
       this.do();
     };
     this.toString = function() {
-      return 'ChangeNameCommand(' + id + ', ' + nameValueMap + ')';
+      return 'ChangeObjectAttributeCommand(' + id + ', ' + JSON.stringify(nameValueMap) + ')';
     };
   };
 })

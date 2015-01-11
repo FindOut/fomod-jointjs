@@ -4,16 +4,16 @@
 
 /**
  * @ngdoc service
- * @name fomodApp.mapper
+ * @name fomodApp.Mapper
  * @description
- * # mapper
+ * # Mapper
  * Service in the fomodApp.
  */
 angular.module('fomodApp')
 .service('attrMap', function() {
     return {};
   })
-.service('mapper', function (CustomElements, attrMap, commander, paletteManager, DeleteRelationCommand, DeleteObjectCommand, MoveObjectCommand, ChangeLinkVerticesCommand, ChangeRelationToCommand, ChangeRelationAttributeCommand) {
+.service('Mapper', function (CustomElements, attrMap, commander, paletteManager, DeleteRelationCommand, DeleteObjectCommand, MoveObjectCommand, ChangeLinkVerticesCommand, ChangeRelationToCommand, ChangeRelationAttributeCommand) {
   var batch;
   return function(data, graph) {
     // set up and maintain palette

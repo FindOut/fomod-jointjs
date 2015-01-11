@@ -11,17 +11,12 @@
  * Service in the fomodApp.
  */
 angular.module('fomodApp')
-.service('dataStore', function(data, mapper, graph, FomodObjectTemplate, FomodObject, FomodRelation, commander, attrMap) {
+.service('dataStore', function(data, Mapper, graph, FomodObjectTemplate, FomodObject, FomodRelation, commander, attrMap) {
   var enableSaving = true;
   var listeners = [];
   var firebaseRoot = new Firebase('https://fomod.firebaseio.com');
-  var fireEvent = function(type) {
-    _.each(listeners, function(listener) {
-      listener(type);
-    });
-  };
 
-  mapper(data, graph);
+  new Mapper(data, graph);
 
   fireEvent('read-begin');
   firebaseRoot.once('value', function(snapshot) {
@@ -46,6 +41,7 @@ angular.module('fomodApp')
       }
     }
     if (data.get('templates').length === 0) {
+      // there were no templates in the database - create one
       var defaultTemplate = new FomodObjectTemplate({id: joint.util.uuid(), name: 'New object'});
       data.get('templates').add(defaultTemplate);
     }
@@ -54,7 +50,14 @@ angular.module('fomodApp')
     commander.clear();
   });
 
-  var getStorableGraph = function(graph) {
+  commander.on('execute', function() {
+    if (enableSaving) {
+      fireEvent('write-begin');
+      firebaseRoot.set({data: data.toJSON(), graph: getStorableGraph(graph)}, function(error) {fireEvent('write-end', error);});
+    }
+  });
+
+  function getStorableGraph(graph) {
     var userElements = _.filter(graph.getElements(), function(element) {return !(element.isPalette || element.isTemplate);});
     var validLinks = _.filter(graph.getLinks(), function(link) {return link.has('vertices');});
     return {
@@ -65,14 +68,13 @@ angular.module('fomodApp')
         return {id: link.id, vertices: link.get('vertices')};
       })
     };
-  };
+  }
 
-  commander.on('execute', function() {
-    if (enableSaving) {
-      fireEvent('write-begin');
-      firebaseRoot.set({data: data.toJSON(), graph: getStorableGraph(graph)}, function(error) {fireEvent('write-end', error);});
-    }
-  });
+  function fireEvent(type) {
+    _.each(listeners, function(listener) {
+      listener(type);
+    });
+  }
 
   return {
     on: function(listener) {

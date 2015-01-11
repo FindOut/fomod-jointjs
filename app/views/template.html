@@ -1,11 +1,13 @@
-<div>name: <input ng-model="name"></div>
-<div>
-  <ul id="attributes" ng-model="attributes">
-    <li ng-repeat="attribute in attributes">
-      {{attribute.get('name')}}
-    </li>
-  </ul>
-  <div class="hcenter">
-    <span class="button-char" ng-click="addTool()" title="Add tool">+</span>
+<div class="objectform">
+  <div>name <input class="name" ng-model-options="{ getterSetter: true }" ng-model="templName"></div>
+  <div>
+    <ul class="attributes" sortable ng-model="attributes">
+      <li ng-repeat="attribute in attributes">
+        <span title="Drag to reorder">{{attributes.indexOf(attribute) + 1}}. </span>
+        <input type="checkbox" ng-checked="attribute.get('visible')" ng-click="changeAttrVisible(attribute)">
+        <input class="name" ng-model-options="{ getterSetter: true }" ng-model="attrName(attribute)">
+      </li>
+      <li><button ng-click="addAttribute()" title="Add attribute">Add</button></li>
+    </ul>
   </div>
 </div>
