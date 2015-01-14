@@ -12,13 +12,14 @@ angular.module('fomodApp')
     joint.shapes.fomod = {};
 
     joint.shapes.fomod.Element = joint.shapes.basic.Rect.extend({
-      markup: '<g class="rotatable"><g class="scalable"><rect/></g><text/><circle/></g>',
+      markup: '<g class="rotatable"><g class="scalable"><rect/></g><text/><circle/><path/></g>',
       defaults: joint.util.deepSupplement({
         type: 'fomod.Element',
         attrs: {
           'rect': { fill: 'white', stroke: 'black', 'follow-scale': true, width: 80, height: 40 },
           'text': { 'font-size': 14, 'ref-x': .5, 'ref-y': .5, ref: 'rect', 'y-alignment': 'middle', 'x-alignment': 'middle' },
-          'circle': { 'ref-x': 11, 'ref-y': 11, ref: 'rect', fill: 'red', r: '10'}
+          'circle': { 'ref-x': 11, 'ref-y': 11, ref: 'rect', fill: 'red', r: '10'},
+          'path': {'ref-x': 15, 'ref-y': 15, ref: 'circle', 'y-alignment': 'middle', 'x-alignment': 'middle', stroke: '#ffffff', 'stroke-width': 3, d: 'M -5 -5 L 5 5 M -5 5 L 5 -5'}
         }
       }, joint.shapes.basic.Rect.prototype.defaults)
     });
@@ -40,10 +41,13 @@ angular.module('fomodApp')
             joint.dia.ElementView.prototype.render.apply(this, arguments);
 
             var cir = this.$el.find('circle');
+            var path = this.$el.find('path');
             cir.hide();
+            path.hide();
             cir.on('click', _.bind(this.model.remove, this.model));
-            this.$el.on('mouseenter', function() {cir.show();});
-            this.$el.on('mouseleave', function() {cir.hide();});
+            path.on('click', _.bind(this.model.remove, this.model));
+            this.$el.on('mouseenter', function() {cir.show(); path.show();});
+            this.$el.on('mouseleave', function() {cir.hide(); path.hide();});
 
             var view = this;
             this.$el.on('mousemove', function(evt) {
