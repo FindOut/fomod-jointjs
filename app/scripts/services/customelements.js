@@ -146,7 +146,7 @@ angular.module('fomodApp')
             // create object
             var newId = joint.util.uuid();
             attrMap[newId] = {x: x - offset.x, y: y - offset.y};
-            commander.do(new CreateObjectCommand(newId, this.model.id, 'new obj'));
+            commander.do(new CreateObjectCommand(newId, this.model.id, 'new object'));
             dragRect.remove();
             templateDragging = false;
           }

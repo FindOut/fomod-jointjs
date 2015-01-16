@@ -11,6 +11,44 @@
  * Service in the fomodApp.
  */
 angular.module('fomodApp')
+.service('data', function (FomodModel) {
+  return new FomodModel();
+})
+.service('FomodModel', function(FomodObjectTemplate, FomodObject, FomodRelation) {
+  return Backbone.AssociatedModel.extend({
+    relations: [
+      {
+        type: Backbone.Many,
+        key: 'objects',
+        relatedModel:FomodObject
+      },
+      {
+        type: Backbone.Many,
+        key: 'relations',
+        relatedModel:FomodRelation
+      },
+      {
+        type: Backbone.Many,
+        key: 'templates',
+        relatedModel:FomodObjectTemplate
+      }
+    ],
+    defaults: {
+      templates: [],
+      objects: [],
+      relations: []
+    }
+  });
+})
+.service('FomodObject', function(FomodObjectTemplate) {
+  // id, text
+  return Backbone.AssociatedModel.extend();
+})
+.service('FomodRelation', function() {
+  // id
+  // from, to - id of an object
+  return Backbone.AssociatedModel.extend();
+})
 .service('FomodObjectTemplate', function(FomodAttribute) {
   // id, name
   return Backbone.AssociatedModel.extend({
@@ -33,45 +71,6 @@ angular.module('fomodApp')
 .service('FomodAttribute', function() {
   // id, name, visible
   return Backbone.AssociatedModel.extend();
-})
-.service('FomodObject', function(FomodObjectTemplate) {
-  // id, text
-  return Backbone.AssociatedModel.extend();
-})
-.service('FomodRelation', function() {
-  // id
-  // from, to - id of an object
-  return Backbone.AssociatedModel.extend();
-})
-.service('FomodModel', function(FomodObjectTemplate, FomodObject, FomodRelation) {
-  return Backbone.AssociatedModel.extend({
-    relations: [
-      {
-        type: Backbone.Many,
-        key: 'templates',
-        relatedModel:FomodObjectTemplate
-      },
-      {
-        type: Backbone.Many,
-        key: 'objects',
-        relatedModel:FomodObject
-      },
-      {
-        type: Backbone.Many,
-        key: 'relations',
-        relatedModel:FomodRelation
-      }
-    ],
-    defaults: {
-      templates: [],
-      objects: [],
-      relations: []
-    }
-  });
-})
-.service('data', function (FomodModel) {
-  var data = new FomodModel();
-  return data;
 })
 .service('CreateObjectCommand', function(data, FomodObject) {
   return function(id, templateId, name) {
