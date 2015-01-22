@@ -37,6 +37,24 @@ angular.module('fomodApp')
       templates: [],
       objects: [],
       relations: []
+    },
+    // FomodAttribute items for all visible attributes for FomodObject obj
+    getVisibleAttributeDefs: function(obj) {
+      var templates = this.get('templates');
+      var template = templates.get(obj.get('template'));
+      if (!template) {
+        console.log('missing template for obj', obj);
+        return [];
+      }
+      var templAttrs = template.get('attributes');
+      return templAttrs.filter(function(attr) {
+        return attr.get('visible');
+      });
+    },
+    getAttributeNameValues: function(obj) {
+      return getVisibleAttributeDefs(obj).map(function(attrDef) {
+        return {name: attrDef.name, value: obj[attrDef.name]};
+      });
     }
   });
 })
@@ -65,6 +83,20 @@ angular.module('fomodApp')
         new FomodAttribute({name: 'effort', visible: 'false'}),
         new FomodAttribute({name: 'category', visible: 'true'})
       ]
+    },
+    addAttribute: function(nameValueMap) {
+      this.get('attributes').add(new FomodAttribute(nameValueMap));
+      this.trigger('changeAttrDef');
+    },
+    removeAttribute: function(attributeName) {
+      var attr = this.getAttributeByName(attributeName);
+      this.get('attributes').remove(attr);
+      this.trigger('changeAttrDef');
+    },
+    getAttributeByName: function(attributeName) {
+      return this.get('attributes').find(function(attrDef) {
+        return attrDef.get('name') === attributeName;
+      });
     }
   });
 })
@@ -227,6 +259,96 @@ angular.module('fomodApp')
     };
     this.toString = function() {
       return 'ChangeRelationAttributeCommand(' + id + ', ' + attributeName + ', ' + newValue + ')';
+    };
+  };
+})
+.service('AddTemplateAttributeCommand', function(data) {
+  return function(templateId) {
+    var template = data.get('templates').get(templateId);
+    this.do = function() {
+      if (template) {
+        template.addAttribute({name: 'new attribute', visible: 'true'});
+      }
+    };
+    this.undo = function() {
+      if (template) {
+        // template.set(oldNameValueMap);
+      }
+    };
+    this.redo = function() {
+      this.do();
+    };
+    this.toString = function() {
+      return 'AddTemplateAttributeCommand(' + templateId + ')';
+    };
+  };
+})
+.service('DeleteTemplateAttributeCommand', function(data) {
+  return function(templateId, attributeName) {
+    var template = data.get('templates').get(templateId);
+    var oldAttribute = template.getAttributeByName(attributeName);
+    this.do = function() {
+      if (template) {
+        template.removeAttribute(attributeName);
+        // attribute is deleted - delete it from all objects
+        data.get('objects').each(function(obj) {
+          if (obj.has(attributeName)) {
+            obj.unset(attributeName);
+          }
+        });
+      }
+    };
+    this.undo = function() {
+      if (template) {
+        template.addAttribute(oldAttribute.attributes);
+      }
+    };
+    this.redo = function() {
+      this.do();
+    };
+    this.toString = function() {
+      return 'DeleteTemplateAttributeCommand(' + templateId + ', ' + attributeName + ')';
+    };
+  };
+})
+.service('ChangeTemplateAttributeCommand', function(data) {
+  return function(templateId, attributeName, nameValueMap) {
+    var template = data.get('templates').get(templateId);
+    var attrDef = template.getAttributeByName(attributeName);
+    var oldNameValueMap;
+    this.do = function() {
+      if (template) {
+        oldNameValueMap = _.reduce(Object.keys(nameValueMap), function(result, key) {
+          console.log('reduce key',key,'attrDef.get(key)',attrDef.get(key));
+          result[key] = attrDef.get(key);
+          return result;
+        }, {});
+        console.log('oldNameValueMap',JSON.stringify(oldNameValueMap));
+        var oldName = attrDef.get('name');
+        if (nameValueMap.name && nameValueMap.name !== oldName) {
+          // attribute name is changed - save, delete and restore values for this attribute for all objects having a value for this attribute
+          data.get('objects').each(function(obj) {
+            if (obj.get(oldName)) {
+              obj.set(nameValueMap.name, obj.get(oldName));
+              obj.unset(oldName);
+            }
+          });
+        }
+        attrDef.set(nameValueMap)
+        template.trigger('changeAttrDef');
+      }
+    };
+    this.undo = function() {
+      if (template) {
+        attrDef.set(oldNameValueMap);
+        template.trigger('changeAttrDef');
+      }
+    };
+    this.redo = function() {
+      this.do();
+    };
+    this.toString = function() {
+      return 'ChangeTemplateAttributeCommand(' + templateId + ', ' + attributeName + ', ' + JSON.stringify(nameValueMap) + ')';
     };
   };
 })

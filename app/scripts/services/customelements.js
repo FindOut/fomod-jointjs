@@ -11,6 +11,18 @@ angular.module('fomodApp')
   .service('CustomElements', function (attrMap, commander, CreateRelationCommand, CreateObjectCommand) {
     joint.shapes.fomod = {};
 
+    // keeps view size a little larger than its contents
+    var growWithTextLayout = function(view) {
+      var layout = function() {
+        view.model.set('size', {width: 1, height: 1});
+        var bbox = view.getBBox();
+        view.model.set('size', {width: bbox.width + 14, height: bbox.height + 9});
+      }
+      view.model.on('change:attrs', layout);
+      layout();
+    }
+
+
     joint.shapes.fomod.Element = joint.shapes.basic.Rect.extend({
       markup: '<g class="rotatable"><g class="scalable"><rect/></g><text/><circle/><path/></g>',
       defaults: joint.util.deepSupplement({
@@ -19,7 +31,7 @@ angular.module('fomodApp')
           'rect': { fill: 'white', stroke: 'black', 'follow-scale': true, width: 80, height: 40 },
           'text': { 'font-size': 14, 'ref-x': .5, 'ref-y': .5, ref: 'rect', 'y-alignment': 'middle', 'x-alignment': 'middle' },
           'circle': { 'ref-x': 11, 'ref-y': 11, ref: 'rect', fill: 'red', r: '10'},
-          'path': {'ref-x': 15, 'ref-y': 15, ref: 'circle', 'y-alignment': 'middle', 'x-alignment': 'middle', stroke: '#ffffff', 'stroke-width': 3, d: 'M -5 -5 L 5 5 M -5 5 L 5 -5'}
+          'path': {'ref-x': 0, 'ref-y': 0, ref: 'circle', 'y-alignment': 'middle', 'x-alignment': 'middle', stroke: '#ffffff', 'stroke-width': 3, d: 'M -5 -5 L 5 5 M -5 5 L 5 -5'}
         }
       }, joint.shapes.basic.Rect.prototype.defaults)
     });
@@ -55,6 +67,8 @@ angular.module('fomodApp')
               var isNearEdge = nearEdge(paperPoint.x, paperPoint.y, view.model.attributes.position, view.model.attributes.size);
               this.style.cursor = isNearEdge ? 'crosshair' : 'move';
             });
+
+            growWithTextLayout(this);
           },
           pointerdown: function(evt, x, y) {
             var position = this.model.get('position');

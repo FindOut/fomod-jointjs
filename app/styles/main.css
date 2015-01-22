@@ -34,3 +34,6 @@
 .attributes li button {
   margin-top: 0.5em;
 }
+input.invalid {
+  background-color: #ffdddd;
+}

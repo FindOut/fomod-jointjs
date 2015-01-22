@@ -1,3 +1,10 @@
 <div class="objectform">
-  <div>text <input class="name" ng-model="text"></div>
+  <div>
+    <ul class="attributes" sortable ng-model="attributes">
+      <li ng-repeat="attribute in attributes">
+        {{attribute.get('name')}}
+        <input class="name" ng-model-options="{ getterSetter: true }" ng-model="attrValue(attribute)">
+      </li>
+    </ul>
+  </div>
 </div>

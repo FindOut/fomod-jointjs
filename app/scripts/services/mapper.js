@@ -29,10 +29,18 @@ angular.module('fomodApp')
     };
     data.get('templates').forEach(addElementTemplate);
     data.get('templates').on('add', addElementTemplate);
-    // data.get('templates').on('remove', function(obj) {
+    // data.get('templates').on('remove', function(obj) { ... });
     data.get('templates').on('change:name', function(obj) {
       var cell = graph.getCell(obj.id);
       cell.attr('text/text', obj.get('name'));
+    });
+    data.get('templates').on('changeAttrDef', function() {
+      data.get('objects').each(function(obj) {
+        var cell = graph.getCell(obj.id);
+        if (cell) {
+          cell.attr('text/text', attrRenderer(obj));
+        }
+      });
     });
 
 
@@ -44,7 +52,7 @@ angular.module('fomodApp')
         size: { width: 100, height: 30 },
         attrs: { rect: { fill: 'blue',
             filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
-          text: { text: obj.get('text'), fill: 'white' } }
+          text: { text: attrRenderer(obj), fill: 'white' } }
       });
       graph.addCell(element);
     };
@@ -56,10 +64,21 @@ angular.module('fomodApp')
         cell.remove();
       }
     });
-    data.get('objects').on('change:text', function(obj) {
+    data.get('objects').on('change', function(obj) {
       var cell = graph.getCell(obj.id);
-      cell.attr('text/text', obj.get('text'));
+      cell.attr('text/text', attrRenderer(obj));
     });
+    function attrRenderer(obj) {
+      var attrDefs = data.getVisibleAttributeDefs(obj);
+      return attrDefs.map(function(attrDef) {
+        var name = attrDef.get('name');
+        if (attrDef == attrDefs[0]) {
+          return (obj.get([attrDef.get('name')]) + '\n' || '');
+        } else {
+          return name + ': ' + (obj.get([attrDef.get('name')]) || '');
+        }
+      }).join('\n');
+    }
 
 
     // change graph links according to data relation change
