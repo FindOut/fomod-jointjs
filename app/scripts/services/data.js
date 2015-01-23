@@ -311,6 +311,39 @@ angular.module('fomodApp')
     };
   };
 })
+.service('ReorderTemplateAttributeCommand', function(data) {
+  return function(templateId, fromIndex, toIndex) {
+    var template = data.get('templates').get(templateId);
+    function move(from, to) {
+      console.log('move(',from,', ',to,')');
+      var toAdjusted = from < to ? to - 1 : toIndex;
+      var attributes = template.get('attributes');
+      var attrToMove = attributes.at(from);
+      if (attrToMove) {
+        console.log('found attr');
+        attributes.remove(attrToMove);
+        attributes.add(attrToMove, {at: to});
+        template.trigger('changeAttrDef');
+      }
+    }
+    this.do = function() {
+      if (template) {
+        move(fromIndex, toIndex);
+      }
+    };
+    this.undo = function() {
+      if (template) {
+        move(toIndex, fromIndex);
+      }
+    };
+    this.redo = function() {
+      this.do();
+    };
+    this.toString = function() {
+      return 'ReorderTemplateAttributeCommand(' + templateId + ', ' + fromIndex + ', ' + toIndex + ')';
+    };
+  };
+})
 .service('ChangeTemplateAttributeCommand', function(data) {
   return function(templateId, attributeName, nameValueMap) {
     var template = data.get('templates').get(templateId);

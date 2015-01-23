@@ -19,14 +19,15 @@
        scope.dragEnd = function(e, ui) {
          var start = ui.item.data('start');
          var end = ui.item.index();
-         ngModel.$modelValue.splice(end, 0, ngModel.$modelValue.splice(start, 1)[0]);
-         scope.$apply();
+         scope.reorderEnd(start, end, elm, attrs, ngModel);
        }
 
        var sortableEle = $(elm).sortable({
          start: scope.dragStart,
          update: scope.dragEnd
        });
+
+
      }
    }
  });
