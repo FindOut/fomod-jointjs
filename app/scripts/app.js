@@ -18,6 +18,10 @@ angular
     'ngTouch',
     'dr.sortable'
   ])
+  .value('fbURL', 'https://fomod.firebaseio.com/')
+  .service('fbref', function (fbURL) {
+    return new Firebase(fbURL);
+  })
   .config(function ($routeProvider) {
     $routeProvider
       .when('/models', {
@@ -36,8 +40,12 @@ angular
         templateUrl: 'views/template.html',
         controller: 'TemplateCtrl'
       })
+      .when('/login', {
+        templateUrl: 'views/login.html',
+        controller: 'LoginCtrl'
+      })
       .otherwise({
-        redirectTo: '/models'
+        redirectTo: '/login'
       });
   })
   .run(function(dataStore) {

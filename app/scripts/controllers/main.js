@@ -12,9 +12,15 @@
 * Controller of the fomodApp
 */
 angular.module('fomodApp')
-.controller('MainCtrl', function ($scope, dragThresholder, dataStore, graph, data, commander,
-      CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand, attrMap) {
+.controller('MainCtrl', function ($scope, $rootScope, $timeout, dragThresholder, dataStore, graph, data, commander,
+      CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand, attrMap, fbref) {
   $scope.commander = commander;
+  $scope.auth = fbref.getAuth();
+  $scope.logout = function() {
+    fbref.unauth();
+    console.log("logged out");
+    $timeout(function() {$rootScope.$apply(); window.location.href = "#/login"});
+  };
 
   $scope.status = 'reading';
   dataStore.on(function(type) {

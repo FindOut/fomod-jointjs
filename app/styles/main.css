@@ -6,11 +6,12 @@
 }
 #toolbar {
   border-bottom: solid #ccc 1px;
-  padding: 0.13em 0.15em;
+  padding: 0.13em 0.6em;
   background-color: #eed;
 }
 #toolbar button {
-  margin-right: 0.1em;
+  margin-left: 0.5em;
+  padding: auto 0;
 }
 #toolbar .status {
   float: right;
@@ -36,4 +37,8 @@
 }
 input.invalid {
   background-color: #ffdddd;
+}
+.gloginlogo {
+  width: 25%;
+  height: auto;
 }
