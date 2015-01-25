@@ -24,7 +24,7 @@ angular
   })
   .config(function ($routeProvider) {
     $routeProvider
-      .when('/models', {
+      .when('/models/:id', {
         templateUrl: 'views/main.html',
         controller: 'MainCtrl'
       })
@@ -43,6 +43,14 @@ angular
       .when('/login', {
         templateUrl: 'views/login.html',
         controller: 'LoginCtrl'
+      })
+      .when('/models', {
+        templateUrl: 'views/list.html',
+        controller: 'ListCtrl'
+      })
+      .when('/new', {
+        templateUrl: 'views/new.html',
+        controller: 'NewCtrl'
       })
       .otherwise({
         redirectTo: '/login'

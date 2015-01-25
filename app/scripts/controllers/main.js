@@ -12,7 +12,7 @@
 * Controller of the fomodApp
 */
 angular.module('fomodApp')
-.controller('MainCtrl', function ($scope, $rootScope, $timeout, dragThresholder, dataStore, graph, data, commander,
+.controller('MainCtrl', function ($scope, $rootScope, $routeParams, $timeout, dragThresholder, dataStore, graph, data, commander,
       CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand, attrMap, fbref) {
   if (!fbref.getAuth()) {
     $timeout(function() {window.location.href = "#/login"});
@@ -97,4 +97,6 @@ angular.module('fomodApp')
       }
     }
   });
+
+  dataStore.setModelId($routeParams.id);
 });
