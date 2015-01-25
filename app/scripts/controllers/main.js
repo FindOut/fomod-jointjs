@@ -14,6 +14,9 @@
 angular.module('fomodApp')
 .controller('MainCtrl', function ($scope, $rootScope, $timeout, dragThresholder, dataStore, graph, data, commander,
       CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand, attrMap, fbref) {
+  if (!fbref.getAuth()) {
+    $timeout(function() {window.location.href = "#/login"});
+  }
   $scope.commander = commander;
   $scope.auth = fbref.getAuth();
   $scope.logout = function() {
