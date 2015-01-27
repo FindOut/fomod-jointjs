@@ -14,7 +14,6 @@ angular.module('fomodApp')
   var obj = objects.get(id);
   var changeHandler = function(d) {
     if (d && d.id === id) {
-      console.log(JSON.stringify(d));
       obj = objects.get(id);
       if (obj) {
         var templates = data.get('templates');
@@ -23,16 +22,12 @@ angular.module('fomodApp')
 
         $scope.obj = obj;
         $scope.attributes = data.getVisibleAttributeDefs(obj);
-        console.log('$scope.attributes',$scope.attributes);
         $scope.attrValue = function(attribute) {
           return function(newValue) {
-            console.log('getterSetter',newValue);
             return angular.isDefined(newValue) ? obj.set(attribute.get('name'), newValue) : obj.get(attribute.get('name'));
           }
         };
-
-        console.log($scope.attributes);
-
+        
         $scope.text = obj.get('text');
         setTimeout(function() {$scope.$apply();});
         var off = $rootScope.$on('$locationChangeStart', function (event, next, current) {

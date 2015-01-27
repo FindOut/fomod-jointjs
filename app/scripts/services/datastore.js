@@ -20,8 +20,10 @@ angular.module('fomodApp')
 
   // set id of model to work on
   function setCurrentModel(id) {
-    fbModelRef = fbref.child('models/' + id);
-    readFbModel();
+    if (!fbModelRef || id !== fbModelRef.key()) {
+      fbModelRef = fbref.child('models/' + id);
+      readFbModel();
+    }
   }
 
   // read the model from database
@@ -33,9 +35,7 @@ angular.module('fomodApp')
           var value = snapshot.val();
           enableSaving = false;
           if (value) {
-            console.log('readFbModel 10');
             data.set(value.data);
-            console.log('readFbModel 20');
             if (value.graph) {
               _.each(value.graph.elements, function(storeElement) {
                 var element = graph.getCell(storeElement.id);
@@ -44,14 +44,12 @@ angular.module('fomodApp')
                   attrMap[storeElement.id] = storeElement.position;
                 }
               });
-              console.log('readFbModel 30');
               _.each(value.graph.links, function(storeLink) {
                 var link = graph.getCell(storeLink.id);
                 if (link) {
                   link.set('vertices', storeLink.vertices);
                 }
               });
-              console.log('readFbModel 40');
             }
           } else {
             //data.set({objects: [], relations: []});
@@ -60,13 +58,11 @@ angular.module('fomodApp')
             data.get('templates').reset();
             data.set('name', 'unnamed');
           }
-          console.log('readFbModel 50');
           if (data.get('templates').length == 0) {
             // there were no templates in the database - create one
             console.log('there were no templates in the database - create one');
             data.get('templates').add(new FomodObjectTemplate({id: joint.util.uuid(), name: 'New object'}));
           }
-          console.log('readFbModel 60');
           enableSaving = true;
           fireEvent('read-end');
           commander.clear();

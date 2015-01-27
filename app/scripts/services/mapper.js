@@ -18,8 +18,7 @@ angular.module('fomodApp')
   var preventViewToModelPropagation = 0;
   return function(data, graph) {
     // set up and maintain palette
-    var addElementTemplate = function(template) {
-      console.log('addElementTemplate',template);
+    function addElementTemplate(template) {
       var elementTemplate = new joint.shapes.fomod.ElementTemplate({
         id: template.id,
         size: { width: 100, height: 30 },
@@ -28,8 +27,8 @@ angular.module('fomodApp')
         text: { text: template.get('name'), fill: 'white' }}
       });
       paletteManager.addElementTemplate(elementTemplate);
-    };
-    function removeTemplate(obj) {
+    }
+    function removeElementTemplate(obj) {
       preventViewToModelPropagation++;
       var cell = graph.getCell(obj.id);
       if (cell) {
@@ -37,20 +36,20 @@ angular.module('fomodApp')
       }
       preventViewToModelPropagation--;
     }
-    data.get('templates').forEach(addElementTemplate);
-    data.get('templates').on('add', addElementTemplate);
-    data.get('templates').on('reset', function (newObjects, options) {
-      console.log('data.get("templates").reset(',arguments,')');
-      _.each(options.previousModels, removeTemplate);
+    var templates = data.get('templates');
+    templates.forEach(addElementTemplate);
+    templates.on('add', addElementTemplate);
+    templates.on('reset', function (newObjects, options) {
+      _.each(options.previousModels, removeElementTemplate);
       _.each(newObjects.models, addElementTemplate);
     });
-    data.get('templates').on('remove', removeTemplate);
-    data.get('templates').on('change:name', function(obj) {
+    templates.on('remove', removeElementTemplate);
+    templates.on('change:name', function(obj) {
       var cell = graph.getCell(obj.id);
       cell.attr('text/text', obj.get('name'));
     });
-    data.get('templates').on('changeAttrDef', function() {
-      data.get('objects').each(function(obj) {
+    templates.on('changeAttrDef', function() {
+      objects.each(function(obj) {
         var cell = graph.getCell(obj.id);
         if (cell) {
           cell.attr('text/text', attrRenderer(obj));
@@ -60,7 +59,7 @@ angular.module('fomodApp')
 
 
     // change graph elements according to data object change
-    var addElement = function(obj) {
+    function addElement(obj) {
       var element = new joint.shapes.fomod.Element({
         id: obj.id,
         position: attrMap[obj.id] || { x: 150, y: 30 },
@@ -70,7 +69,7 @@ angular.module('fomodApp')
           text: { text: attrRenderer(obj), fill: 'white' } }
       });
       graph.addCell(element);
-    };
+    }
     function removeElement(obj) {
       preventViewToModelPropagation++;
       var cell = graph.getCell(obj.id);
@@ -79,16 +78,15 @@ angular.module('fomodApp')
       }
       preventViewToModelPropagation--;
     }
-    data.get('objects').forEach(addElement);
-    data.get('objects').on('add', addElement);
-    data.get('objects').on('reset', function (newElements, options) {
-      console.log('data.get("objects").reset(',arguments,')');
-      _.each(options.previousModels, function (obj) {
-        removeElement(obj);
-      });
+    var objects = data.get('objects');
+    objects.forEach(addElement);
+    objects.on('add', addElement);
+    objects.on('reset', function (newElements, options) {
+      _.each(options.previousModels, removeElement);
+      _.each(newObjects.models, addElement);
     });
-    data.get('objects').on('remove', removeElement);
-    data.get('objects').on('change', function(obj) {
+    objects.on('remove', removeElement);
+    objects.on('change', function(obj) {
       var cell = graph.getCell(obj.id);
       cell.attr('text/text', attrRenderer(obj));
     });
@@ -106,7 +104,7 @@ angular.module('fomodApp')
 
 
     // change graph links according to data relation change
-    var addLink = function(rel) {
+    function addLink(rel) {
       var link = new joint.dia.Link({
         id: rel.id,
         source: { id: rel.get('from') },
@@ -127,22 +125,21 @@ angular.module('fomodApp')
       }
       preventViewToModelPropagation--;
     }
-    data.get('relations').forEach(addLink);
-    data.get('relations').on('add', addLink);
-    data.get('relations').on('reset', function (newElements, options) {
-      console.log('data.get("relations").reset(',arguments,')');
-      _.each(options.previousModels, function (obj) {
-        removeLink(obj);
-      })
+    var relations = data.get('relations');
+    relations.forEach(addLink);
+    relations.on('add', addLink);
+    relations.on('reset', function (newElements, options) {
+      _.each(options.previousModels, removeLink);
+      _.each(newObjects.models, addLink);
     });
-    data.get('relations').on('remove', removeLink);
-    data.get('relations').on('change:from', function(rel) {
+    relations.on('remove', removeLink);
+    relations.on('change:from', function(rel) {
       var link = graph.getCell(rel.id);
       if (link) {
         link.set('source', {id: rel.get('from')});
       }
     });
-    data.get('relations').on('change:to', function(rel) {
+    relations.on('change:to', function(rel) {
       var link = graph.getCell(rel.id);
       if (link) {
         link.set('target', {id: rel.get('to')});
