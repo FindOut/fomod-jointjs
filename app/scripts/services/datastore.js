@@ -14,56 +14,101 @@ angular.module('fomodApp')
 .service('dataStore', function(data, Mapper, graph, FomodObjectTemplate, FomodObject, FomodRelation, commander, attrMap, fbref) {
   var enableSaving = true;
   var listeners = [];
-  var fbModelRef = new Firebase('https://fomod.firebaseio.com');
+  var fbModelRef;
 
   new Mapper(data, graph);
 
-  function setModelId(id) {
+  // set id of model to work on
+  function setCurrentModel(id) {
     fbModelRef = fbref.child('models/' + id);
     readFbModel();
   }
 
+  // read the model from database
   function readFbModel() {
-    fireEvent('read-begin');
-    fbModelRef.once('value', function(snapshot) {
-      var value = snapshot.val();
-      enableSaving = false;
-      if (value) {
-        data.set(value.data);
-        if (value.graph) {
-          _.each(value.graph.elements, function(storeElement) {
-            var element = graph.getCell(storeElement.id);
-            if (element) {
-              element.set('position', storeElement.position);
-              attrMap[storeElement.id] = storeElement.position;
+    if (fbModelRef) {
+      fireEvent('read-begin');
+      fbModelRef.once('value',
+        function(snapshot) {
+          var value = snapshot.val();
+          enableSaving = false;
+          if (value) {
+            console.log('readFbModel 10');
+            data.set(value.data);
+            console.log('readFbModel 20');
+            if (value.graph) {
+              _.each(value.graph.elements, function(storeElement) {
+                var element = graph.getCell(storeElement.id);
+                if (element) {
+                  element.set('position', storeElement.position);
+                  attrMap[storeElement.id] = storeElement.position;
+                }
+              });
+              console.log('readFbModel 30');
+              _.each(value.graph.links, function(storeLink) {
+                var link = graph.getCell(storeLink.id);
+                if (link) {
+                  link.set('vertices', storeLink.vertices);
+                }
+              });
+              console.log('readFbModel 40');
             }
-          });
-          _.each(value.graph.links, function(storeLink) {
-            var link = graph.getCell(storeLink.id);
-            if (link) {
-              link.set('vertices', storeLink.vertices);
-            }
-          });
+          } else {
+            //data.set({objects: [], relations: []});
+            data.get('relations').reset();
+            data.get('objects').reset();
+            data.get('templates').reset();
+            data.set('name', 'unnamed');
+          }
+          console.log('readFbModel 50');
+          if (data.get('templates').length == 0) {
+            // there were no templates in the database - create one
+            console.log('there were no templates in the database - create one');
+            data.get('templates').add(new FomodObjectTemplate({id: joint.util.uuid(), name: 'New object'}));
+          }
+          console.log('readFbModel 60');
+          enableSaving = true;
+          fireEvent('read-end');
+          commander.clear();
+        },
+        function function_name(error) {
+          console.log('database read error for ' + fbModelRef.toString(), error);
+          //data.set({objects: [], relations: []});
+          data.get('relations').reset();
+          data.get('objects').reset();
+          data.get('templates').reset(new FomodObjectTemplate({id: joint.util.uuid(), name: 'New object'}));
+          data.set('name', 'unnamed');
+          enableSaving = true;
+          fireEvent('read-end');
         }
-      } else {
-        data.set({objects: [], relations: []});
-      }
+      );
+    }
+  }
 
-      if (data.get('templates').length === 0) {
-        // there were no templates in the database - create one
-        var defaultTemplate = new FomodObjectTemplate({id: joint.util.uuid(), name: 'New object'});
-        data.get('templates').add(defaultTemplate);
+  // write model id, name, access rights to the users tree
+  function updateUserInfo() {
+    var userRef = fbref.child('users').child(fbref.getAuth().uid).child(fbModelRef.key());
+    userRef.set({name: data.get('name'), access: 'rw'}, function(error) {
+      if (error) {
+        console.log('error writing user info', error);
       }
-      enableSaving = true;
-      fireEvent('read-end');
-      commander.clear();
     });
   }
 
+  // on each command on the model, write it to database
   commander.on('execute', function() {
-    if (enableSaving) {
+    if (enableSaving && fbModelRef) {
       fireEvent('write-begin');
-      fbModelRef.set({owner: fbModelRef.getAuth().uid, data: data.toJSON(), graph: getStorableGraph(graph)}, function(error) {fireEvent('write-end', error);});
+      fbModelRef.set(
+        {owner: fbModelRef.getAuth().uid, data: data.toJSON(), graph: getStorableGraph(graph)},
+        function(error) {
+          if (error) {
+            console.log('database write error',error);
+          }
+          fireEvent('write-end', error);
+        }
+      );
+      updateUserInfo();
     }
   });
 
@@ -90,6 +135,6 @@ angular.module('fomodApp')
     on: function(listener) {
       listeners.push(listener);
     },
-    setModelId: setModelId
+    setCurrentModel: setCurrentModel
   };
 });

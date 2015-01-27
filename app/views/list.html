@@ -1,8 +1,15 @@
-<div>
-  My models:
-</div><ul>
-  <li ng-repeat="model in models">{{model}}</li>
-</ul>
-<div>
-  {{models.length}} models.
+<div class="listpage">
+  <div id="toolbar">
+    <a ng-click="logout()" title="Click to logout">{{auth[auth.provider].displayName}}</a>
+  </div>
+  <ul class="modellist">
+    <li ng-repeat="model in models">
+      {{$index + 1}}
+      <a href="#/models/{{model.$id}}">{{model.name ? model.name : model.$id}}</a>
+      <a ng-click="deleteModel(model)" title="delete"><img class="deleteicon" src="images/del.png" alt="delete model" /></a>
+    </li>
+  </ul>
+  <div>
+    <button ng-click="addModel()">Add</button>
+  </div>
 </div>

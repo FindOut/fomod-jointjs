@@ -13,12 +13,42 @@
 */
 angular.module('fomodApp')
 .controller('MainCtrl', function ($scope, $rootScope, $routeParams, $timeout, dragThresholder, dataStore, graph, data, commander,
-      CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand, attrMap, fbref) {
+      CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand, ChangeDataAttributeCommand, attrMap, fbref) {
   if (!fbref.getAuth()) {
     $timeout(function() {window.location.href = "#/login"});
   }
+
+  $scope.editing = false;
+  $scope.startEdit = function () {
+    $scope.editing = true;
+    var target = $(".modelnameedit")[0];
+    target.setSelectionRange(0, target.value.length);
+    $timeout(function() {target.focus(); $rootScope.$apply();});
+
+  }
+  $scope.nameGetterSetter = function(name) {
+    return angular.isDefined(name) ? commander.do(new ChangeDataAttributeCommand({name: name})) : data.get('name');
+  };
+  $scope.stopEdit = function () {
+    $scope.editing = false;
+  }
+  $(".modelnameedit").keyup(function (e) {
+    if (e.keyCode == 13) {
+      $timeout(function() {e.target.blur(); $rootScope.$apply();});
+    }
+  });
+
   $scope.commander = commander;
   $scope.auth = fbref.getAuth();
+  function dataChangeHandler() {
+    $scope.name = data.get('name');
+    document.title = data.get('name') + ' - fomod';
+  }
+  data.on('change', dataChangeHandler);
+  if (data.get('name')) {
+    dataChangeHandler();
+  }
+
   $scope.logout = function() {
     fbref.unauth();
     console.log("logged out");
@@ -86,6 +116,9 @@ angular.module('fomodApp')
       }
     }
   });
+  paper.on('blank:pointerdown cell:pointerdown', function() {
+    $timeout(function() {$scope.stopEdit(); $rootScope.$apply();});
+  });
 
   $(document).keydown(function(e) {
     e = e || window.event; // IE support
@@ -98,5 +131,5 @@ angular.module('fomodApp')
     }
   });
 
-  dataStore.setModelId($routeParams.id);
+  dataStore.setCurrentModel($routeParams.id);
 });

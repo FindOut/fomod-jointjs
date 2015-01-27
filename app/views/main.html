@@ -1,7 +1,10 @@
 <div>
   <div id="toolbar">
-    <a ng-click="logout()" title="Click to logout">{{auth.google.displayName}}</a>
-    <button ng-disabled="!commander.canUndo()" ng-click="commander.undo()">Undo</button><button ng-disabled="!commander.canRedo()" ng-click="commander.redo()">Redo</button>
+    <a class="authname" ng-click="logout()" title="Click to logout">{{auth.provider}} {{auth[auth.provider].displayName}}</a>
+    <!-- <button ng-disabled="!commander.canUndo()" ng-click="commander.undo()">Undo</button><button ng-disabled="!commander.canRedo()" ng-click="commander.redo()">Redo</button> -->
+    <span ng-show="!editing" ng-click="startEdit()" class="modelname">{{name}}</span>
+    <input type="text" ng-show="editing" ng-blur="stopEdit()" class="modelnameedit"
+      ng-model-options="{ getterSetter: true, debounce: 1000 }" ng-model="nameGetterSetter" name="some_name" value="">
     <div class="status">{{status}}</div>
   </div>
   <div id="paper"></div>

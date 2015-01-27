@@ -11,19 +11,19 @@ angular.module('fomodApp')
 .controller('LoginCtrl', function ($scope, $rootScope, $timeout, fbref) {
 
   if (fbref.getAuth()) {
-    console.log("logged in auth:", fbref.getAuth());
-    $timeout(function() {window.location.href = "#/models"});
+    console.log('logged in auth:', fbref.getAuth());
+    $timeout(function() {window.location.href = '#/models'});
   }
 
   $scope.email = "dag.rende@gmail.com";
   $scope.pw = '';
   $scope.login = function (serviceProvider, data) {
-    fbref.authWithOAuthPopup("google", function(error, authData) {
+    fbref.authWithOAuthPopup(serviceProvider, function(error, authData) {
       if (error) {
-        console.log("Login Failed!", error);
+        console.log('Login Failed!', error);
       } else {
-        console.log("logged in auth:", authData);
-        $timeout(function() {$rootScope.$apply(); window.location.href = "#/models"});
+        console.log('logged in auth:', authData);
+        $timeout(function() {$rootScope.$apply(); window.location.href = '#/models'});
       }
     });
 

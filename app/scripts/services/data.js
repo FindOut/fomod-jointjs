@@ -15,6 +15,7 @@ angular.module('fomodApp')
   return new FomodModel();
 })
 .service('FomodModel', function(FomodObjectTemplate, FomodObject, FomodRelation) {
+  // name
   return Backbone.AssociatedModel.extend({
     relations: [
       {
@@ -34,6 +35,7 @@ angular.module('fomodApp')
       }
     ],
     defaults: {
+      name: 'unnamed',
       templates: [],
       objects: [],
       relations: []
@@ -216,13 +218,31 @@ angular.module('fomodApp')
     };
   };
 })
+.service('ChangeDataAttributeCommand', function(data) {
+  return function(nameValueMap) {
+    var oldNameValueMap;
+    this.do = function() {
+        oldNameValueMap = _.reduce(nameValueMap, function(result, value, key) {result[key] = data.get(key); return result;}, {});
+        data.set(nameValueMap);
+    };
+    this.undo = function() {
+      data.set(oldNameValueMap);
+    };
+    this.redo = function() {
+      this.do();
+    };
+    this.toString = function() {
+      return 'ChangeDataAttributeCommand(' + JSON.stringify(nameValueMap) + ')';
+    };
+  };
+})
 .service('ChangeObjectAttributeCommand', function(data) {
   return function(id, nameValueMap) {
     var obj, oldNameValueMap;
     this.do = function() {
       obj = data.get('objects').get(id) || data.get('templates').get(id);
       if (obj) {
-        oldNameValueMap = _.reduce(nameValueMap, function(result, key) {result[key] = obj.get(key);}, {});
+        oldNameValueMap = _.reduce(nameValueMap, function(result, value, key) {result[key] = data.get(key); return result;}, {});
         obj.set(nameValueMap);
       }
     };
@@ -351,11 +371,7 @@ angular.module('fomodApp')
     var oldNameValueMap;
     this.do = function() {
       if (template) {
-        oldNameValueMap = _.reduce(Object.keys(nameValueMap), function(result, key) {
-          console.log('reduce key',key,'attrDef.get(key)',attrDef.get(key));
-          result[key] = attrDef.get(key);
-          return result;
-        }, {});
+        oldNameValueMap = _.reduce(nameValueMap, function(result, value, key) {result[key] = data.get(key); return result;}, {});
         console.log('oldNameValueMap',JSON.stringify(oldNameValueMap));
         var oldName = attrDef.get('name');
         if (nameValueMap.name && nameValueMap.name !== oldName) {

@@ -15,9 +15,11 @@ angular.module('fomodApp')
   })
 .service('Mapper', function (CustomElements, attrMap, commander, paletteManager, DeleteRelationCommand, DeleteObjectCommand, MoveObjectCommand, ChangeLinkVerticesCommand, ChangeRelationToCommand, ChangeRelationAttributeCommand) {
   var batch;
+  var preventViewToModelPropagation = 0;
   return function(data, graph) {
     // set up and maintain palette
     var addElementTemplate = function(template) {
+      console.log('addElementTemplate',template);
       var elementTemplate = new joint.shapes.fomod.ElementTemplate({
         id: template.id,
         size: { width: 100, height: 30 },
@@ -27,9 +29,22 @@ angular.module('fomodApp')
       });
       paletteManager.addElementTemplate(elementTemplate);
     };
+    function removeTemplate(obj) {
+      preventViewToModelPropagation++;
+      var cell = graph.getCell(obj.id);
+      if (cell) {
+        cell.remove();
+      }
+      preventViewToModelPropagation--;
+    }
     data.get('templates').forEach(addElementTemplate);
     data.get('templates').on('add', addElementTemplate);
-    // data.get('templates').on('remove', function(obj) { ... });
+    data.get('templates').on('reset', function (newObjects, options) {
+      console.log('data.get("templates").reset(',arguments,')');
+      _.each(options.previousModels, removeTemplate);
+      _.each(newObjects.models, addElementTemplate);
+    });
+    data.get('templates').on('remove', removeTemplate);
     data.get('templates').on('change:name', function(obj) {
       var cell = graph.getCell(obj.id);
       cell.attr('text/text', obj.get('name'));
@@ -56,14 +71,23 @@ angular.module('fomodApp')
       });
       graph.addCell(element);
     };
-    data.get('objects').forEach(addElement);
-    data.get('objects').on('add', addElement);
-    data.get('objects').on('remove', function(obj) {
+    function removeElement(obj) {
+      preventViewToModelPropagation++;
       var cell = graph.getCell(obj.id);
       if (cell) {
         cell.remove();
       }
+      preventViewToModelPropagation--;
+    }
+    data.get('objects').forEach(addElement);
+    data.get('objects').on('add', addElement);
+    data.get('objects').on('reset', function (newElements, options) {
+      console.log('data.get("objects").reset(',arguments,')');
+      _.each(options.previousModels, function (obj) {
+        removeElement(obj);
+      });
     });
+    data.get('objects').on('remove', removeElement);
     data.get('objects').on('change', function(obj) {
       var cell = graph.getCell(obj.id);
       cell.attr('text/text', attrRenderer(obj));
@@ -95,14 +119,23 @@ angular.module('fomodApp')
       });
       graph.addCell(link);
     };
-    data.get('relations').forEach(addLink);
-    data.get('relations').on('add', addLink);
-    data.get('relations').on('remove', function(rel) {
+    function removeLink(rel) {
+      preventViewToModelPropagation++;
       var link = graph.getCell(rel.id);
       if (link) {
         link.remove();
       }
+      preventViewToModelPropagation--;
+    }
+    data.get('relations').forEach(addLink);
+    data.get('relations').on('add', addLink);
+    data.get('relations').on('reset', function (newElements, options) {
+      console.log('data.get("relations").reset(',arguments,')');
+      _.each(options.previousModels, function (obj) {
+        removeLink(obj);
+      })
     });
+    data.get('relations').on('remove', removeLink);
     data.get('relations').on('change:from', function(rel) {
       var link = graph.getCell(rel.id);
       if (link) {
@@ -120,10 +153,12 @@ angular.module('fomodApp')
 
     // handle click link or element remove button
     graph.on('remove', function(cell) {
-      if (cell instanceof joint.dia.Link) {
-        commander.do(new DeleteRelationCommand(cell.id));
-      } else if (cell instanceof joint.dia.Element) {
-        commander.do(new DeleteObjectCommand(cell.id));
+      if (!preventViewToModelPropagation) {
+        if (cell instanceof joint.dia.Link) {
+          commander.do(new DeleteRelationCommand(cell.id));
+        } else if (cell instanceof joint.dia.Element) {
+          commander.do(new DeleteObjectCommand(cell.id));
+        }
       }
     });
 
@@ -135,7 +170,9 @@ angular.module('fomodApp')
     graph.on('batch:start', function() {
       if (batchLevel++ === 0) {
         // outermost batch command found
-        batch = {}; // create an object to hold data for the command
+        if (!preventViewToModelPropagation) {
+          batch = {}; // create an object to hold data for the command
+        }
       }
     });
 
@@ -185,7 +222,9 @@ angular.module('fomodApp')
         // outermost batch command end
         if (batch) {
           if (batch.moveElement) {
-            commander.register(new MoveObjectCommand(batch.moveElement.element, batch.moveElement.startPosition, batch.moveElement.endPosition));
+            if (!batch.moveElement.element.isTemplate) {
+              commander.register(new MoveObjectCommand(batch.moveElement.element, batch.moveElement.startPosition, batch.moveElement.endPosition));
+            }
           } else if (batch.changeLinkEnd) {
             if (batch.changeLinkEnd.newEndElementId) {
               commander.do(new ChangeRelationAttributeCommand(batch.changeLinkEnd.link.id, batch.changeLinkEnd.attributeName, batch.changeLinkEnd.newEndElementId));

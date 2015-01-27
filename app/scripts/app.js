@@ -16,7 +16,8 @@ angular
     'ngRoute',
     'ngSanitize',
     'ngTouch',
-    'dr.sortable'
+    'dr.sortable',
+    'firebase'
   ])
   .value('fbURL', 'https://fomod.firebaseio.com/')
   .service('fbref', function (fbURL) {
