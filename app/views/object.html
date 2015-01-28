@@ -3,7 +3,7 @@
     <ul class="attributes" sortable ng-model="attributes">
       <li ng-repeat="attribute in attributes">
         {{attribute.get('name')}}
-        <input class="name" ng-model-options="{ getterSetter: true }" ng-model="attrValue(attribute)">
+        <input class="name" ng-model-options="{getterSetter: true, debounce: 1000}" ng-model="attrValue(attribute)">
       </li>
     </ul>
   </div>

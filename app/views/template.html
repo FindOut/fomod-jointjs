@@ -1,11 +1,11 @@
 <div class="objectform">
-  <div>template <input class="name" ng-model-options="{ getterSetter: true }" ng-model="nameGetterSetter"></div>
+  <div>template <input class="name" ng-model-options="{getterSetter: true, debounce: 1000}" ng-model="nameGetterSetter"></div>
   <div>
     <ul class="attributes" sortable ng-model="attributes">
       <li ng-repeat="attribute in attributes">
         <span title="Drag to reorder">{{attributes.indexOf(attribute) + 1}}. </span>
         <input type="checkbox" ng-checked="attribute.get('visible')" ng-click="changeAttrVisible(attribute)" title="visible">
-        <input class="name" ng-class="invalidAttrClass(attribute, $index)" ng-model-options="{ getterSetter: true }" ng-model="attrName(attribute, $index)" title="{{invalidAttrMessage(attribute, $index)}}">
+        <input class="name" ng-class="invalidAttrClass(attribute, $index)" ng-model-options="{getterSetter: true, debounce: 1000}" ng-model="attrName(attribute, $index)" title="{{invalidAttrMessage(attribute, $index)}}">
         <button ng-click="deleteAttribute(attribute)" title="delete">-</button>
       </li>
       <li><button ng-click="addAttribute()" title="Add attribute">Add</button></li>
