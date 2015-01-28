@@ -12,7 +12,7 @@ angular.module('fomodApp')
   var palette = new joint.shapes.basic.Rect({
     position: { x: 5, y: 5},
     size: { width: 110, height: 100 },
-    attrs: { rect: { fill: '#888', 'stroke-width': 0,
+    attrs: { rect: { fill: '#ccc', 'stroke-width': 0,
     filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } }}
   });
   palette.isPalette = true;

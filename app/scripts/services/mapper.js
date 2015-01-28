@@ -17,14 +17,13 @@ angular.module('fomodApp')
   var batch;
   var preventViewToModelPropagation = 0;
   return function(data, graph) {
-    // set up and maintain palette
+    // change palette templates according to data object change
     function addElementTemplate(template) {
       var elementTemplate = new joint.shapes.fomod.ElementTemplate({
         id: template.id,
         size: { width: 100, height: 30 },
-        attrs: { rect: { fill: 'blue',
-        filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
-        text: { text: template.get('name'), fill: 'white' }}
+        attrs: { rect: { fill: 'white'},
+        text: { text: template.get('name'), fill: '#444' }}
       });
       paletteManager.addElementTemplate(elementTemplate);
     }
@@ -39,9 +38,9 @@ angular.module('fomodApp')
     var templates = data.get('templates');
     templates.forEach(addElementTemplate);
     templates.on('add', addElementTemplate);
-    templates.on('reset', function (newObjects, options) {
+    templates.on('reset', function (newTemplates, options) {
       _.each(options.previousModels, removeElementTemplate);
-      _.each(newObjects.models, addElementTemplate);
+      _.each(newTemplates.models, addElementTemplate);
     });
     templates.on('remove', removeElementTemplate);
     templates.on('change:name', function(obj) {
@@ -57,16 +56,16 @@ angular.module('fomodApp')
       });
     });
 
-
     // change graph elements according to data object change
     function addElement(obj) {
       var element = new joint.shapes.fomod.Element({
         id: obj.id,
         position: attrMap[obj.id] || { x: 150, y: 30 },
         size: { width: 100, height: 30 },
-        attrs: { rect: { fill: 'blue',
+        attrs: {
+          rect: { fill: 'white', stroke: '#aaa',
             filter: { name: 'dropShadow', args: { dx: 2, dy: 2, blur: 3 } } },
-          text: { text: attrRenderer(obj), fill: 'white' } }
+          text: { text: attrRenderer(obj), fill: '#444' } }
       });
       graph.addCell(element);
     }
@@ -81,7 +80,7 @@ angular.module('fomodApp')
     var objects = data.get('objects');
     objects.forEach(addElement);
     objects.on('add', addElement);
-    objects.on('reset', function (newElements, options) {
+    objects.on('reset', function (newObjects, options) {
       _.each(options.previousModels, removeElement);
       _.each(newObjects.models, addElement);
     });
@@ -92,16 +91,22 @@ angular.module('fomodApp')
     });
     function attrRenderer(obj) {
       var attrDefs = data.getVisibleAttributeDefs(obj);
-      return attrDefs.map(function(attrDef) {
+      return _.reduce(attrDefs, function(result, attrDef, index) {
         var name = attrDef.get('name');
-        if (attrDef == attrDefs[0]) {
-          return (obj.get([attrDef.get('name')]) + '\n' || '');
-        } else {
-          return name + ': ' + (obj.get([attrDef.get('name')]) || '');
+        var value = obj.get([attrDef.get('name')]);
+        if (value) {
+          if (attrDef == attrDefs[0]) {
+            result.push(value);
+          } else {
+            if (index == 1) {
+              result.push('');
+            }
+            result.push(name + ': ' + value);
+          }
         }
-      }).join('\n');
+        return result;
+      }, []).join('\n');
     }
-
 
     // change graph links according to data relation change
     function addLink(rel) {
@@ -128,9 +133,9 @@ angular.module('fomodApp')
     var relations = data.get('relations');
     relations.forEach(addLink);
     relations.on('add', addLink);
-    relations.on('reset', function (newElements, options) {
+    relations.on('reset', function (newRelations, options) {
       _.each(options.previousModels, removeLink);
-      _.each(newObjects.models, addLink);
+      _.each(newRelations.models, addLink);
     });
     relations.on('remove', removeLink);
     relations.on('change:from', function(rel) {

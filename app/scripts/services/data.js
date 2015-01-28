@@ -81,9 +81,7 @@ angular.module('fomodApp')
     ],
     defaults: {
       attributes: [
-        new FomodAttribute({name: 'description', visible: 'true'}),
-        new FomodAttribute({name: 'effort', visible: 'false'}),
-        new FomodAttribute({name: 'category', visible: 'true'})
+        new FomodAttribute({name: 'text', visible: 'true'})
       ]
     },
     addAttribute: function(nameValueMap) {

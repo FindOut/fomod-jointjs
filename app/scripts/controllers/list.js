@@ -9,6 +9,7 @@
 */
 angular.module('fomodApp')
 .controller('ListCtrl', function ($scope, $timeout, fbref, $firebase) {
+  document.title = 'My models - fomod';
   $scope.auth = fbref.getAuth();
   var ref = fbref.child('users').child(fbref.getAuth().uid);
   var sync = $firebase(ref);

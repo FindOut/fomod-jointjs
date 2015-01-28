@@ -2,6 +2,7 @@
   "name": "fomod",
   "version": "0.0.0",
   "dependencies": {},
+  "repository": "git@github.com:FindOut/fomod.git",
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-autoprefixer": "^0.7.3",

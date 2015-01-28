@@ -1,3 +1,26 @@
+.listdemoBasicUsage .face {
+  border-radius: 30px;
+  border: 1px solid #ddd;
+  width: 48px;
+  margin: 16px;
+}
+.dividerdemoBasicUsage .face {
+  border-radius: 30px;
+  border: 1px solid #ddd;
+  width: 48px;
+  margin: 16px;
+}
+
+.md-tile-left img {
+  margin-left: 0.8em;
+  margin-right: 0.2em;
+  margin-bottom: 0.3em;
+}
+.delete-model-button {
+  width: 1em;
+  height: auto;
+}
+
 #palette {
   float: left;
   border: solid black 1px;
@@ -24,7 +47,8 @@
 }
 #toolbar .modelname {
 }
-#toolbar .modelnameedit {
+.modelnameedit {
+  color: black;
 }
 .attributes {
   padding: 1em;
