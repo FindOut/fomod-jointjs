@@ -27,6 +27,13 @@
   margin-bottom: 0.2em;
   margin-right: 0.2em;
 }
+.md-toolbar-tools {
+  height: 40px;
+  min-height: 0;
+}
+.toolbar-smaller {
+  min-height: 44px;
+}
 
 #login div {
   margin: 1em;

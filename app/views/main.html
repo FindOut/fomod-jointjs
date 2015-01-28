@@ -1,5 +1,5 @@
 <div layout="column" style="padding-bottom: 15px;">
-  <md-toolbar class="md-primary">
+  <md-toolbar class="toolbar-smaller md-primary">
     <div class="md-toolbar-tools">
       <span class="md-flex"><span ng-show="!editing" ng-click="startEdit()" class="modelname">{{name}}</span>
       <input type="text" ng-show="editing" ng-blur="stopEdit()" class="modelnameedit"
@@ -9,16 +9,3 @@
   <md-content id="paper">
   </md-content>
 </div>
-  <!--
-<div>
-  <div id="toolbar">
-    <a class="authname" ng-click="logout()" title="Click to logout">{{auth.provider}} {{auth[auth.provider].displayName}}</a>
-    <!-- <button ng-disabled="!commander.canUndo()" ng-click="commander.undo()">Undo</button><button ng-disabled="!commander.canRedo()" ng-click="commander.redo()">Redo</button> -->
-<!--    <span ng-show="!editing" ng-click="startEdit()" class="modelname">{{name}}</span>
-    <input type="text" ng-show="editing" ng-blur="stopEdit()" class="modelnameedit"
-      ng-model-options="{ getterSetter: true, debounce: 1000 }" ng-model="nameGetterSetter" name="some_name" value="">
-    <div class="status">{{status}}</div>
-  </div>
-  <div id="paper"></div>
-</div>
- -->
