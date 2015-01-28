@@ -8,7 +8,13 @@
 * Controller of the fomodApp
 */
 angular.module('fomodApp')
-.controller('ListCtrl', function ($scope, $timeout, fbref, $firebase) {
+.controller('ListCtrl', function ($scope, $timeout, $mdSidenav, fbref, $firebase) {
+  $scope.toggleLeft = function() {
+    $mdSidenav('left').toggle()
+    .then(function(){
+      console.log('toggle left is done');
+    });
+  };
   document.title = 'My models - fomod';
   $scope.auth = fbref.getAuth();
   var ref = fbref.child('users').child(fbref.getAuth().uid);
@@ -31,5 +37,18 @@ angular.module('fomodApp')
   $scope.addModel = function() {
     var newModelRef = fbref.child('models').push();
     $timeout(function() {window.location.href = '#/models/' + newModelRef.key()});
+  };
+})
+.controller('LeftCtrl', function($scope, $rootScope, $timeout, $mdSidenav, fbref) {
+  $scope.close = function() {
+    $mdSidenav('left').close()
+    .then(function(){
+      console.log('close LEFT is done');
+    });
+  };
+  $scope.logout = function() {
+    fbref.unauth();
+    console.log("logged out");
+    $timeout(function() {$rootScope.$apply(); window.location.href = "#/login"});
   };
 });
