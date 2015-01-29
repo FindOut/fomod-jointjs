@@ -18,7 +18,8 @@ angular
     'ngTouch',
     'dr.sortable',
     'firebase',
-    'ngMaterial'
+    'ngMaterial',
+    'ui.pagedown'
   ])
   .value('fbURL', 'https://fomod.firebaseio.com/')
   .service('fbref', function (fbURL) {
@@ -53,6 +54,10 @@ angular
       .when('/new', {
         templateUrl: 'views/new.html',
         controller: 'NewCtrl'
+      })
+      .when('/manual', {
+        templateUrl: 'views/manual.html',
+        controller: 'ManualCtrl'
       })
       .otherwise({
         redirectTo: '/login'

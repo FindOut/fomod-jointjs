@@ -34,17 +34,25 @@
 .toolbar-smaller {
   min-height: 44px;
 }
-
 #login div {
   margin: 1em;
   font-size: 20pt;
   text-color: black;
 }
-
 #login img {
   width: 50px;
   height: auto;
 }
+#manual h1 {
+  margin: 0em;
+}
+#manual h2 {
+  margin: 0em;
+}
+#manual h1 {
+  margin: 0em;
+}
+
 
 #palette {
   float: left;

@@ -17,9 +17,19 @@
     "firebase": "~2.1.1",
     "jquery-ui": "~1.11.2",
     "angularfire": "~0.9.2",
-    "angular-material": "~0.7.0"
+    "angular-material": "~0.7.0",
+    "angular-pagedown": "*",
+    "pagedown": "*"
   },
   "overrides": {
+    "pagedown": {
+      "main": [
+        "Markdown.Converter.js",
+        "Markdown.Sanitizer.js",
+        "Markdown.Editor.js",
+        "Markdown.Extra.js"
+      ]
+    },
     "joint": {
       "main": [
         "dist/joint.all.js",
