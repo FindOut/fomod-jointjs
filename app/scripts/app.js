@@ -30,11 +30,11 @@ angular
         templateUrl: 'views/main.html',
         controller: 'MainCtrl'
       })
-      .when('/objects/:id', {
+      .when('/objects/:modelId/:objectId', {
         templateUrl: 'views/object.html',
         controller: 'ObjectCtrl'
       })
-      .when('/templates/:id', {
+      .when('/templates/:modelId/:objectId', {
         templateUrl: 'views/template.html',
         controller: 'TemplateCtrl'
       })

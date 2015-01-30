@@ -17,6 +17,7 @@ angular.module('fomodApp')
   if (!fbref.getAuth()) {
     $timeout(function() {window.location.href = "#/login"});
   }
+  var modelId = $routeParams.id;
 
   $scope.editing = false;
   $scope.startEdit = function () {
@@ -110,9 +111,9 @@ angular.module('fomodApp')
   paper.on('cell:doubleclick', function(cell) {
     if (cell.model.id) {
       if (cell.model instanceof joint.shapes.fomod.ElementTemplate) {
-        window.location.href = '/#/templates/' + cell.model.id;
+        window.location.href = '/#/templates/' + modelId + '/' + cell.model.id;
       } else if (cell.model instanceof joint.shapes.fomod.Element) {
-        window.location.href = '/#/objects/' + cell.model.id;
+        window.location.href = '/#/objects/' + modelId + '/' + cell.model.id;
       }
     }
   });
@@ -131,5 +132,5 @@ angular.module('fomodApp')
     }
   });
 
-  dataStore.setCurrentModel($routeParams.id);
+  dataStore.setCurrentModel(modelId);
 });
