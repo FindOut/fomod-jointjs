@@ -2,10 +2,9 @@
   <md-toolbar class="toolbar-smaller md-primary">
     <div class="md-toolbar-tools">
       <span class="md-flex"><span ng-show="!editing" ng-click="startEdit()" class="modelname">{{name}}</span>
-      <input type="text" ng-show="editing" ng-blur="stopEdit()" class="modelnameedit"
+      <input type="text" ng-show="editing" ng-blur="stopEdit()" class="toolbaredit"
       ng-model-options="{ getterSetter: true, debounce: 1000 }" ng-model="nameGetterSetter" name="some_name" value=""></span>
     </div>
   </md-toolbar>
-  <md-content id="paper">
-  </md-content>
+  <md-content id="paper"></md-content>
 </div>

@@ -8,19 +8,43 @@
  * Controller of the fomodApp
  */
 angular.module('fomodApp')
-  .controller('TemplateCtrl', function ($scope, $rootScope, $routeParams, data, dataStore, commander, ChangeObjectAttributeCommand, AddTemplateAttributeCommand, DeleteTemplateAttributeCommand, ChangeTemplateAttributeCommand, ReorderTemplateAttributeCommand, FomodAttribute) {
+  .controller('TemplateCtrl', function ($scope, $rootScope, $routeParams, $timeout, data, dataStore, commander, ChangeObjectAttributeCommand, AddTemplateAttributeCommand, DeleteTemplateAttributeCommand, ChangeTemplateAttributeCommand, ReorderTemplateAttributeCommand, FomodAttribute) {
     var modelId = $routeParams.modelId;
     var templateId = $routeParams.objectId;
     var templates = data.get('templates');
     var tmpName = {};
+    $scope.editing = false;
+
     var changeHandler = function(d) {
       var template = templates.get(templateId);
       if (template) {
+        $scope.template = template;
+        $scope.startEdit = function () {
+          console.log('startEdit');
+          $scope.editing = true;
+          var target = $(".toolbaredit")[0];
+          target.setSelectionRange(0, target.value.length);
+          $timeout(function() {target.focus(); $rootScope.$apply();});
+        }
         $scope.nameGetterSetter = function(name) {
           return angular.isDefined(name) ? commander.do(new ChangeObjectAttributeCommand(templateId, {name: name})) : template.get('name');
         };
+        $scope.stopEdit = function () {
+          console.log('stopEdit');
+          $scope.editing = false;
+        }
+        $(".toolbaredit").keyup(function (e) {
+          if (e.keyCode == 13) {
+            $timeout(function() {e.target.blur(); $rootScope.$apply();});
+          }
+        });
+
         $scope.attributes = template.get('attributes').models;
-        $scope.changeAttrVisible = function(attribute) { commander.do(new ChangeTemplateAttributeCommand(templateId, attribute.get('name'), {visible: !attribute.get('visible')}));};
+        $scope.visibleGetterSetter = function(attribute) {
+          return function(visible) {
+            return angular.isDefined(visible) ? commander.do(new ChangeTemplateAttributeCommand(templateId, attribute.get('name'), {visible: visible})) : attribute.get('visible');
+          };
+        };
         $scope.attrName = function(attribute, i) {
           return function(newName) {
             if (angular.isDefined(newName)) {

@@ -9,6 +9,9 @@
 */
 angular.module('fomodApp')
 .controller('ListCtrl', function ($scope, $timeout, $mdSidenav, fbref, $firebase) {
+  if (!fbref.getAuth()) {
+    $timeout(function() {window.location.href = "#/login"});
+  }
   $scope.toggleLeft = function() {
     $mdSidenav('left').toggle()
     .then(function(){

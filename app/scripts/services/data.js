@@ -333,12 +333,10 @@ angular.module('fomodApp')
   return function(templateId, fromIndex, toIndex) {
     var template = data.get('templates').get(templateId);
     function move(from, to) {
-      console.log('move(',from,', ',to,')');
       var toAdjusted = from < to ? to - 1 : toIndex;
       var attributes = template.get('attributes');
       var attrToMove = attributes.at(from);
       if (attrToMove) {
-        console.log('found attr');
         attributes.remove(attrToMove);
         attributes.add(attrToMove, {at: to});
         template.trigger('changeAttrDef');
@@ -369,8 +367,7 @@ angular.module('fomodApp')
     var oldNameValueMap;
     this.do = function() {
       if (template) {
-        oldNameValueMap = _.reduce(nameValueMap, function(result, value, key) {result[key] = data.get(key); return result;}, {});
-        console.log('oldNameValueMap',JSON.stringify(oldNameValueMap));
+        oldNameValueMap = _.reduce(nameValueMap, function(result, value, key) {result[key] = attrDef.get(key); return result;}, {});
         var oldName = attrDef.get('name');
         if (nameValueMap.name && nameValueMap.name !== oldName) {
           // attribute name is changed - save, delete and restore values for this attribute for all objects having a value for this attribute

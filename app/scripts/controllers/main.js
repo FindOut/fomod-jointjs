@@ -22,7 +22,7 @@ angular.module('fomodApp')
   $scope.editing = false;
   $scope.startEdit = function () {
     $scope.editing = true;
-    var target = $(".modelnameedit")[0];
+    var target = $(".toolbaredit")[0];
     target.setSelectionRange(0, target.value.length);
     $timeout(function() {target.focus(); $rootScope.$apply();});
 
@@ -33,7 +33,7 @@ angular.module('fomodApp')
   $scope.stopEdit = function () {
     $scope.editing = false;
   }
-  $(".modelnameedit").keyup(function (e) {
+  $(".toolbaredit").keyup(function (e) {
     if (e.keyCode == 13) {
       $timeout(function() {e.target.blur(); $rootScope.$apply();});
     }

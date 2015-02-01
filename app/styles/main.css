@@ -1,3 +1,7 @@
+.template-dialog md-whiteframe {
+  background: #00f;
+  padding: 20px;
+}
 .listdemoBasicUsage .face {
   border-radius: 30px;
   border: 1px solid #ddd;
@@ -19,17 +23,20 @@
   width: 1em;
   height: auto;
 }
-.modelnameedit {
+.toolbaredit {
   color: black;
 }
 .md-button.sidenav {
   left: -6px;
-  margin-bottom: 0.2em;
-  margin-right: 0.2em;
+  top: -2px;
+  margin-top: 0em;
 }
 .md-toolbar-tools {
   height: 40px;
   min-height: 0;
+}
+.md-toolbar-tools .title {
+  margin-bottom: 5em;
 }
 .toolbar-smaller {
   min-height: 44px;
@@ -74,9 +81,19 @@
 }
 .attributes {
   padding: 1em;
+  display: flex;
+  flex-direction: column;
 }
 .attributes li {
   list-style-type: none;
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+}
+.attributes input {
+}
+.attributes input.name {
+  flex-grow: 10;
 }
 .deleteicon {
   width: 14px;

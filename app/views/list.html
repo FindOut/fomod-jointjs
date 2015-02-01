@@ -1,51 +1,48 @@
-<div layout="column" style="padding-bottom: 15px;">
-  <section layout="row" flex>
-    <md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left">
-      <md-toolbar class="md-theme-indigo">
-        <h1 class="md-toolbar-tools">{{auth[auth.provider].displayName}}</h1>
-      </md-toolbar>
-      <md-content class="md-padding" ng-controller="LeftCtrl">
-        <md-button ng-click="logout()" class="md-primary">
-          Logout
-        </md-button>
-      </md-content>
-    </md-sidenav>
-    <md-content flex>
-      <div layout="column" layout-fill layout-align="left">
-        <md-toolbar class="toolbar-smaller md-primary">
-          <div class="md-toolbar-tools">
-            <md-button class="sidenav" ng-click="toggleLeft()"><md-icon icon="/images/hamburger.svg"></md-icon></md-button>
-            <span class="md-flex">Models</span>
-          </div>
-        </md-toolbar>
-        <md-content>
-          <md-list>
-            <md-item ng-repeat="model in models">
-              <md-item-content>
-                <div class="md-tile-left">
-                  <img src="/images/model.gif" class="face" alt="a model">
-                </div>
-                <div class="md-tile-content">
-                  <h3><a href="#/models/{{model.$id}}">{{model.name ? model.name : model.$id}}</a></h3>
-                  <h4>{{auth[auth.provider].displayName}}</h4>
-                  <!-- <p>
-                    En lite beskrivning av denna modell.
-                  </p> -->
-                </div>
-                <div class="md-tile-right">
-                  <md-button class="md-warn md-mini-fab md-fab-right" ng-click="deleteModel(model)">
-                    delete
-                  </md-button>
-                </div>
-              </md-item-content>
-              <md-divider ng-if="!$last"></md-divider>
-            </md-item>
-          </md-list>
-        </md-content>
+<md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left">
+  <md-toolbar class="md-theme-indigo">
+    <h1 class="md-toolbar-tools">{{auth[auth.provider].displayName}}</h1>
+  </md-toolbar>
+  <md-content class="md-padding" ng-controller="LeftCtrl">
+    <md-button ng-click="logout()" class="md-primary">
+      Logout
+    </md-button>
+  </md-content>
+</md-sidenav>
+  <md-toolbar class="toolbar-smaller md-primary">
+    <div class="md-toolbar-tools" layout-align="left">
+      <md-button class="sidenav" ng-click="toggleLeft()"><md-icon icon="/images/hamburger.svg" aria-label="open side navigation menu"></md-button>
+        <span>Models</span>
+    </div>
+    <!-- <div class="md-toolbar-tools">
+      <div flex="50">
+        <md-button class="sidenav" ng-click="toggleLeft()"><md-icon icon="/images/hamburger.svg" aria-label="open side navigation menu"></md-icon></md-button>
+        <span class="md-flex">Models</span>
       </div>
-    </content>
-  </section>
-  <md-button class="md-primary md-fab md-fab-bottom-right" ng-click="addModel()">
-    Add
-  </md-button>
-</div>
+    </div> -->
+  </md-toolbar>
+  <div flex layout="column" style="position:relative">
+    <md-button class="md-primary md-fab md-fab-bottom-right" ng-click="addModel()">
+      Add
+    </md-button>
+    <md-content >
+      <md-list>
+        <md-item ng-repeat="model in models">
+          <md-item-content>
+            <div class="md-tile-left">
+              <img src="/images/model.gif" class="face" alt="a model">
+            </div>
+            <div class="md-tile-content">
+              <h3><a href="#/models/{{model.$id}}">{{model.name ? model.name : model.$id}}</a></h3>
+              <h4>{{auth[auth.provider].displayName}}</h4>
+            </div>
+            <div class="md-tile-right">
+              <md-button class="md-warn md-mini-fab md-fab-right" ng-click="deleteModel(model)">
+                delete
+              </md-button>
+            </div>
+          </md-item-content>
+          <md-divider inset></md-divider>
+        </md-item>
+      </md-list>
+    </md-content>
+  </div>
