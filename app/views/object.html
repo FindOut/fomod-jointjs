@@ -1,4 +1,4 @@
-<div class="objectform">
+<!-- <div class="objectform">
   <div>
     <ul class="attributes" sortable ng-model="attributes">
       <li ng-repeat="attribute in attributes">
@@ -7,4 +7,12 @@
       </li>
     </ul>
   </div>
+</div> -->
+<div class="objectform">
+  <table>
+    <tr class="attributes" ng-model="attributes" ng-repeat="attribute in attributes">
+      <td>{{attribute.get('name')}}</td>
+      <td><input class="name" ng-model-options="{getterSetter: true, debounce: 1000}" ng-model="attrValue(attribute)"></td>
+    </tr>
+  </table>
 </div>

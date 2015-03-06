@@ -14,10 +14,19 @@
   width: 48px;
   margin: 16px;
 }
+.fomod-template md-content {
+  padding-top: 0.5em;
+}
 .md-tile-left img {
   margin-left: 0.8em;
   margin-right: 0.2em;
   margin-bottom: 0.3em;
+}
+.fomod-template .md-tile-content {
+  padding: 0;
+}
+.fomod-template md-checkbox {
+  margin: 0.6em 0.6em 0.6em 0.8em;
 }
 .delete-model-button {
   width: 1em;

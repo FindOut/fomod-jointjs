@@ -8,7 +8,7 @@
  * Service in the fomodApp.
 
 <button ng-click="autolayout()">Auto-layout</button>
- 
+
 $scope.autolayout = function() {
  autoLayouter.layout(graph, { setLinkVertices: false });
 };
