@@ -34,17 +34,31 @@ angular.module('fomodApp')
       });
 
       // For each link.
-      _.each(graph.getLinks(), function(cell) {
+      _.each(graph.getLinks(), function(link) {
 
-        if (dagreGraph.hasEdge(cell.id)) return;
+        if (dagreGraph.hasEdge(link.id)) return;
 
-        var sourceId = cell.get('source').id;
-        var targetId = cell.get('target').id;
+        var sourceId = link.get('source').id;
+        var targetId = link.get('target').id;
 
-        dagreGraph.addEdge(cell.id, sourceId, targetId, { minLen: cell.get('minLen') || 1 });
+        dagreGraph.addEdge(link.id, sourceId, targetId, { minLen: link.get('minLen') || 1 });
       });
 
       return dagreGraph;
     };
-    return dg;
+    function shift(graph, dx, dy) {
+      _.each(graph.getElements(), function(cell) {
+        if (!(cell.isPalette || cell.isTemplate)) {
+          var pos = cell.get('position');
+          cell.set('position', {x: pos.x + dx, y: pos.y + dy});
+        }
+      });
+      _.each(graph.getLinks(), function(link) {
+      });
+    }
+    return {
+      layout: function(graph, opt) {
+        dg.layout(graph, opt);
+      }
+    };
   });

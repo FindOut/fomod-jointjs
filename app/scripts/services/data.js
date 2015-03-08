@@ -412,6 +412,34 @@ angular.module('fomodApp')
     };
   };
 })
+.service('AutoLayoutCommand', function(autoLayouter) {
+  return function(graph) {
+    var oldPositions = [];
+    this.do = function() {
+      oldPositions = [];
+      var opt = {
+        setPosition: function(cell, value) {
+          oldPositions.push({cellId: cell.id, position: cell.get('position')})
+          cell.set('position', {
+             x: value.x - value.width/2 + 130,
+             y: value.y - value.height/2 + 10
+          });
+        },
+        setLinkVertices: false
+      };
+      autoLayouter.layout(graph, opt);
+    };
+    this.undo = function() {
+      _.each(oldPositions, function(posItem) {graph.getCell(posItem.cellId).set('position', posItem.position)});
+    };
+    this.redo = function() {
+      this.do();
+    };
+    this.toString = function() {
+      return 'AutoLayoutCommand()';
+    };
+  };
+})
 .service('commander', function() {
   var undoStack = [], undoI = 0, maxRedoI = 0, inCommand = 0, commandListeners = [];
   var Commander = function() {

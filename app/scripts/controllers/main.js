@@ -13,7 +13,7 @@
 */
 angular.module('fomodApp')
 .controller('MainCtrl', function ($scope, $rootScope, $routeParams, $timeout, dragThresholder, dataStore, graph, data, commander,
-      CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand, ChangeDataAttributeCommand, attrMap, fbref, autoLayouter) {
+      CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand, ChangeDataAttributeCommand, attrMap, fbref, AutoLayoutCommand) {
   if (!fbref.getAuth()) {
     $timeout(function() {window.location.href = "#/login"});
   }
@@ -40,8 +40,7 @@ angular.module('fomodApp')
   });
 
   $scope.autoLayout = function() {
-    console.log('autolayout');
-    autoLayouter.layout(graph, { setLinkVertices: false });
+    commander.do(new AutoLayoutCommand(graph))
   };
 
   $scope.commander = commander;
