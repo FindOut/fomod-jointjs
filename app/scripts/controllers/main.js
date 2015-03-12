@@ -17,7 +17,7 @@ angular.module('fomodApp')
   if (!fbref.getAuth()) {
     $timeout(function() {window.location.href = "#/login"});
   }
-  var modelId = $routeParams.id;
+  var modelId = $routeParams.modelId;
 
   $scope.editing = false;
   $scope.startEdit = function () {

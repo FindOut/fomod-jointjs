@@ -18,7 +18,8 @@ angular
     'ngTouch',
     'dr.sortable',
     'firebase',
-    'ngMaterial'
+    'ngMaterial',
+    'ngMessages'
   ])
   .value('fbURL', 'https://fomod.firebaseio.com/')
   .service('fbref', function (fbURL) {
@@ -26,7 +27,7 @@ angular
   })
   .config(function ($routeProvider) {
     $routeProvider
-      .when('/models/:id', {
+      .when('/models/:modelId', {
         templateUrl: 'views/main.html',
         controller: 'MainCtrl'
       })
@@ -53,6 +54,10 @@ angular
       .when('/new', {
         templateUrl: 'views/new.html',
         controller: 'NewCtrl'
+      })
+      .when('/random', {
+        templateUrl: 'views/random.html',
+        controller: 'RandomCtrl'
       })
       .otherwise({
         redirectTo: '/login'

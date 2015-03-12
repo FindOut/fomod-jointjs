@@ -8,41 +8,37 @@
     </md-button>
   </md-content>
 </md-sidenav>
-  <md-toolbar class="toolbar-smaller md-primary">
-    <div class="md-toolbar-tools" layout-align="left">
-      <md-button class="sidenav" ng-click="toggleLeft()"><md-icon icon="/images/hamburger.svg" aria-label="open side navigation menu"></md-button>
-        <span>Models</span>
-    </div>
-    <!-- <div class="md-toolbar-tools">
-      <div flex="50">
-        <md-button class="sidenav" ng-click="toggleLeft()"><md-icon icon="/images/hamburger.svg" aria-label="open side navigation menu"></md-icon></md-button>
-        <span class="md-flex">Models</span>
-      </div>
-    </div> -->
-  </md-toolbar>
-  <div flex layout="column" style="position:relative">
-    <md-button class="md-primary md-fab md-fab-bottom-right" ng-click="addModel()">
-      Add
-    </md-button>
-    <md-content >
-      <md-list>
-        <md-item ng-repeat="model in models">
-          <md-item-content>
-            <div class="md-tile-left">
-              <img src="/images/model.gif" class="face" alt="a model">
-            </div>
-            <div class="md-tile-content">
-              <h3><a href="#/models/{{model.$id}}">{{model.name ? model.name : model.$id}}</a></h3>
-              <h4>{{auth[auth.provider].displayName}}</h4>
-            </div>
-            <div class="md-tile-right">
-              <md-button class="md-warn md-mini-fab md-fab-right" ng-click="deleteModel(model)">
-                delete
-              </md-button>
-            </div>
-          </md-item-content>
-          <md-divider inset></md-divider>
-        </md-item>
-      </md-list>
-    </md-content>
+<md-toolbar class="toolbar-smaller md-primary">
+  <div class="md-toolbar-tools" layout-align="left">
+    <md-button class="sidenav" ng-click="toggleLeft()"><md-icon icon="/images/hamburger.svg" aria-label="open side navigation menu"></md-button>
+    <span>Models</span>
+    <span flex/>
+    <md-button ng-click="addRandomModel()">Add random model</md-button>
   </div>
+</md-toolbar>
+<div flex layout="column" style="position:relative">
+  <md-button class="md-primary md-fab md-fab-bottom-right" ng-click="addModel()">
+    Add
+  </md-button>
+  <md-content >
+    <md-list>
+      <md-item ng-repeat="model in models">
+        <md-item-content>
+          <div class="md-tile-left">
+            <img src="/images/model.gif" class="face" alt="a model">
+          </div>
+          <div class="md-tile-content">
+            <h3><a href="#/models/{{model.$id}}">{{model.name ? model.name : model.$id}}</a></h3>
+            <h4>{{auth[auth.provider].displayName}}</h4>
+          </div>
+          <div class="md-tile-right">
+            <md-button class="md-warn md-mini-fab md-fab-right" ng-click="deleteModel(model)">
+              delete
+            </md-button>
+          </div>
+        </md-item-content>
+        <md-divider inset></md-divider>
+      </md-item>
+    </md-list>
+  </md-content>
+</div>

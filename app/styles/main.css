@@ -1,3 +1,6 @@
+.inputdemoErrors .inputErrorsApp {
+  min-height: 48px;
+}
 .template-dialog md-whiteframe {
   background: #00f;
   padding: 20px;

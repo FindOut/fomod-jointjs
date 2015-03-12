@@ -26,11 +26,13 @@ angular.module('fomodApp')
 
         if (dagreGraph.hasNode(cell.id) || cell.isPalette || cell.isTemplate) return;
 
-        dagreGraph.addNode(cell.id, {
-          width: cell.get('size').width,
-          height: cell.get('size').height,
-          rank: cell.get('rank')
-        });
+        var vals = {
+            width: cell.get('size').width,
+            height: cell.get('size').height,
+            rank: cell.get('rank')
+        };
+        console.log('vals',JSON.stringify(vals));
+        dagreGraph.addNode(cell.id, vals);
       });
 
       // For each link.
@@ -46,16 +48,6 @@ angular.module('fomodApp')
 
       return dagreGraph;
     };
-    function shift(graph, dx, dy) {
-      _.each(graph.getElements(), function(cell) {
-        if (!(cell.isPalette || cell.isTemplate)) {
-          var pos = cell.get('position');
-          cell.set('position', {x: pos.x + dx, y: pos.y + dy});
-        }
-      });
-      _.each(graph.getLinks(), function(link) {
-      });
-    }
     return {
       layout: function(graph, opt) {
         dg.layout(graph, opt);

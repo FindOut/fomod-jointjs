@@ -43,6 +43,9 @@ angular.module('fomodApp')
     var newModelRef = fbref.child('models').push();
     $timeout(function() {window.location.href = '#/models/' + newModelRef.key()});
   };
+  $scope.addRandomModel = function() {
+    $timeout(function() {window.location.href = "#/random"});
+  }
 })
 .controller('LeftCtrl', function($scope, $rootScope, $timeout, $mdSidenav, fbref) {
   $scope.close = function() {
