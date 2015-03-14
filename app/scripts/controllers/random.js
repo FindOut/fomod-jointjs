@@ -49,69 +49,12 @@ angular.module('fomodApp')
       }
       model.data.relations = relations;
     }
-
-    function layout(model) {
-      var opt = {setLinkVertices: false};
-
-      var dagreGraph = new dagre.Digraph();
-
-      // For each element.
-      _.each(model.data.objects, function(object) {
-        if (!dagreGraph.hasNode(object.id)) {
-          console.log('addnode id',object.id);
-          dagreGraph.addNode(object.id, {
-            width: 60,
-            height: 25
-          });
-        }
-      });
-
-      // For each link.
-      _.each(model.data.relations, function(link) {
-        if (!dagreGraph.hasEdge(link.id)) {
-          console.log('addEdge id ',link.id);
-          dagreGraph.addEdge(link.id, link.from, link.to, { minLen: 1 });
-        }
-      });
-
-      var runner = dagre.layout();
-      console.log('runner ',runner);
-      var layoutGraph = runner.run(dagreGraph);
-
-      console.log('layouted');
-
-      model.graph.elements = [];
-      layoutGraph.eachNode(function(u, value) {
-          if (!value.dummy) {
-              model.graph.elements.push({id: u, position: {
-                 x: value.x - value.width/2 + 130,
-                 y: value.y - value.height/2 + 10
-              }});
-          }
-      });
-
-      // if (opt.setLinkVertices) {
-      //     layoutGraph.eachEdge(function(e, u, v, value) {
-      //         var link = graph.getCell(e);
-      //         if (link) {
-      //             opt.setVertices
-      //               ? opt.setVertices(link, value.points)
-      //               : link.set('vertices', value.points);
-      //         }
-      //     });
-      // }
-
-      var size = {width: layoutGraph.graph().width, height: layoutGraph.graph().height };
-
-    }
-
     $scope.create = function() {
       // create model and add it to the models
       var fbModelRef = fbref.child('models').push();
 
       var model = {data: {name: parameters.name}, graph: {}, owner: fbModelRef.getAuth().uid};
       addRandomContent(model);
-      layout(model);
       fbModelRef.set(
         model,
         function(error) {

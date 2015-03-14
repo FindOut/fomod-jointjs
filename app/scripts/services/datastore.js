@@ -11,7 +11,7 @@
  * Service in the fomodApp.
  */
 angular.module('fomodApp')
-.service('dataStore', function(data, Mapper, graph, FomodObjectTemplate, FomodObject, FomodRelation, commander, attrMap, fbref) {
+.service('dataStore', function(data, Mapper, graph, FomodObjectTemplate, FomodObject, FomodRelation, commander, attrMap, fbref, autoLayouter) {
   var enableSaving = true;
   var listeners = [];
   var fbModelRef;
@@ -36,6 +36,9 @@ angular.module('fomodApp')
           enableSaving = false;
           if (value) {
             data.set(value.data);
+            for (var key in attrMap) {
+              delete attrMap[key];
+            }
             if (value.graph) {
               _.each(value.graph.elements, function(storeElement) {
                 var element = graph.getCell(storeElement.id);
@@ -50,6 +53,17 @@ angular.module('fomodApp')
                   link.set('vertices', storeLink.vertices);
                 }
               });
+            } else {
+              var opt = {
+                setPosition: function(cell, value) {
+                  cell.set('position', {
+                     x: value.x - value.width/2 + 130,
+                     y: value.y - value.height/2 + 10
+                  });
+                },
+                setLinkVertices: false
+              };
+              autoLayouter.layout(graph, opt);
             }
           } else {
             //data.set({objects: [], relations: []});

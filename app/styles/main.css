@@ -1,3 +1,7 @@
+#paper {
+    overflow-x: scroll;
+}
+
 .inputdemoErrors .inputErrorsApp {
   min-height: 48px;
 }

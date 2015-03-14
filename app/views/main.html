@@ -1,5 +1,5 @@
 <div layout="column" style="padding-bottom: 15px;">
-  <md-toolbar class="toolbar-smaller md-primary">
+  <md-toolbar id="graphtoolbar" class="toolbar-smaller md-primary">
     <div class="md-toolbar-tools">
       <span class="md-flex">
         <span ng-show="!editing" ng-click="startEdit()" class="modelname">{{name}}</span>
@@ -10,5 +10,5 @@
       <md-button ng-click="autoLayout()">Auto-layout</md-button>
     </div>
   </md-toolbar>
-  <md-content id="paper"></md-content>
+  <md-content><div id="paper"></div></md-content>
 </div>

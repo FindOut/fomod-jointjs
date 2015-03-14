@@ -6,8 +6,7 @@
  * @ngdoc service
  * @name fomodApp.Mapper
  * @description
- * # Mapper
- * Service in the fomodApp.
+ * Creates a graph from data, and keeps them synchronized.
  */
 angular.module('fomodApp')
 .service('attrMap', function() {
@@ -17,7 +16,7 @@ angular.module('fomodApp')
   var batch;
   var preventViewToModelPropagation = 0;
   return function(data, graph) {
-    // change palette templates according to data object change
+    // templates - palette templates
     function addElementTemplate(template) {
       var elementTemplate = new joint.shapes.fomod.ElementTemplate({
         id: template.id,
@@ -36,7 +35,9 @@ angular.module('fomodApp')
       preventViewToModelPropagation--;
     }
     var templates = data.get('templates');
+    // show templates in palette
     templates.forEach(addElementTemplate);
+    // keep templates synced in both directions
     templates.on('add', addElementTemplate);
     templates.on('reset', function (newTemplates, options) {
       _.each(options.previousModels, removeElementTemplate);
@@ -56,7 +57,7 @@ angular.module('fomodApp')
       });
     });
 
-    // change graph elements according to data object change
+    // objects - elements
     function addElement(obj) {
       var element = new joint.shapes.fomod.Element({
         id: obj.id,
@@ -78,6 +79,7 @@ angular.module('fomodApp')
       preventViewToModelPropagation--;
     }
     var objects = data.get('objects');
+    // create an element for each object
     objects.forEach(addElement);
     objects.on('add', addElement);
     objects.on('reset', function (newObjects, options) {
@@ -108,7 +110,7 @@ angular.module('fomodApp')
       }, []).join('\n');
     }
 
-    // change graph links according to data relation change
+    // relations - links
     function addLink(rel) {
       var link = new joint.dia.Link({
         id: rel.id,
@@ -131,7 +133,9 @@ angular.module('fomodApp')
       preventViewToModelPropagation--;
     }
     var relations = data.get('relations');
+    // create a link for each relation
     relations.forEach(addLink);
+    // keep them synced
     relations.on('add', addLink);
     relations.on('reset', function (newRelations, options) {
       _.each(options.previousModels, removeLink);
@@ -241,5 +245,20 @@ angular.module('fomodApp')
         }
       }
     });
+    console.log('graph',graph);
   };
+
+  // if no graph attributes exists, do an automatic layout
+  if (!data.graph) {
+    // var opt = {
+    //   setPosition: function(cell, value) {
+    //     cell.set('position', {
+    //        x: value.x - value.width/2 + 130,
+    //        y: value.y - value.height/2 + 10
+    //     });
+    //   },
+    //   setLinkVertices: false
+    // };
+    // autoLayouter.layout(graph, opt);
+  }
 });

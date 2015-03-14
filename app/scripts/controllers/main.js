@@ -45,6 +45,7 @@ angular.module('fomodApp')
 
   $scope.commander = commander;
   $scope.auth = fbref.getAuth();
+
   function dataChangeHandler() {
     $scope.name = data.get('name');
     document.title = data.get('name') + ' - fomod';
@@ -56,7 +57,6 @@ angular.module('fomodApp')
 
   $scope.logout = function() {
     fbref.unauth();
-    console.log("logged out");
     $timeout(function() {$rootScope.$apply(); window.location.href = "#/login"});
   };
 
@@ -66,6 +66,7 @@ angular.module('fomodApp')
       $scope.status = 'reading';
     } else if (type === 'read-end') {
       $scope.status = '';
+      setPaperSize();
     } else if (type === 'write-begin') {
       $scope.status = 'writing';
     } else if (type === 'write-end') {
@@ -76,6 +77,7 @@ angular.module('fomodApp')
 
   commander.on('execute', function() {
     setTimeout(function() {$scope.$apply();});
+    setPaperSize();
   });
 
   var WrappedPaper = joint.dia.Paper.extend({
@@ -106,11 +108,14 @@ angular.module('fomodApp')
   });
   paper.resetCells(graph.get('cells'));
 
-  function setHeight() {
-    paper.setDimensions($(window).width(), $(window).height());
+  function setPaperSize() {
+    var bBox = paper.getContentBBox();
+    var tbh = $('#graphtoolbar').outerHeight();
+    console.log('tbh', tbh);
+    paper.setDimensions(Math.max(bBox.width + 20, $(window).width()), Math.max(bBox.height + 10, $(window).height() - tbh));
   }
-  setHeight();
-  $(window).bind('resize', setHeight);
+  setPaperSize();
+  $(window).bind('resize', setPaperSize);
 
   paper.on('cell:doubleclick', function(cell) {
     if (cell.model.id) {
