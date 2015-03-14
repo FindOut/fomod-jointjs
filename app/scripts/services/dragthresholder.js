@@ -10,24 +10,24 @@
  * Service in the fomodApp.
  */
 angular.module('fomodApp')
-  .service('dragThresholder', function () {
+  .service('dragThresholder', function() {
     return function(viewType) {
       var isSpecial = false;
       var isDrag = false;
       var isDown = false;
       var downEvt, downX, downY, downTimestamp;
       var dist2 = function(x1, y1, x2, y2) {
-        var dx = x2 - x1, dy = y2 - y1;
+        var dx = x2 - x1,
+          dy = y2 - y1;
         return dx * dx + dy * dy;
       };
       return viewType.extend({
-        pointerdown: function (evt, x, y) {
+        pointerdown: function(evt, x, y) {
           if (!evt.target.id) {
             // click or drag joint defined link button - remove link/remove knee/move end
             isSpecial = true;
             viewType.prototype.pointerdown.apply(this, arguments);
-          }
-          else {
+          } else {
             if (new Date().getTime() - downTimestamp < 300) {
               this.notify('cell:doubleclick', evt, x, y);
             }
@@ -38,7 +38,7 @@ angular.module('fomodApp')
             downTimestamp = new Date().getTime();
           }
         },
-        pointermove: function (evt, x, y) {
+        pointermove: function(evt, x, y) {
           if (isSpecial || isDrag || !isDown) {
             viewType.prototype.pointermove.apply(this, arguments);
           } else {
@@ -49,7 +49,7 @@ angular.module('fomodApp')
             }
           }
         },
-        pointerup: function (evt, x, y) {
+        pointerup: function(evt, x, y) {
           if (isSpecial || isDrag) {
             isDrag = false;
             isDown = false;

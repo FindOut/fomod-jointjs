@@ -15,7 +15,7 @@ $scope.autolayout = function() {
 
  */
 angular.module('fomodApp')
-  .service('autoLayouter', function () {
+  .service('autoLayouter', function() {
     var dg = joint.layout.DirectedGraph;
     dg._prepareData = function(graph) {
 
@@ -27,11 +27,11 @@ angular.module('fomodApp')
         if (dagreGraph.hasNode(cell.id) || cell.isPalette || cell.isTemplate) return;
 
         var vals = {
-            width: cell.get('size').width,
-            height: cell.get('size').height,
-            rank: cell.get('rank')
+          width: cell.get('size').width,
+          height: cell.get('size').height,
+          rank: cell.get('rank')
         };
-        console.log('vals',JSON.stringify(vals));
+        console.log('vals', JSON.stringify(vals));
         dagreGraph.addNode(cell.id, vals);
       });
 
@@ -43,7 +43,9 @@ angular.module('fomodApp')
         var sourceId = link.get('source').id;
         var targetId = link.get('target').id;
 
-        dagreGraph.addEdge(link.id, sourceId, targetId, { minLen: link.get('minLen') || 1 });
+        dagreGraph.addEdge(link.id, sourceId, targetId, {
+          minLen: link.get('minLen') || 1
+        });
       });
 
       return dagreGraph;

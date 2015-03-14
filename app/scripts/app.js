@@ -22,10 +22,10 @@ angular
     'ngMessages'
   ])
   .value('fbURL', 'https://fomod.firebaseio.com/')
-  .service('fbref', function (fbURL) {
+  .service('fbref', function(fbURL) {
     return new Firebase(fbURL);
   })
-  .config(function ($routeProvider) {
+  .config(function($routeProvider) {
     $routeProvider
       .when('/models/:modelId', {
         templateUrl: 'views/main.html',

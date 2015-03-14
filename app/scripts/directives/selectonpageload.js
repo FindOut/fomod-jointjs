@@ -7,10 +7,12 @@
  * # selectOnPageLoad
  */
 angular.module('fomodApp')
-  .directive('selectOnPageLoad', function ($timeout) {
+  .directive('selectOnPageLoad', function($timeout) {
     return {
-      link: function(scope,element){
-        $timeout(function() {element[0].select();});
+      link: function(scope, element) {
+        $timeout(function() {
+          element[0].select();
+        });
       }
     };
   });

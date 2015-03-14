@@ -10,7 +10,8 @@
 </md-sidenav>
 <md-toolbar class="toolbar-smaller md-primary">
   <div class="md-toolbar-tools" layout-align="left">
-    <md-button class="sidenav" ng-click="toggleLeft()"><md-icon icon="/images/hamburger.svg" aria-label="open side navigation menu"></md-button>
+    <md-button class="sidenav" ng-click="toggleLeft()">
+      <md-icon icon="/images/hamburger.svg" aria-label="open side navigation menu"></md-button>
     <span>Models</span>
     <span flex/>
     <md-button ng-click="addRandomModel()">Add random model</md-button>
@@ -20,7 +21,7 @@
   <md-button class="md-primary md-fab md-fab-bottom-right" ng-click="addModel()">
     Add
   </md-button>
-  <md-content >
+  <md-content>
     <md-list>
       <md-item ng-repeat="model in models">
         <md-item-content>
@@ -28,7 +29,8 @@
             <img src="/images/model.gif" class="face" alt="a model">
           </div>
           <div class="md-tile-content">
-            <h3><a href="#/models/{{model.$id}}">{{model.name ? model.name : model.$id}}</a></h3>
+            <h3><a href="#/models/{{model.$id}}">{{model.name ? model.name : model.$id}}</a>
+            </h3>
             <h4>{{auth[auth.provider].displayName}}</h4>
           </div>
           <div class="md-tile-right">

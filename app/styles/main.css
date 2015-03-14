@@ -1,7 +1,6 @@
 #paper {
-    overflow-x: scroll;
+  overflow-x: scroll;
 }
-
 .inputdemoErrors .inputErrorsApp {
   min-height: 48px;
 }
@@ -57,25 +56,20 @@
 .toolbar-smaller {
   min-height: 44px;
 }
-
 #login div {
   margin: 1em;
   font-size: 20pt;
   text-color: black;
 }
-
 #login img {
   width: 50px;
   height: auto;
 }
-
 #palette {
   float: left;
   border: solid black 1px;
 }
-#graph {
-}
-#toolbar {
+#graph {} #toolbar {
   border-bottom: solid #ccc 1px;
   padding: 0.13em 0.6em;
   background-color: #eed;
@@ -93,9 +87,7 @@
 #toolbar .authname {
   float: left;
 }
-#toolbar .modelname {
-}
-.attributes {
+#toolbar .modelname {} .attributes {
   padding: 1em;
   display: flex;
   flex-direction: column;
@@ -106,9 +98,7 @@
   flex-direction: row;
   flex: 1;
 }
-.attributes input {
-}
-.attributes input.name {
+.attributes input {} .attributes input.name {
   flex-grow: 10;
 }
 .deleteicon {

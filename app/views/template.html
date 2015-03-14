@@ -1,9 +1,10 @@
 <div class="fomod-template" layout="column" style="padding-bottom: 15px;">
   <md-toolbar class="toolbar-smaller md-primary">
     <div class="md-toolbar-tools">
-      <span class="md-flex" ng-click="startEdit()">Template <span ng-show="!editing" class="name">{{template.get('name')}}</span>
-      <input type="text" ng-show="editing" ng-blur="stopEdit()" class="toolbaredit"
-      ng-model-options="{ getterSetter: true, debounce: 1000 }" ng-model="nameGetterSetter" name="some_name"></span>
+      <span class="md-flex" ng-click="startEdit()">Template
+        <span ng-show="!editing" class="name">{{template.get('name')}}</span>
+        <input type="text" ng-show="editing" ng-blur="stopEdit()" class="toolbaredit" ng-model-options="{ getterSetter: true, debounce: 1000 }" ng-model="nameGetterSetter" name="some_name">
+      </span>
     </div>
   </md-toolbar>
   <md-content class="should-scroll">
@@ -14,8 +15,7 @@
             <md-checkbox ng-model-options="{getterSetter: true}" ng-model="visibleGetterSetter(attribute)" aria-label="{{attribute.get('name')}} visible"></md-checkbox>
           </div>
           <div class="md-tile-content" flex layout="row">
-            <input class="name" ng-class="invalidAttrClass(attribute, $index)" ng-model-options="{getterSetter: true, debounce: 1000}"
-              ng-model="attrName(attribute, $index)" title="{{invalidAttrMessage(attribute, $index)}}" flex>
+            <input class="name" ng-class="invalidAttrClass(attribute, $index)" ng-model-options="{getterSetter: true, debounce: 1000}" ng-model="attrName(attribute, $index)" title="{{invalidAttrMessage(attribute, $index)}}" flex>
           </div>
           <div class="md-tile-right">
             <md-button class="md-warn md-mini-fab md-fab-right" ng-click="deleteAttribute(attribute)">
@@ -39,7 +39,7 @@
   </md-content>
   <md-button class="md-primary md-fab md-fab-bottom-right" ng-click="addAttribute()">Add</md-button>
 
-    <!-- <md-content>
+  <!-- <md-content>
       <ul class="attributes" sortable ng-model="attributes">
         <li class="attribute" ng-repeat="attribute in attributes">
           <span title="Drag to reorder">{{attributes.indexOf(attribute) + 1}}. </span>

@@ -8,7 +8,7 @@
  * Controller of the fomodApp
  */
 angular.module('fomodApp')
-  .controller('TemplateCtrl', function ($scope, $rootScope, $routeParams, $timeout, data, dataStore, commander, ChangeObjectAttributeCommand, AddTemplateAttributeCommand, DeleteTemplateAttributeCommand, ChangeTemplateAttributeCommand, ReorderTemplateAttributeCommand, FomodAttribute) {
+  .controller('TemplateCtrl', function($scope, $rootScope, $routeParams, $timeout, data, dataStore, commander, ChangeObjectAttributeCommand, AddTemplateAttributeCommand, DeleteTemplateAttributeCommand, ChangeTemplateAttributeCommand, ReorderTemplateAttributeCommand, FomodAttribute) {
     var modelId = $routeParams.modelId;
     var templateId = $routeParams.objectId;
     var templates = data.get('templates');
@@ -19,30 +19,40 @@ angular.module('fomodApp')
       var template = templates.get(templateId);
       if (template) {
         $scope.template = template;
-        $scope.startEdit = function () {
+        $scope.startEdit = function() {
           console.log('startEdit');
           $scope.editing = true;
           var target = $(".toolbaredit")[0];
           target.setSelectionRange(0, target.value.length);
-          $timeout(function() {target.focus(); $rootScope.$apply();});
+          $timeout(function() {
+            target.focus();
+            $rootScope.$apply();
+          });
         }
         $scope.nameGetterSetter = function(name) {
-          return angular.isDefined(name) ? commander.do(new ChangeObjectAttributeCommand(templateId, {name: name})) : template.get('name');
+          return angular.isDefined(name) ? commander.do(new ChangeObjectAttributeCommand(templateId, {
+            name: name
+          })) : template.get('name');
         };
-        $scope.stopEdit = function () {
+        $scope.stopEdit = function() {
           console.log('stopEdit');
           $scope.editing = false;
         }
-        $(".toolbaredit").keyup(function (e) {
+        $(".toolbaredit").keyup(function(e) {
           if (e.keyCode == 13) {
-            $timeout(function() {e.target.blur(); $rootScope.$apply();});
+            $timeout(function() {
+              e.target.blur();
+              $rootScope.$apply();
+            });
           }
         });
 
         $scope.attributes = template.get('attributes').models;
         $scope.visibleGetterSetter = function(attribute) {
           return function(visible) {
-            return angular.isDefined(visible) ? commander.do(new ChangeTemplateAttributeCommand(templateId, attribute.get('name'), {visible: visible})) : attribute.get('visible');
+            return angular.isDefined(visible) ? commander.do(new ChangeTemplateAttributeCommand(templateId, attribute.get('name'), {
+              visible: visible
+            })) : attribute.get('visible');
           };
         };
         $scope.attrName = function(attribute, i) {
@@ -53,21 +63,35 @@ angular.module('fomodApp')
                 tmpName[i] = newName;
               } else {
                 tmpName[i] = undefined;
-                commander.do(new ChangeTemplateAttributeCommand(templateId, attribute.get('name'), {name: newName}));
+                commander.do(new ChangeTemplateAttributeCommand(templateId, attribute.get('name'), {
+                  name: newName
+                }));
               }
             }
             return tmpName[i] || attribute.get('name');
           }
         };
-        $scope.invalidAttrClass = function(attribute, i) {return tmpName[i] ? "invalid" : "";};
-        $scope.invalidAttrMessage = function(attribute, i) {return tmpName[i] ? "name can't be id, template and existing name" : "";};
-        $scope.addAttribute = function() {tmpName = {}; commander.do(new AddTemplateAttributeCommand(templateId));};
-        $scope.deleteAttribute = function(attribute) {tmpName = {}; commander.do(new DeleteTemplateAttributeCommand(templateId, attribute.get('name')));};
+        $scope.invalidAttrClass = function(attribute, i) {
+          return tmpName[i] ? "invalid" : "";
+        };
+        $scope.invalidAttrMessage = function(attribute, i) {
+          return tmpName[i] ? "name can't be id, template and existing name" : "";
+        };
+        $scope.addAttribute = function() {
+          tmpName = {};
+          commander.do(new AddTemplateAttributeCommand(templateId));
+        };
+        $scope.deleteAttribute = function(attribute) {
+          tmpName = {};
+          commander.do(new DeleteTemplateAttributeCommand(templateId, attribute.get('name')));
+        };
         $scope.reorderEnd = function(fromIndex, toIndex, elm, attrs, ngModel) {
           commander.do(new ReorderTemplateAttributeCommand(templateId, fromIndex, toIndex));
         };
-        setTimeout(function() {$scope.$apply();});
-        var off = $rootScope.$on('$locationChangeStart', function (event, next, current) {
+        setTimeout(function() {
+          $scope.$apply();
+        });
+        var off = $rootScope.$on('$locationChangeStart', function(event, next, current) {
           templates.off(null, changeHandler);
           tmpName = {};
           off();
@@ -85,7 +109,9 @@ angular.module('fomodApp')
       }
     });
     commander.on('execute', function() {
-      setTimeout(function() {$scope.$apply();});
+      setTimeout(function() {
+        $scope.$apply();
+      });
     });
     templates.on('change add', changeHandler);
     if (templates.get(templateId)) {

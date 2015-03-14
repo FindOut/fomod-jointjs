@@ -3,12 +3,13 @@
     <div class="md-toolbar-tools">
       <span class="md-flex">
         <span ng-show="!editing" ng-click="startEdit()" class="modelname">{{name}}</span>
-        <input type="text" ng-show="editing" ng-blur="stopEdit()" class="toolbaredit"
-            ng-model-options="{ getterSetter: true, debounce: 1000 }" ng-model="nameGetterSetter" name="some_name" value="">
+        <input type="text" ng-show="editing" ng-blur="stopEdit()" class="toolbaredit" ng-model-options="{ getterSetter: true, debounce: 1000 }" ng-model="nameGetterSetter" name="some_name" value="">
       </span>
       <span flex/>
       <md-button ng-click="autoLayout()">Auto-layout</md-button>
     </div>
   </md-toolbar>
-  <md-content><div id="paper"></div></md-content>
+  <md-content>
+    <div id="paper"></div>
+  </md-content>
 </div>

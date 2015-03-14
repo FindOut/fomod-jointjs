@@ -10,7 +10,7 @@
     <md-content class="md-padding">
       <md-input-container>
         <label>Model Name</label>
-        <input required id="firstinput" name="name" ng-model="parameters.name" select-on-page-load=""/>
+        <input required id="firstinput" name="name" ng-model="parameters.name" select-on-page-load="" />
         <div ng-messages="projectForm.name.$error">
           <div ng-message="required">This is required.</div>
           <div ng-message="md-maxlength">The name has to be less than 30 characters long.</div>
@@ -18,7 +18,7 @@
       </md-input-container>
       <md-input-container>
         <label>Object Count</label>
-        <input required type="number" step="any" name="objectCount" ng-model="parameters.objectCount" min="1" max="10000"/>
+        <input required type="number" step="any" name="objectCount" ng-model="parameters.objectCount" min="1" max="10000" />
         <div ng-messages="projectForm.objectCount.$error">
           <div ng-message="required">You've got to create something!</div>
           <div ng-message="min">You have to create at least one object.</div>
@@ -27,12 +27,12 @@
       </md-input-container>
       <md-input-container>
         <label>Relation Count</label>
-        <input type="number" step="any" name="relationCount" ng-model="parameters.relationCount" min="0" max="10000"/>
+        <input type="number" step="any" name="relationCount" ng-model="parameters.relationCount" min="0" max="10000" />
         <div ng-messages="projectForm.relationCount.$error">
           <div ng-message="max">Don't overflow browser memory.</div>
         </div>
       </md-input-container>
-      <md-checkbox >Allow multiple relations between an object pair</md-checkbox>
+      <md-checkbox>Allow multiple relations between an object pair</md-checkbox>
     </md-content>
   </form>
 </div>
