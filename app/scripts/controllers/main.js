@@ -72,13 +72,22 @@ angular.module('fomodApp')
         window.location.href = "#/login"
       });
     };
+    var modelObjects = [
+        {id:"a", text:"Hello", x:"30", y:"50", fill:"#afa"},
+        {id:"b", text:"World!", x:"200", y:"90", fill:"#bbf"},
+        {id:"c", text:"Dag!!!", x:"100", y:"30", fill:"#ccc"}
+    ];
+
+    var modelRelations = [{from: 'a', to: 'b'}, {from: 'c', to: 'b'}];
 
     $scope.status = 'reading';
     dataStore.on(function(type) {
       if (type === 'read-begin') {
         $scope.status = 'reading';
+        graph.trigger('read-begin');
       } else if (type === 'read-end') {
         $scope.status = '';
+        graph.trigger('read-end');
         setPaperSize();
       } else if (type === 'write-begin') {
         $scope.status = 'writing';
@@ -90,6 +99,11 @@ angular.module('fomodApp')
       });
     });
 
+    React.render(
+      React.createElement(Graph, {width: 5000, height: 2000},
+        React.createElement(GraphObjects, {graph: graph})),
+      document.getElementById('paper')
+    );
     commander.on('execute', function() {
       setTimeout(function() {
         $scope.$apply();
@@ -97,53 +111,54 @@ angular.module('fomodApp')
       setPaperSize();
     });
 
-    var WrappedPaper = joint.dia.Paper.extend({
-      // paper that wraps all elements and links in a dragThresholder
-      createViewForModel: function(cell) {
-        var view;
-        var type = cell.get('type');
-        var module = type.split('.')[0];
-        var entity = type.split('.')[1];
-        // If there is a special view defined for this model, use that one instead of the default `elementView`/`linkView`.
-        if (joint.shapes[module] && joint.shapes[module][entity + 'View']) {
-          view = new(dragThresholder(joint.shapes[module][entity + 'View']))({
-            model: cell,
-            interactive: this.options.interactive
-          });
-        } else if (cell instanceof joint.dia.Element) {
-          view = new(dragThresholder(this.options.elementView))({
-            model: cell,
-            interactive: this.options.interactive
-          });
-        } else {
-          view = new(dragThresholder(this.options.linkView))({
-            model: cell,
-            interactive: this.options.interactive
-          });
-        }
-        return view;
-      }
-    });
+    // var WrappedPaper = joint.dia.Paper.extend({
+    //   // paper that wraps all elements and links in a dragThresholder
+    //   createViewForModel: function(cell) {
+    //     var view;
+    //     var type = cell.get('type');
+    //     var module = type.split('.')[0];
+    //     var entity = type.split('.')[1];
+    //     // If there is a special view defined for this model, use that one instead of the default `elementView`/`linkView`.
+    //     if (joint.shapes[module] && joint.shapes[module][entity + 'View']) {
+    //       view = new(dragThresholder(joint.shapes[module][entity + 'View']))({
+    //         model: cell,
+    //         interactive: this.options.interactive
+    //       });
+    //     } else if (cell instanceof joint.dia.Element) {
+    //       view = new(dragThresholder(this.options.elementView))({
+    //         model: cell,
+    //         interactive: this.options.interactive
+    //       });
+    //     } else {
+    //       view = new(dragThresholder(this.options.linkView))({
+    //         model: cell,
+    //         interactive: this.options.interactive
+    //       });
+    //     }
+    //     return view;
+    //   }
+    // });
 
-    var paper = new WrappedPaper({
-      el: $('#paper'),
-      width: 600,
-      height: 200,
-      model: graph,
-      gridSize: 1
-    });
-    paper.resetCells(graph.get('cells'));
 
+    //
+    // var paper = new WrappedPaper({
+    //   el: $('#paper'),
+    //   width: 600,
+    //   height: 200,
+    //   model: graph,
+    //   gridSize: 1
+    // });
+    // paper.resetCells(graph.get('cells'));
+    //
     function setPaperSize() {
-      var bBox = paper.getContentBBox();
-      var tbh = $('#graphtoolbar').outerHeight();
-      console.log('tbh', tbh);
-      paper.setDimensions(Math.max(bBox.width + 20, $(window).width()), Math.max(bBox.height + 10, $(window).height() - tbh));
+    //   var bBox = paper.getContentBBox();
+    //   var tbh = $('#graphtoolbar').outerHeight();
+    //   paper.setDimensions(Math.max(bBox.width + 20, $(window).width()), Math.max(bBox.height + 10, $(window).height() - tbh));
     }
-    setPaperSize();
-    $(window).bind('resize', setPaperSize);
-
-    paper.on('cell:doubleclick', function(cell) {
+    // setPaperSize();
+    // $(window).bind('resize', setPaperSize);
+    //
+    graph.on('cell:doubleclick', function(cell) {
       if (cell.model.id) {
         if (cell.model instanceof joint.shapes.fomod.ElementTemplate) {
           window.location.href = '/#/templates/' + modelId + '/' + cell.model.id;
@@ -152,12 +167,12 @@ angular.module('fomodApp')
         }
       }
     });
-    paper.on('blank:pointerdown cell:pointerdown', function() {
-      $timeout(function() {
-        $scope.stopEdit();
-        $rootScope.$apply();
-      });
-    });
+    // paper.on('blank:pointerdown cell:pointerdown', function() {
+    //   $timeout(function() {
+    //     $scope.stopEdit();
+    //     $rootScope.$apply();
+    //   });
+    // });
 
     $(document).keydown(function(e) {
       e = e || window.event; // IE support

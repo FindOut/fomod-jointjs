@@ -316,20 +316,5 @@ angular.module('fomodApp')
           }
         }
       });
-      console.log('graph', graph);
     };
-
-    // if no graph attributes exists, do an automatic layout
-    if (!data.graph) {
-      // var opt = {
-      //   setPosition: function(cell, value) {
-      //     cell.set('position', {
-      //        x: value.x - value.width/2 + 130,
-      //        y: value.y - value.height/2 + 10
-      //     });
-      //   },
-      //   setLinkVertices: false
-      // };
-      // autoLayouter.layout(graph, opt);
-    }
   });

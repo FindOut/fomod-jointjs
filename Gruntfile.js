@@ -27,6 +27,16 @@ module.exports = function (grunt) {
     // Project settings
     yeoman: appConfig,
 
+    react: {
+      files: {
+        expand: true,
+        cwd: 'app/scripts/services',
+        src: ['*.jsx'],
+        dest: 'app/scripts/services',
+        ext: '.js'
+      }
+    },
+
     // Watches files for changes and runs tasks based on the changed files
     watch: {
       bower: {
@@ -39,6 +49,10 @@ module.exports = function (grunt) {
         options: {
           livereload: '<%= connect.options.livereload %>'
         }
+      },
+      react: {
+          files: ['app/scripts/services/*.jsx'],
+          tasks: ['react']
       },
       jsTest: {
         files: ['test/spec/{,*/}*.js'],
@@ -340,6 +354,7 @@ module.exports = function (grunt) {
       ],
       dist: [
         'copy:styles',
+        'react',
         'imagemin',
         'svgmin'
       ]
@@ -363,6 +378,7 @@ module.exports = function (grunt) {
     grunt.task.run([
       'clean:server',
       'wiredep',
+      'react',
       'concurrent:server',
       'autoprefixer',
       'connect:livereload',
@@ -377,6 +393,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test', [
     'clean:server',
+    'react',
     'concurrent:test',
     'autoprefixer',
     'connect:test',
@@ -386,6 +403,7 @@ module.exports = function (grunt) {
   grunt.registerTask('build', [
     'clean:dist',
     'wiredep',
+    'react',
     'useminPrepare',
     'concurrent:dist',
     'autoprefixer',

@@ -1,7 +1,8 @@
 {
   "name": "fomod",
   "version": "0.0.0",
-  "dependencies": {},
+  "dependencies": {
+  },
   "repository": "git@github.com:FindOut/fomod.git",
   "devDependencies": {
     "grunt": "^0.4.5",
@@ -31,7 +32,8 @@
     "karma-jasmine": "^0.3.2",
     "karma-phantomjs-launcher": "^0.1.4",
     "load-grunt-tasks": "^0.4.0",
-    "time-grunt": "^0.3.1"
+    "time-grunt": "^0.3.1",
+    "grunt-react": "^0.12.0"
   },
   "engines": {
     "node": ">=0.10.0"
