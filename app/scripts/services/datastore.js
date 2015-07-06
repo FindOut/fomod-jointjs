@@ -32,7 +32,6 @@ angular.module('fomodApp')
         fireEvent('read-begin');
         fbModelRef.once('value',
           function(snapshot) {
-            console.log('in once');
             var value = snapshot.val();
             enableSaving = false;
             if (value) {

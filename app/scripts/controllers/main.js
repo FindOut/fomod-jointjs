@@ -13,7 +13,7 @@
  */
 angular.module('fomodApp')
   .controller('MainCtrl', function($scope, $rootScope, $routeParams, $timeout, dragThresholder, dataStore, graph, data, commander,
-    CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand, ChangeDataAttributeCommand, attrMap, fbref, AutoLayoutCommand) {
+    CreateObjectCommand, CreateRelationCommand, DeleteRelationCommand, ChangeDataAttributeCommand, attrMap, fbref, AutoLayoutCommand, graphd3) {
     if (!fbref.getAuth()) {
       $timeout(function() {
         window.location.href = "#/login"
@@ -88,7 +88,7 @@ angular.module('fomodApp')
       } else if (type === 'read-end') {
         $scope.status = '';
         graph.trigger('read-end');
-        setPaperSize();
+        update();
       } else if (type === 'write-begin') {
         $scope.status = 'writing';
       } else if (type === 'write-end') {
@@ -99,17 +99,19 @@ angular.module('fomodApp')
       });
     });
 
-    React.render(
-      React.createElement(Graph, {width: 5000, height: 2000},
-        React.createElement(GraphObjects, {graph: graph})),
-      document.getElementById('paper')
-    );
+    function update() {
+      d3.select("#paper")
+          .datum(graph)
+        .call(graphd3());
+    }
     commander.on('execute', function() {
       setTimeout(function() {
         $scope.$apply();
       });
-      setPaperSize();
+      update();
     });
+
+    update();
 
     // var WrappedPaper = joint.dia.Paper.extend({
     //   // paper that wraps all elements and links in a dragThresholder
