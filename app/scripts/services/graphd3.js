@@ -6,28 +6,21 @@
  * @description
  * # graphd3
  * Service in the fomodApp.
+    usage:
+    angular.module('myApp')
+      .controller('MyCtrl', function(... graphd3 ...) {
+      ...
+      d3.select("#viewerSite")
+          .datum(myGraph)
+        .call(graphd3();
  */
 angular.module('fomodApp')
-  .service('graphd3', function () {
-    /*
-    usage:
-      d3.select("#viewerSite")
-          .datum(graph)
-        .call(graphd3()
-          .x(function(listItem) { return +listItem.longitude; })
-          .y(function(listItem) { return +listItem.latitude; }));
-    */
+  .service('graphd3', function (utils) {
     return function() {
-      var margin = {top: 20, right: 20, bottom: 20, left: 20},
-          width = 760,
-          height = 120,
-          xValue = function(d) { return d[0]; },
-          yValue = function(d) { return d[1]; },
-          keyValue = function(d) { return d[2]; },
-          clickHandler = function(id) {console.log(id);},
-          xScale = d3.scale.linear(),
-          yScale = d3.scale.linear(),
-          selId = undefined;
+      var t0 = performance.now(), tRel0, tRel1;
+
+      var width = 760,
+          height = 120;
 
       function graphView(selection) {
         selection.each(function(data) {
@@ -60,10 +53,6 @@ angular.module('fomodApp')
               .attr("d", function(d) {return d.pathd})
               .attr('fill', function(d) {return d.color});
 
-          // Update the inner offset
-          var g = svg.select("g")
-              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
           var node = svg.selectAll('.node')
             .data(function(d) {return d.getElements()}, function(d) {return d.id})
 
@@ -87,51 +76,29 @@ angular.module('fomodApp')
 
           node.exit().remove();
 
-          function lineCrossing(result, x1, y1, x2, y2, x3, y3, x4, y4) {
-            var px = ((x1*y2-y1*x2)*(x3-x4)-(x1-x2)*(x3*y4-y3*x4))/((x1-x2)*(y3-y4)-((y1-y2)*(x3-x4)));
-            var py = ((x1*y2-y1*x2)*(y3-y4)-(y1-y2)*(x3*y4-y3*x4))/((x1-x2)*(y3-y4)-((y1-y2)*(x3-x4)));
-            result.x = px;
-            result.y = py;
-          }
+          // size node rect around text
+          node.each(function(d, i) {
+            var textBBox = d3.select(this).select('text').node().getBBox();
+            var width = Math.max(40, textBBox.width);
+            var height = Math.max(50, textBBox.height);
+            d3.select(this).select('rect')
+              .attr('width', width + textBBox.x * 2.0)
+              .attr('height', height + textBBox.y * 2.1);
+          });
 
-          function adjustToRectEdge(p, rp, r) {
-            var x3, y3, x4, y4;
-            var dx = rp.x - p.x;
-            var dy = rp.y - p.y;
-            var k = dx == 0 ? 1000000 : dy / dx;
-            var rk = r.height / r.width;
-            x3 = r.x;
-            y3 = r.y;
-            if (Math.abs(k) < Math.abs(rk)) {
-              // line crosses left or right rect edge
-              x4 = r.x;
-              y4 = r.y + r.height;
-              if (dx < 0) {
-                // line crosses right edge
-                x3 += r.width;
-                x4 += r.width;
-              }
-            } else {
-              // line crosses top or bottom rect edge
-              x4 = r.x + r.width;
-              y4 = r.y;
-              if (dy < 0) {
-                // line crosses bottom edge
-                y3 += r.height;
-                y4 += r.height;
-              }
-            }
-            lineCrossing(rp, p.x, p.y, rp.x, rp.y, x3, y3, x4, y4);
-          }
+          tRel0 = performance.now();
 
           function relations() {
             // prepare and add relations
             var zp = svg.node().createSVGPoint();
             var rels = [];
             _.each(data.getLinks(), function(relation) {
-              console.log('relation', relation);
-              var fromEl = d3.select(document.getElementById('node_' + relation.get('source').id)).select('rect');
-              var toEl = d3.select(document.getElementById('node_' + relation.get('target').id)).select('rect');
+              var fromNodeId = 'node_' + relation.get('source').id;
+              var toNodeId = 'node_' + relation.get('target').id;
+              var fromNode = document.getElementById(fromNodeId);
+              var toNode = document.getElementById(toNodeId);
+              var fromEl = d3.select(fromNode).select('rect');
+              var toEl = d3.select(toNode).select('rect');
               if (fromEl.node() && toEl.node()) {
                 var fromRectTopLeft = zp.matrixTransform(fromEl.node().getCTM());
                 var toRectTopLeft = zp.matrixTransform(toEl.node().getCTM());
@@ -142,8 +109,8 @@ angular.module('fomodApp')
                 var toRect = {x: toRectTopLeft.x, y: toRectTopLeft.y, width: parseFloat(toEl.attr('width')), height: parseFloat(toEl.attr('height'))};
                 var toPoint = {x: toRect.x + toRect.width / 2, y: toRect.y + toRect.height / 2};
 
-                adjustToRectEdge(fromPoint, toPoint, toRect);
-                adjustToRectEdge(toPoint, fromPoint, fromRect);
+                utils.adjustToRectEdge(fromPoint, toPoint, toRect);
+                utils.adjustToRectEdge(toPoint, fromPoint, fromRect);
 
                 rels.push({from:{x: fromPoint.x, y: fromPoint.y}, to: {x: toPoint.x, y: toPoint.y}, key: relation.get('source').id + '-' + relation.get('target').id});
               }
@@ -163,33 +130,14 @@ angular.module('fomodApp')
             relation.exit().remove();
           }
 
-          // size node rect around text
-          node.each(function(d, i) {
-            var textBBox = d3.select(this).select('text').node().getBBox();
-            var width = Math.max(40, textBBox.width);
-            var height = Math.max(50, textBBox.height);
-            d3.select(this).select('rect')
-              .attr('width', width + textBBox.x * 2.0)
-              .attr('height', height + textBBox.y * 2.1);
-          });
-
           relations();
 
-          var regexTranslate2Args = /translate\(([0-9.]+)[, ]+([0-9.]+)\)/;
-          var regexTranslate1Arg = /translate\(([0-9.]+)\)/;
-          function getTranslation(tr) {
-            var tr = regexTranslate2Args.exec(tr);
-            if (tr) {
-              return {x: +tr[1], y: +tr[2]};
-            }
-            tr = regexTranslate1Arg.exec(transform);
-            return tr && {x: +tr[1], y: 0};
-          }
+          tRel1 = performance.now();
 
           function nodeSelectionSize(sel) {
             var size = {width: 0, height: 0};
             sel.each(function(d, i) {
-              var tr = getTranslation(this.getAttribute('transform'));
+              var tr = utils.getTranslation(this.getAttribute('transform'));
               var rectSel = d3.select(this).select('rect');
               size.width = Math.max(size.width, +tr.x + +rectSel.attr('width') + 10);
               size.height = Math.max(size.height, +tr.y + +rectSel.attr('height') + 10);
@@ -201,43 +149,10 @@ angular.module('fomodApp')
           svg.attr('width', allNodeSize.width).attr('height', allNodeSize.height);
 
         });
+
+        var t2 = performance.now();
+        console.log('rendering time: ' + (t2 - t0) + 'ms (nodes ' + (t2 - t0 - (tRel1 - tRel0)) + 'ms, relations ' + (tRel1 - tRel0) + 'ms)')
       }
-
-      graphView.margin = function(_) {
-        if (!arguments.length) return margin;
-        margin = _;
-        return graphView;
-      };
-
-      graphView.width = function(_) {
-        if (!arguments.length) return width;
-        width = _;
-        return graphView;
-      };
-
-      graphView.height = function(_) {
-        if (!arguments.length) return height;
-        height = _;
-        return graphView;
-      };
-
-      graphView.key = function(_) {
-        if (!arguments.length) return keyValue;
-        keyValue = _;
-        return graphView;
-      };
-
-      graphView.click = function(_) {
-        if (!arguments.length) return clickHandler;
-        clickHandler = _;
-        return graphView;
-      };
-
-      graphView.selectedId = function(_) {
-        if (!arguments.length) return selId;
-        selId = _;
-        return graphView;
-      };
 
       return graphView;
     };
