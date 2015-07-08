@@ -72,13 +72,6 @@ angular.module('fomodApp')
         window.location.href = "#/login"
       });
     };
-    var modelObjects = [
-        {id:"a", text:"Hello", x:"30", y:"50", fill:"#afa"},
-        {id:"b", text:"World!", x:"200", y:"90", fill:"#bbf"},
-        {id:"c", text:"Dag!!!", x:"100", y:"30", fill:"#ccc"}
-    ];
-
-    var modelRelations = [{from: 'a', to: 'b'}, {from: 'c', to: 'b'}];
 
     $scope.status = 'reading';
     dataStore.on(function(type) {
@@ -151,14 +144,6 @@ angular.module('fomodApp')
     //   gridSize: 1
     // });
     // paper.resetCells(graph.get('cells'));
-    //
-    function setPaperSize() {
-    //   var bBox = paper.getContentBBox();
-    //   var tbh = $('#graphtoolbar').outerHeight();
-    //   paper.setDimensions(Math.max(bBox.width + 20, $(window).width()), Math.max(bBox.height + 10, $(window).height() - tbh));
-    }
-    // setPaperSize();
-    // $(window).bind('resize', setPaperSize);
     //
     graph.on('cell:doubleclick', function(cell) {
       if (cell.model.id) {
