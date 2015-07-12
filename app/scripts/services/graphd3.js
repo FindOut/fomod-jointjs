@@ -28,11 +28,59 @@ angular.module('fomodApp')
           var svg = d3.select(this).selectAll("svg").data([data]);
 
           // Otherwise, create the skeletal graphView.
-          var gEnter = svg.enter().append("svg").append("g");
+          var svgEnter = svg.enter().append("svg");
+          svgEnter.append('g')
+              .attr('class', 'nodes');
+          svgEnter.append('g')
+              .attr('class', 'relations');
+          svgEnter.append('g')
+              .attr('class', 'manipulation');
           // Update the outer dimensions
           svg
               .attr("width", width)
               .attr("height", height);
+          var svgZeroPoint = svg.node().createSVGPoint();
+
+          var manipulator = new Manipulator(svg.select('.manipulation'));
+
+          // Manipulator feature for context menu using https://github.com/mar10/jquery-ui-contextmenu
+          function ContextMenu() {
+            var contextMenuListener;
+            return {
+              init: function(manRect) {
+                $(manRect.node()).contextmenu({
+                    show: { effect: "slideDown", duration: 10},
+                    select: function(event, ui) {
+                        console.log("select " + ui.cmd);
+                    }
+                });
+              },
+              open: function(manRect, d, node) {
+                var menuItems = contextMenuListener && contextMenuListener(d, node);
+                if (!menuItems) {
+                  menuItems = [];
+                }
+                $(manRect.node()).contextmenu("replaceMenu", menuItems);
+              },
+              setContextMenuListener: function(listener) {
+                contextMenuListener = listener;
+                return this;
+              }
+            }
+          }
+
+          var contextMenuFeature = new ContextMenu();
+          contextMenuFeature.setContextMenuListener(function(d, el) {
+            return [
+              {title: "Copy", cmd: "copy", uiIcon: "ui-icon-copy"},
+              {title: "----"},
+              {title: "More", children: [
+                {title: "Sub 1", cmd: "sub1"},
+                {title: "Sub 2", cmd: "sub2"}
+              ]}
+            ];
+          });
+          manipulator.addFeature(contextMenuFeature);
 
           var defs = svg.append('defs');
           var markerData = [
@@ -53,7 +101,7 @@ angular.module('fomodApp')
               .attr("d", function(d) {return d.pathd})
               .attr('fill', function(d) {return d.color});
 
-          var node = svg.selectAll('.node')
+          var node = svg.select('.nodes').selectAll('.node')
             .data(function(d) {return d.getElements()}, function(d) {return d.id})
 
           var nodeEnter = node.enter().append('g')
@@ -65,16 +113,59 @@ angular.module('fomodApp')
           nodeEnter.append('text');
 
           node.select('text')
-            .attr('x', '.2em')
-            .attr('dy', '1em')
-            .text(function(d) {return d.attr('text/text')});
+              .attr('x', '.2em')
+              .attr('dy', '1em')
+              .text(function(d) {return d.attr('text/text')});
           node.select('rect')
-            .attr('width', 50)
-            .attr('height', 60)
-            .attr('fill', '#eeeeee')
-            .attr('stroke', 'black');
+              .attr('width', 50)
+              .attr('height', 60)
+              .attr('fill', '#eeeeee')
+              .attr('stroke', 'black')
+              .on('mouseenter', function(d) {manipulator.open(d, this.parentElement);});
 
           node.exit().remove();
+
+          function Manipulator(site) {
+            var features = [];
+            var manRect = site.append('rect')
+                .attr({
+                  'class': 'manipulator',
+                  fill: '#ffff00',
+                  opacity: 0.3
+                })
+                .on('mouseleave', function() {
+                  manRect.attr('display', 'none');
+                  for (var i in features) {
+                    var feature = features[i];
+                    feature.close && feature.close(manRect);
+                  }
+                });
+
+            return {
+              // places the manipulator on top of node and adapts its size to it
+              // call this on the mouseenter event for the node
+              open: function(d, node) {
+                var target = d3.select(node);
+                var rect = target.select('rect');
+                var rectSvgPos = svgZeroPoint.matrixTransform(rect.node().getCTM());
+                manRect.attr({
+                  x: rectSvgPos.x,
+                  y: rectSvgPos.y,
+                  width: rect.attr('width'),
+                  height: rect.attr('height'),
+                  display: null
+                });
+                for (var i in features) {
+                  var feature = features[i];
+                  feature.open(manRect, d, node);
+                }
+              },
+              addFeature: function(feature) {
+                features.push(feature);
+                feature.init(manRect);
+              }
+            };
+          }
 
           // size node rect around text
           node.each(function(d, i) {
@@ -90,7 +181,6 @@ angular.module('fomodApp')
 
           function relations() {
             // prepare and add relations
-            var zp = svg.node().createSVGPoint();
             var rels = [];
             _.each(data.getLinks(), function(relation) {
               var fromNodeId = 'node_' + relation.get('source').id;
@@ -100,8 +190,8 @@ angular.module('fomodApp')
               var fromEl = d3.select(fromNode).select('rect');
               var toEl = d3.select(toNode).select('rect');
               if (fromEl.node() && toEl.node()) {
-                var fromRectTopLeft = zp.matrixTransform(fromEl.node().getCTM());
-                var toRectTopLeft = zp.matrixTransform(toEl.node().getCTM());
+                var fromRectTopLeft = svgZeroPoint.matrixTransform(fromEl.node().getCTM());
+                var toRectTopLeft = svgZeroPoint.matrixTransform(toEl.node().getCTM());
 
                 var fromRect = {x: fromRectTopLeft.x, y: fromRectTopLeft.y, width: parseFloat(fromEl.attr('width')), height: parseFloat(fromEl.attr('height'))};
                 var fromPoint = {x: fromRect.x + fromRect.width / 2, y: fromRect.y + fromRect.height / 2};
@@ -116,7 +206,7 @@ angular.module('fomodApp')
               }
             });
 
-            var relation = svg.selectAll(".relation")
+            var relation = svg.select('.relations').selectAll(".relation")
                 .data(rels, function(rel) {return rel.key});
             var relationEnter = relation.enter().append("line");
             relation
