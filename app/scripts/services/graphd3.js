@@ -15,7 +15,7 @@
         .call(graphd3();
  */
 angular.module('fomodApp')
-  .service('graphd3', function (utils) {
+  .service('graphd3', function (utils, Manipulator, ContextMenu, RelationCreator, Mover) {
     return function() {
       var t0 = performance.now(), tRel0, tRel1;
 
@@ -41,46 +41,27 @@ angular.module('fomodApp')
               .attr("height", height);
           var svgZeroPoint = svg.node().createSVGPoint();
 
-          var manipulator = new Manipulator(svg.select('.manipulation'));
+          var manipulator = new Manipulator(svg.select('.manipulation'))
+            .on('open', function(what) {console.log(what);})
+            .on('close', function(what) {console.log(what);});
 
-          // Manipulator feature for context menu using https://github.com/mar10/jquery-ui-contextmenu
-          function ContextMenu() {
-            var contextMenuListener;
-            return {
-              init: function(manRect) {
-                $(manRect.node()).contextmenu({
-                    show: { effect: "slideDown", duration: 10},
-                    select: function(event, ui) {
-                        console.log("select " + ui.cmd);
-                    }
-                });
-              },
-              open: function(manRect, d, node) {
-                var menuItems = contextMenuListener && contextMenuListener(d, node);
-                if (!menuItems) {
-                  menuItems = [];
-                }
-                $(manRect.node()).contextmenu("replaceMenu", menuItems);
-              },
-              setContextMenuListener: function(listener) {
-                contextMenuListener = listener;
-                return this;
-              }
-            }
-          }
+          var contextMenuFeature = new ContextMenu(manipulator)
+            .setContextMenuListener(function(d, el) {
+              return [
+                {title: "Copy", cmd: "copy", uiIcon: "ui-icon-copy"},
+                {title: "----"},
+                {title: "More", children: [
+                  {title: "Sub 1", cmd: "sub1"},
+                  {title: "Sub 2", cmd: "sub2"}
+                ]}
+              ];
+            })
+            .addMenuSelectListener(function(cmd) {
+              console.log('selected ' + cmd);
+            });
 
-          var contextMenuFeature = new ContextMenu();
-          contextMenuFeature.setContextMenuListener(function(d, el) {
-            return [
-              {title: "Copy", cmd: "copy", uiIcon: "ui-icon-copy"},
-              {title: "----"},
-              {title: "More", children: [
-                {title: "Sub 1", cmd: "sub1"},
-                {title: "Sub 2", cmd: "sub2"}
-              ]}
-            ];
-          });
-          manipulator.addFeature(contextMenuFeature);
+          new RelationCreator(manipulator);
+          new Mover(manipulator);
 
           var defs = svg.append('defs');
           var markerData = [
@@ -124,48 +105,6 @@ angular.module('fomodApp')
               .on('mouseenter', function(d) {manipulator.open(d, this.parentElement);});
 
           node.exit().remove();
-
-          function Manipulator(site) {
-            var features = [];
-            var manRect = site.append('rect')
-                .attr({
-                  'class': 'manipulator',
-                  fill: '#ffff00',
-                  opacity: 0.3
-                })
-                .on('mouseleave', function() {
-                  manRect.attr('display', 'none');
-                  for (var i in features) {
-                    var feature = features[i];
-                    feature.close && feature.close(manRect);
-                  }
-                });
-
-            return {
-              // places the manipulator on top of node and adapts its size to it
-              // call this on the mouseenter event for the node
-              open: function(d, node) {
-                var target = d3.select(node);
-                var rect = target.select('rect');
-                var rectSvgPos = svgZeroPoint.matrixTransform(rect.node().getCTM());
-                manRect.attr({
-                  x: rectSvgPos.x,
-                  y: rectSvgPos.y,
-                  width: rect.attr('width'),
-                  height: rect.attr('height'),
-                  display: null
-                });
-                for (var i in features) {
-                  var feature = features[i];
-                  feature.open(manRect, d, node);
-                }
-              },
-              addFeature: function(feature) {
-                features.push(feature);
-                feature.init(manRect);
-              }
-            };
-          }
 
           // size node rect around text
           node.each(function(d, i) {
