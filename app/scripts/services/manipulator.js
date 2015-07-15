@@ -10,51 +10,45 @@
 angular.module('fomodApp')
   .service('Manipulator', function (utils) {
     return function(site) {
-      var listeners = {}; // listeners map by
+      var eventManager = new utils.EventManager();
       var owner;
       var manRect = site.append('rect')
           .attr({
             'class': 'manipulator',
             fill: '#ffff00',
+            stroke: '#ffff00',
             opacity: 0.3
           })
-          .on('mouseleave', function() {
-            manRect.attr('display', 'none');
-            fireEvent('close');
-            owner = undefined;
-          });
+          .on('mouseleave', close);
       var svgZeroPoint = utils.getParentSvgElement(site.node()).createSVGPoint();
-
-      function fireEvent(what) {
-        var openListeners = listeners[what];
-        for (var i in openListeners) {
-          var listener = openListeners[i];
-          listener.apply(this, arguments);
+      function close() {
+        if (!owner) {
+          manRect.attr('display', 'none');
+          eventManager.fire('close', this);
+          owner = undefined;
         }
       }
-
       return {
         // places the manipulator on top of node and adapts its size to it
         // call this on the mouseenter event for the node
         open: function(d, node) {
-          var target = d3.select(node);
-          var rect = target.select('rect');
-          var rectSvgPos = svgZeroPoint.matrixTransform(rect.node().getCTM());
-          manRect.attr({
-            x: rectSvgPos.x,
-            y: rectSvgPos.y,
-            width: rect.attr('width'),
-            height: rect.attr('height'),
-            display: null
-          });
-          var what = 'open';
-          fireEvent('open', d, node);
+          if (!owner) {
+            var target = d3.select(node);
+            var rect = target.select('rect');
+            var rectSvgPos = svgZeroPoint.matrixTransform(rect.node().getCTM());
+            manRect.attr({
+              x: rectSvgPos.x,
+              y: rectSvgPos.y,
+              width: rect.attr('width'),
+              height: rect.attr('height'),
+              display: null
+            });
+            eventManager.fire('open', this, d, node);
+          }
         },
         // what is 'open', 'close'
-        on: function(what, listener) {
-          var openListeners = listeners[what] || [];
-          listeners[what] = openListeners;
-          openListeners.push(listener);
+        on: function(eventKey, listener) {
+          eventManager.on(eventKey, listener);
           return this;
         },
         getManRect: function() {
@@ -66,15 +60,20 @@ angular.module('fomodApp')
           }
           console.log('becomeMaster(' + key + '): ' + (key === owner));
           return key === owner;
+        },
+        unbecomeMaster: function(key) {
+          if (owner === key) {
+            owner = undefined;
+          }
         }
       }
     }
   })
-  .service('ContextMenu', function () {
+  .service('ContextMenu', function (utils) {
     // Manipulator feature for context menu using https://github.com/mar10/jquery-ui-contextmenu
     return function(manipulator) {
+      var eventManager = new utils.EventManager();
       var contextMenuListener;
-      var menuSelectListeners = [];
 
       manipulator.getManRect().on('mousedown.contextMenu', function() {
         manipulator.becomeMaster('ContextMenu');
@@ -88,10 +87,7 @@ angular.module('fomodApp')
         },
         show: { effect: "slideDown", duration: 10},
         select: function(event, ui) {
-            for (var i in menuSelectListeners) {
-              var listener = menuSelectListeners[i];
-              listener(ui.cmd);
-            }
+          eventManager.fire('select', this, ui.cmd);
         }
       });
       manipulator
@@ -102,10 +98,7 @@ angular.module('fomodApp')
           }
         });
 
-        var menuItems = contextMenuListener && contextMenuListener(d, node);
-        if (!menuItems) {
-          menuItems = [];
-        }
+        var menuItems = contextMenuListener && contextMenuListener(d, node) || [];
         $(manipulator.getManRect().node()).contextmenu("replaceMenu", menuItems);
       })
       .on('close', function() {
@@ -113,10 +106,7 @@ angular.module('fomodApp')
       });
 
       return {
-        addMenuSelectListener: function(listener) {
-          menuSelectListeners.push(listener);
-          return this;
-        },
+        on: eventManager.on,
         // manipulator calls listener(d, node) on open and expects a menu definition array in return
         setContextMenuListener: function(listener) {
           contextMenuListener = listener;
@@ -181,42 +171,61 @@ angular.module('fomodApp')
     // Mover Manipulator feature
     // moves the manipulated object by mouse dragging
     return function(manipulator) {
-      var moveListeners = [], movedListeners = [];
+      var eventManager = new utils.EventManager();
       var state;  // 'down', 'dragging'
+      var manRect = manipulator.getManRect();
       var downPos;
+      var manRectPos;
+      var parentSvgElement = utils.getParentSvgElement(manipulator.getManRect().node());
+      function getPos() {return d3.mouse(parentSvgElement);}
 
-      manipulator.on('open', function() {
+      manipulator.on('open', function(eventKey, d, node) {
         // listen to mousedown, move and up and call moveListener and movedListener
-        manipulator.getManRect().on('mousedown.mover', function() {
+        manRect.on('mousedown.mover', function() {
           if (manipulator.becomeMaster('Mover')) {
             state = 'down';
-            downPos = d3.mouse(utils.getParentSvgElement(manipulator.getManRect().node()));
-            console.log('mousedown.mover at', downPos);
+            downPos = getPos();
+            manRectPos = [+manRect.attr('x'), +manRect.attr('y')];
+            console.log('mousedown.mover at', downPos, manRectPos, 'id', d.id);
+            eventManager.fire('beginmove', this, downPos);
+            //d3.event.preventDefault();
           }
-        })
-        .on('mousemove.mover', function() {
+        });
+        d3.select(parentSvgElement).on('mousemove.mover', function() {
           if (state) {
-            console.log('mousemove.mover');
-            // manipulator.getManRect().attr({
-            //   x: rectPos.x,
-            //   y: rectPos.y
-            // });
+            var pos = getPos();
+            console.log('mousemove.mover at ', pos);
+            manRect.attr({
+              x: manRectPos[0] + (pos[0] - downPos[0]),
+              y: manRectPos[1] + (pos[1] - downPos[1])
+            });
+            eventManager.fire('move', this, pos);
+            d3.event.preventDefault();
           }
         })
         .on('mouseup.mover', function() {
           if (state) {
             console.log('mouseup.mover');
             state = undefined;
+            var pos = getPos();
+            eventManager.fire('endmove', this, d, [manRectPos[0] + (pos[0] - downPos[0]), manRectPos[1] + (pos[1] - downPos[1])]);
+            d3.event.preventDefault();
+            manipulator.unbecomeMaster('Mover');
           }
         });
       })
       .on('close', function() {
-        manipulator.getManRect()
-          .on('mousedown.mover', null)
-          .on('mousemove.mover', null)
-          .on('mouseup.mover', null);
+        if (!state) {
+          manipulator.getManRect()
+            .on('mousedown.mover', null)
+            .on('mousemove.mover', null)
+            .on('mouseup.mover', null);
+        }
+        //state = undefined;
       });
 
-      return {};
+      return {
+        on: eventManager.on
+      };
     }
   });

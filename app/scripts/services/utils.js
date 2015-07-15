@@ -10,6 +10,33 @@
 angular.module('fomodApp')
   .service('utils', function () {
     return {
+      EventManager: function() {
+        var listeners = {};
+
+        function on(eventKey, listener) {
+          var keyListeners = listeners[eventKey] || [];
+          listeners[eventKey] = keyListeners;
+          keyListeners.push(listener);
+          return this;
+        }
+
+        function fire(eventKey, thisValue) {
+          var keyListeners = listeners[eventKey];
+          for (var i in keyListeners) {
+            var listener = keyListeners[i];
+            var args = Array.prototype.slice.call(arguments, 0);
+            args.splice(1, 1);  // remove thisValue
+            listener.apply(thisValue, args);
+          }
+          return this;
+        }
+
+        return {
+          on: on,
+          fire: fire
+        };
+      },
+
       getParentSvgElement: function(el) {
         if (!el || el.tagName === 'svg') {
           return el;

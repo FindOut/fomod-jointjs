@@ -97,7 +97,7 @@ angular.module('fomodApp')
           .datum(graph)
         .call(graphd3());
     }
-    commander.on('execute', function() {
+    commander.on('do', function() {
       setTimeout(function() {
         $scope.$apply();
       });

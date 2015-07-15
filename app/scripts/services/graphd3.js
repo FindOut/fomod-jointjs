@@ -15,7 +15,7 @@
         .call(graphd3();
  */
 angular.module('fomodApp')
-  .service('graphd3', function (utils, Manipulator, ContextMenu, RelationCreator, Mover) {
+  .service('graphd3', function (utils, Manipulator, ContextMenu, RelationCreator, Mover, commander) {
     return function() {
       var t0 = performance.now(), tRel0, tRel1;
 
@@ -23,9 +23,9 @@ angular.module('fomodApp')
           height = 120;
 
       function graphView(selection) {
-        selection.each(function(data) {
+        selection.each(function(graph) {
           // Select the svg element, if it exists.
-          var svg = d3.select(this).selectAll("svg").data([data]);
+          var svg = d3.select(this).selectAll("svg").data([graph]);
 
           // Otherwise, create the skeletal graphView.
           var svgEnter = svg.enter().append("svg");
@@ -56,12 +56,20 @@ angular.module('fomodApp')
                 ]}
               ];
             })
-            .addMenuSelectListener(function(cmd) {
+            .on('select', function(eventKey, cmd) {
               console.log('selected ' + cmd);
             });
 
-          new RelationCreator(manipulator);
-          new Mover(manipulator);
+          // new RelationCreator(manipulator);
+          new Mover(manipulator)
+            .on('beginmove', function(key, d) {
+              graph.trigger('batch:start');
+            })
+            .on('endmove', function(key, d, newPos) {
+              console.log('graphd3 endmove', arguments);
+              d.set('position', {x: newPos[0], y: newPos[1]});
+              graph.trigger('batch:stop');
+            });
 
           var defs = svg.append('defs');
           var markerData = [
@@ -87,11 +95,13 @@ angular.module('fomodApp')
 
           var nodeEnter = node.enter().append('g')
               .attr('class', 'node')
-              .attr("transform", function(d) {
-                return 'translate(' + d.get('position').x +', ' + d.get('position').y + ')'; })
               .attr('id', function(d) {return 'node_' + d.id});
           nodeEnter.append('rect');
           nodeEnter.append('text');
+
+          node
+              .attr("transform", function(d) {
+                  return 'translate(' + d.get('position').x +', ' + d.get('position').y + ')'; })
 
           node.select('text')
               .attr('x', '.2em')
@@ -121,7 +131,7 @@ angular.module('fomodApp')
           function relations() {
             // prepare and add relations
             var rels = [];
-            _.each(data.getLinks(), function(relation) {
+            _.each(graph.getLinks(), function(relation) {
               var fromNodeId = 'node_' + relation.get('source').id;
               var toNodeId = 'node_' + relation.get('target').id;
               var fromNode = document.getElementById(fromNodeId);
