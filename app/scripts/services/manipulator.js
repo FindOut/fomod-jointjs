@@ -186,26 +186,25 @@ angular.module('fomodApp')
             state = 'down';
             downPos = getPos();
             manRectPos = [+manRect.attr('x'), +manRect.attr('y')];
-            console.log('mousedown.mover at', downPos, manRectPos, 'id', d.id);
+            // console.log('mousedown.mover at', downPos, manRectPos, 'id', d.id);
             eventManager.fire('beginmove', this, downPos);
-            //d3.event.preventDefault();
           }
         });
         d3.select(parentSvgElement).on('mousemove.mover', function() {
           if (state) {
             var pos = getPos();
-            console.log('mousemove.mover at ', pos);
+            // console.log('mousemove.mover at ', pos);
             manRect.attr({
               x: manRectPos[0] + (pos[0] - downPos[0]),
               y: manRectPos[1] + (pos[1] - downPos[1])
             });
-            eventManager.fire('move', this, pos);
+            eventManager.fire('move', this, d, [manRectPos[0] + (pos[0] - downPos[0]), manRectPos[1] + (pos[1] - downPos[1])]);
             d3.event.preventDefault();
           }
         })
         .on('mouseup.mover', function() {
           if (state) {
-            console.log('mouseup.mover');
+            // console.log('mouseup.mover');
             state = undefined;
             var pos = getPos();
             eventManager.fire('endmove', this, d, [manRectPos[0] + (pos[0] - downPos[0]), manRectPos[1] + (pos[1] - downPos[1])]);

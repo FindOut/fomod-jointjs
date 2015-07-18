@@ -147,8 +147,10 @@ angular.module('fomodApp')
     };
   })
   .service('MoveObjectCommand', function() {
-    return function(element, startPosition, endPosition) {
+    return function(element, endPosition) {
+      var startPosition;
       this.do = function() {
+        startPosition = element.get('position');
         element.set('position', endPosition);
       };
       this.undo = function() {
@@ -158,7 +160,7 @@ angular.module('fomodApp')
         this.do();
       };
       this.toString = function() {
-        return 'MoveObjectCommand(' + element + ', ' + JSON.stringify(startPosition) + ', ' + endPosition + ')';
+        return 'MoveObjectCommand(' + element + ', ' + endPosition + ')';
       };
     };
   })

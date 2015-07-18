@@ -15,7 +15,7 @@
         .call(graphd3();
  */
 angular.module('fomodApp')
-  .service('graphd3', function (utils, Manipulator, ContextMenu, RelationCreator, Mover, commander) {
+  .service('graphd3', function (utils, Manipulator, ContextMenu, RelationCreator, Mover, commander, MoveObjectCommand) {
     return function() {
       var t0 = performance.now(), tRel0, tRel1;
 
@@ -35,15 +35,13 @@ angular.module('fomodApp')
               .attr('class', 'relations');
           svgEnter.append('g')
               .attr('class', 'manipulation');
-          // Update the outer dimensions
-          svg
-              .attr("width", width)
-              .attr("height", height);
+
           var svgZeroPoint = svg.node().createSVGPoint();
 
-          var manipulator = new Manipulator(svg.select('.manipulation'))
-            .on('open', function(what) {console.log(what);})
-            .on('close', function(what) {console.log(what);});
+          var manipulator = new Manipulator(svg.select('.manipulation'));
+
+          // manipulator.on('open', function(what) {console.log(what);})
+          //   .on('close', function(what) {console.log(what);});
 
           var contextMenuFeature = new ContextMenu(manipulator)
             .setContextMenuListener(function(d, el) {
@@ -62,13 +60,8 @@ angular.module('fomodApp')
 
           // new RelationCreator(manipulator);
           new Mover(manipulator)
-            .on('beginmove', function(key, d) {
-              graph.trigger('batch:start');
-            })
             .on('endmove', function(key, d, newPos) {
-              console.log('graphd3 endmove', arguments);
-              d.set('position', {x: newPos[0], y: newPos[1]});
-              graph.trigger('batch:stop');
+              commander.do(new MoveObjectCommand(d, {x: newPos[0], y: newPos[1]}));
             });
 
           var defs = svg.append('defs');
@@ -185,7 +178,8 @@ angular.module('fomodApp')
           }
 
           var allNodeSize = nodeSelectionSize(node);
-          svg.attr('width', allNodeSize.width).attr('height', allNodeSize.height);
+          svg.attr('width', Math.max(allNodeSize.width, $('#paper').innerWidth())).attr('height', Math.max(allNodeSize.height, $('#paper').innerHeight()));
+
 
         });
 

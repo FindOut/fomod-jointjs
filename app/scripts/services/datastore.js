@@ -115,8 +115,9 @@ angular.module('fomodApp')
     }
 
     // on each command on the model, write it to database
-    commander.on('execute', function() {
+    var saveData = function() {
       if (enableSaving && fbModelRef) {
+        console.log('saveData');
         fireEvent('write-begin');
         fbModelRef.set({
             owner: fbModelRef.getAuth().uid,
@@ -132,7 +133,8 @@ angular.module('fomodApp')
         );
         updateUserInfo();
       }
-    });
+    };
+    commander.on('do', _.debounce(saveData, 200));
 
     function getStorableGraph(graph) {
       var userElements = _.filter(graph.getElements(), function(element) {

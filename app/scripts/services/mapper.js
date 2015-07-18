@@ -298,7 +298,7 @@ angular.module('fomodApp')
           if (batch) {
             if (batch.moveElement) {
               if (!batch.moveElement.element.isTemplate) {
-                commander.do(new MoveObjectCommand(batch.moveElement.element, batch.moveElement.startPosition, batch.moveElement.endPosition));
+                commander.do(new MoveObjectCommand(batch.moveElement.element, batch.moveElement.endPosition));
               }
             } else if (batch.changeLinkEnd) {
               if (batch.changeLinkEnd.newEndElementId) {

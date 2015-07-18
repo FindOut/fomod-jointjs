@@ -1,6 +1,9 @@
 #paper {
   overflow-x: scroll;
 }
+#paper text {
+  pointer-events: none;
+}
 .inputdemoErrors .inputErrorsApp {
   min-height: 48px;
 }
@@ -69,7 +72,9 @@
   float: left;
   border: solid black 1px;
 }
-#graph {} #toolbar {
+#graph {}
+
+#toolbar {
   border-bottom: solid #ccc 1px;
   padding: 0.13em 0.6em;
   background-color: #eed;
