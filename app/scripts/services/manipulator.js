@@ -10,21 +10,21 @@
 angular.module('fomodApp')
   .service('Manipulator', function (utils) {
     return function(site) {
-      var eventManager = new utils.EventManager();
+      var dispatch = d3.dispatch('open', 'close');
       var owner;
       var manRect = site.append('rect')
           .attr({
             'class': 'manipulator',
             fill: '#ffff00',
-            stroke: '#ffff00',
-            opacity: 0.3
+            stroke: '#000000',
+            'fill-opacity': 0.3
           })
           .on('mouseleave', close);
       var svgZeroPoint = utils.getParentSvgElement(site.node()).createSVGPoint();
       function close() {
         if (!owner) {
           manRect.attr('display', 'none');
-          eventManager.fire('close', this);
+          dispatch.close();
           owner = undefined;
         }
       }
@@ -43,12 +43,12 @@ angular.module('fomodApp')
               height: rect.attr('height'),
               display: null
             });
-            eventManager.fire('open', this, d, node);
+            dispatch.open(d, node);
           }
         },
         // what is 'open', 'close'
         on: function(eventKey, listener) {
-          eventManager.on(eventKey, listener);
+          dispatch.on(eventKey, listener);
           return this;
         },
         getManRect: function() {
@@ -63,8 +63,12 @@ angular.module('fomodApp')
         },
         unbecomeMaster: function(key) {
           if (owner === key) {
+            console.log('unbecomeMaster(' + key + ')');
             owner = undefined;
           }
+        },
+        getMaster: function() {
+          return owner;
         }
       }
     }
@@ -76,6 +80,7 @@ angular.module('fomodApp')
       var contextMenuListener;
 
       manipulator.getManRect().on('mousedown.contextMenu', function() {
+        console.log('mousedown.contextMenu 1');
         manipulator.becomeMaster('ContextMenu');
       });
       $(manipulator.getManRect().node()).contextmenu({
@@ -84,15 +89,18 @@ angular.module('fomodApp')
         },
         close: function(event) {
           console.log('close(event)');
+          manipulator.unbecomeMaster('ContextMenu');
+          event.preventDefault();
         },
-        show: { effect: "slideDown", duration: 10},
         select: function(event, ui) {
           eventManager.fire('select', this, ui.cmd);
         }
       });
       manipulator
-      .on('open', function(eventKey, d, node) {
+      .on('open.ContextMenu', function(d, node) {
+        console.log('ContextMenu manipulator open');
         manipulator.getManRect().on('mousedown.contextMenu', function() {
+          console.log('mousedown.contextMenu 2');
           if (d3.event.button === 2) {
             manipulator.becomeMaster('ContextMenu');
           }
@@ -101,7 +109,8 @@ angular.module('fomodApp')
         var menuItems = contextMenuListener && contextMenuListener(d, node) || [];
         $(manipulator.getManRect().node()).contextmenu("replaceMenu", menuItems);
       })
-      .on('close', function() {
+      .on('close.ContextMenu', function() {
+        console.log('ContextMenu manipulator close');
         manipulator.getManRect().on('mousedown.contextMenu', null);
       });
 
@@ -169,62 +178,98 @@ angular.module('fomodApp')
   })
   .service('Mover', function (utils) {
     // Mover Manipulator feature
-    // moves the manipulated object by mouse dragging
-    return function(manipulator) {
-      var eventManager = new utils.EventManager();
+    // moves the manipulated object when dragged
+    // emits events:
+    //   begin, move and end
+    // options - object with attrs
+    //    shiftKey, altKey, ctrlKey, metaKey - requires the specified state for these keys, in order to recognize dragging
+    return function(manipulator, options) {
+      options = options || {};
+      var randint = Math.floor(Math.random() * 100000);
+      var dispatch = d3.dispatch('begin', 'move', 'end');
       var state;  // 'down', 'dragging'
-      var manRect = manipulator.getManRect();
       var downPos;
       var manRectPos;
+      var manRect = manipulator.getManRect();
       var parentSvgElement = utils.getParentSvgElement(manipulator.getManRect().node());
       function getPos() {return d3.mouse(parentSvgElement);}
-
-      manipulator.on('open', function(eventKey, d, node) {
-        // listen to mousedown, move and up and call moveListener and movedListener
-        manRect.on('mousedown.mover', function() {
-          if (manipulator.becomeMaster('Mover')) {
-            state = 'down';
-            downPos = getPos();
-            manRectPos = [+manRect.attr('x'), +manRect.attr('y')];
-            // console.log('mousedown.mover at', downPos, manRectPos, 'id', d.id);
-            eventManager.fire('beginmove', this, downPos);
+      function dist2(p0, p1) {
+        var dx = p1[0] - p0[0];
+        var dy = p1[1] - p0[1];
+        return dx * dx + dy * dy;
+      }
+      var validKeysMap = {shiftKey: true, altKey: true, ctrlKey: true, metaKey: true};
+      function keysMatch(event) {
+        var keys = Object.keys(options);
+        for (var i in keys) {
+          var key = keys[i];
+          console.log('keysMatch',key,validKeysMap[key],event[key],options[key]);
+          if (validKeysMap[key] && event[key] != options[key]) {
+            return false;
           }
+        }
+        return true;
+      }
+
+      manipulator.on('open.mover' + randint, function(d, node) {
+        manRect.on('mousedown.mover' + randint, function() {
+          console.log('mousedown.mover');
+          if (!manipulator.getMaster() && keysMatch(d3.event)) {
+            state = 'down';
+          }
+          downPos = getPos();
+          manRectPos = [+manRect.attr('x'), +manRect.attr('y')];
         });
-        d3.select(parentSvgElement).on('mousemove.mover', function() {
+        d3.select(parentSvgElement).on('mousemove.mover' + randint, function() {
           if (state) {
+            console.log('mousemove.mover');
             var pos = getPos();
-            // console.log('mousemove.mover at ', pos);
-            manRect.attr({
-              x: manRectPos[0] + (pos[0] - downPos[0]),
-              y: manRectPos[1] + (pos[1] - downPos[1])
-            });
-            eventManager.fire('move', this, d, [manRectPos[0] + (pos[0] - downPos[0]), manRectPos[1] + (pos[1] - downPos[1])]);
-            d3.event.preventDefault();
+            if (state === 'down' && dist2(downPos, pos) > 9) {
+              if (manipulator.becomeMaster('Mover' + randint)) {
+                state = 'dragging'
+                dispatch.begin(downPos, d, node);
+              } else {
+                state = undefined;
+              }
+            }
+            if (state === 'dragging') {
+              manRect.attr({
+                x: manRectPos[0] + (pos[0] - downPos[0]),
+                y: manRectPos[1] + (pos[1] - downPos[1])
+              });
+              var newPos = [manRectPos[0] + (pos[0] - downPos[0]), manRectPos[1] + (pos[1] - downPos[1])];
+              dispatch.move(newPos, d, node);
+              d3.event.preventDefault();
+            }
           }
         })
-        .on('mouseup.mover', function() {
+        .on('mouseup.mover' + randint, function() {
+          console.log('mouseup.mover');
           if (state) {
-            // console.log('mouseup.mover');
+            if (state === 'dragging') {
+              var pos = getPos();
+              var newPos = [manRectPos[0] + (pos[0] - downPos[0]), manRectPos[1] + (pos[1] - downPos[1])];
+              dispatch.end(newPos, d, node);
+            }
             state = undefined;
-            var pos = getPos();
-            eventManager.fire('endmove', this, d, [manRectPos[0] + (pos[0] - downPos[0]), manRectPos[1] + (pos[1] - downPos[1])]);
             d3.event.preventDefault();
-            manipulator.unbecomeMaster('Mover');
+            manipulator.unbecomeMaster('Mover' + randint);
           }
         });
       })
-      .on('close', function() {
+      .on('close.mover' + randint, function() {
         if (!state) {
           manipulator.getManRect()
-            .on('mousedown.mover', null)
-            .on('mousemove.mover', null)
-            .on('mouseup.mover', null);
+            .on('mousedown.mover' + randint, null)
+            .on('mousemove.mover' + randint, null)
+            .on('mouseup.mover' + randint, null);
         }
-        //state = undefined;
       });
-
       return {
-        on: eventManager.on
+        on: function(type, listener) {
+          dispatch.on(type, listener);
+          return this;
+        }
       };
     }
   });

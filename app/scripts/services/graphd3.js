@@ -15,12 +15,9 @@
         .call(graphd3();
  */
 angular.module('fomodApp')
-  .service('graphd3', function (utils, Manipulator, ContextMenu, RelationCreator, Mover, commander, MoveObjectCommand) {
+  .service('graphd3', function (utils, Manipulator, ContextMenu, RelationCreator, Mover, commander, MoveObjectCommand, CreateObjectCommand, attrMap) {
     return function() {
       var t0 = performance.now(), tRel0, tRel1;
-
-      var width = 760,
-          height = 120;
 
       function graphView(selection) {
         selection.each(function(graph) {
@@ -40,7 +37,8 @@ angular.module('fomodApp')
 
           var manipulator = new Manipulator(svg.select('.manipulation'));
 
-          // manipulator.on('open', function(what) {console.log(what);})
+          // manipulator
+          //   .on('open', function(what) {console.log(what);})
           //   .on('close', function(what) {console.log(what);});
 
           var contextMenuFeature = new ContextMenu(manipulator)
@@ -58,9 +56,18 @@ angular.module('fomodApp')
               console.log('selected ' + cmd);
             });
 
+          new Mover(manipulator, {shiftKey: true})
+            .on('end', function(newPos, d) {
+              console.log('dup!',d);
+              var newId = joint.util.uuid();
+              attrMap[newId] = {x: newPos[0], y: newPos[1]};
+              commander.do(new CreateObjectCommand(newId, 'randomtemplate', 'New object'));
+            });
+
           // new RelationCreator(manipulator);
+
           new Mover(manipulator)
-            .on('endmove', function(key, d, newPos) {
+            .on('end', function(newPos, d) {
               commander.do(new MoveObjectCommand(d, {x: newPos[0], y: newPos[1]}));
             });
 
@@ -83,6 +90,7 @@ angular.module('fomodApp')
               .attr("d", function(d) {return d.pathd})
               .attr('fill', function(d) {return d.color});
 
+          // d here is the item associated with the svg element
           var node = svg.select('.nodes').selectAll('.node')
             .data(function(d) {return d.getElements()}, function(d) {return d.id})
 

@@ -113,6 +113,7 @@ angular.module('fomodApp')
       });
       this.do = function() {
         data.get('objects').add(newObject);
+        return newObject;
       };
       this.undo = function() {
         data.get('objects').remove(newObject);
